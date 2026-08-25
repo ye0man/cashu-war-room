@@ -11,6 +11,7 @@ from typing import Any
 import pandas as pd
 import plotly.graph_objects as go
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from markupsafe import Markup
 from plotly.subplots import make_subplots
 
 from config import (
@@ -53,11 +54,11 @@ def _month_bucket(ts: pd.Timestamp | None) -> str:
 
 
 def _link(text: str, url: str) -> str:
-    return f'<a href="{url}" target="_blank" rel="noopener">{text}</a>'
+    return Markup(f'<a href="{url}" target="_blank" rel="noopener">{text}</a>')
 
 
 def _figure_to_json(fig: go.Figure) -> str:
-    return fig.to_json()
+    return fig.to_json(engine="json")
 
 
 # ---------------------------------------------------------------------------
@@ -239,7 +240,7 @@ def make_historic_charts(metrics: pd.DataFrame) -> dict[str, str]:
     overall = metrics.groupby(["month", "repo"])["commits"].sum().unstack(fill_value=0).reset_index()
     fig = go.Figure()
     for repo in overall.columns[1:]:
-        fig.add_trace(go.Scatter(x=overall["month"], y=overall[repo], mode="lines+markers", name=repo, stackgroup="one"))
+        fig.add_trace(go.Scatter(x=overall["month"].tolist(), y=overall[repo].tolist(), mode="lines+markers", name=repo, stackgroup="one"))
     fig.update_layout(
         title="Monthly Commits by Repo",
         xaxis_title="Month",
@@ -253,7 +254,7 @@ def make_historic_charts(metrics: pd.DataFrame) -> dict[str, str]:
     lines = metrics.groupby(["month", "repo"])["lines_changed"].sum().unstack(fill_value=0).reset_index()
     fig2 = go.Figure()
     for repo in lines.columns[1:]:
-        fig2.add_trace(go.Bar(x=lines["month"], y=lines[repo], name=repo))
+        fig2.add_trace(go.Bar(x=lines["month"].tolist(), y=lines[repo].tolist(), name=repo))
     fig2.update_layout(
         title="Monthly Lines Changed by Repo",
         xaxis_title="Month",
@@ -267,7 +268,7 @@ def make_historic_charts(metrics: pd.DataFrame) -> dict[str, str]:
     pr_issue = metrics.groupby("month")[["prs_opened", "prs_merged", "issues_opened", "issues_closed"]].sum().reset_index()
     fig3 = go.Figure()
     for col in ["prs_opened", "prs_merged", "issues_opened", "issues_closed"]:
-        fig3.add_trace(go.Scatter(x=pr_issue["month"], y=pr_issue[col], mode="lines+markers", name=col))
+        fig3.add_trace(go.Scatter(x=pr_issue["month"].tolist(), y=pr_issue[col].tolist(), mode="lines+markers", name=col))
     fig3.update_layout(
         title="Monthly PR & Issue Activity",
         xaxis_title="Month",
@@ -279,7 +280,7 @@ def make_historic_charts(metrics: pd.DataFrame) -> dict[str, str]:
 
     # Top contributors by commits (last 12 months)
     top = metrics.groupby("contributor")["commits"].sum().sort_values(ascending=False).head(15)
-    fig4 = go.Figure(go.Bar(x=top.index, y=top.values))
+    fig4 = go.Figure(go.Bar(x=top.index.tolist(), y=top.tolist()))
     fig4.update_layout(title="Top Contributors by Commits (Selected Period)", xaxis_title="Contributor", yaxis_title="Commits", template="plotly_white")
     charts["top_contributors"] = _figure_to_json(fig4)
 
@@ -454,7 +455,7 @@ def compute_growth(snapshot_df: pd.DataFrame) -> dict[str, Any]:
     pivot = snapshot_df.pivot_table(index="snapshot_at", columns="repo", values="stars", aggfunc="last").sort_index()
     fig = go.Figure()
     for repo in pivot.columns:
-        fig.add_trace(go.Scatter(x=pivot.index, y=pivot[repo], mode="lines+markers", name=repo))
+        fig.add_trace(go.Scatter(x=pivot.index.tolist(), y=pivot[repo].tolist(), mode="lines+markers", name=repo))
     fig.update_layout(
         title="Star Growth by Repo",
         xaxis_title="Date",

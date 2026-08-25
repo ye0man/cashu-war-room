@@ -92,12 +92,12 @@ def summarize_changes(
     bullets: list[str] = []
     for k in added:
         m = cur_by_key[k]
-        bullets.append(f"New mint: **{m.get('name', k)}** ({m.get('url', 'no URL')})")
+        bullets.append(f"New mint: {m.get('name', k)} ({m.get('url', 'no URL')})")
     for k in removed:
         m = prev_by_key[k]
-        bullets.append(f"Removed mint: **{m.get('name', k)}** ({m.get('url', 'no URL')})")
+        bullets.append(f"Removed mint: {m.get('name', k)} ({m.get('url', 'no URL')})")
     for name, diffs in changed:
-        bullets.append(f"**{name}**: " + "; ".join(diffs))
+        bullets.append(f"{name}: " + "; ".join(diffs))
     return bullets
 
 
