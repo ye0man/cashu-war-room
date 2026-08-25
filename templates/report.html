@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashu War Room — {{ report_date.strftime('%Y-%m-%d') }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    body { padding-top: 4.5rem; background: #f8f9fa; }
+    .section { margin-bottom: 3rem; }
+    .chart { min-height: 400px; }
+    .metric-card { border-left: 4px solid #0d6efd; }
+    .metric-card.warning { border-left-color: #ffc107; }
+    .metric-card.danger { border-left-color: #dc3545; }
+    .metric-card.success { border-left-color: #198754; }
+    .small-muted { font-size: .85rem; color: #6c757d; }
+    footer { margin-top: 4rem; padding: 2rem 0; border-top: 1px solid #dee2e6; color: #6c757d; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Cashu War Room</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="#summary">Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="#history">History</a></li>
+        <li class="nav-item"><a class="nav-link" href="#momentum">Momentum</a></li>
+        <li class="nav-item"><a class="nav-link" href="#health">Health</a></li>
+        <li class="nav-item"><a class="nav-link" href="#growth">Growth</a></li>
+        <li class="nav-item"><a class="nav-link" href="#mints">Mints</a></li>
+        <li class="nav-item"><a class="nav-link" href="#nuts">NUTs</a></li>
+      </ul>
+      <span class="navbar-text">Report date: {{ report_date.strftime('%Y-%m-%d') }}</span>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Header / Summary -->
+  <section id="summary" class="section">
+    <h1>Cashu War Room</h1>
+    <p class="lead">
+      Historic view: <strong>{{ start_date.strftime('%Y-%m-%d') }}</strong> →
+      <strong>{{ report_date.strftime('%Y-%m-%d') }}</strong>
+      &nbsp;|&nbsp; Repos:
+      {% for repo in repos %}<span class="badge bg-secondary me-1">{{ repo }}</span>{% endfor %}
+    </p>
+
+    <div class="row g-3">
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">New Issues (7d)</div>
+            <div class="fs-3">{{ momentum.summary.new_issues }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">PRs Opened (7d)</div>
+            <div class="fs-3">{{ momentum.summary.opened_prs }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card success h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">PRs Merged (7d)</div>
+            <div class="fs-3">{{ momentum.summary.merged_prs }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card warning h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Closed Issues (7d)</div>
+            <div class="fs-3">{{ momentum.summary.closed_issues }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Active Contributors (7d)</div>
+            <div class="fs-3">{{ momentum.summary.active_contributors }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Releases (7d)</div>
+            <div class="fs-3">{{ momentum.summary.releases }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Historic Contributor Analysis -->
+  <section id="history" class="section">
+    <h2>Historic Contributor Analysis</h2>
+    <p class="small-muted">
+      Monthly buckets from {{ start_date.strftime('%Y-%m-%d') }}.
+      Use the table filters below to narrow by repo or contributor.
+    </p>
+
+    <div class="row g-4 mb-4">
+      {% if historic_charts.commits_by_repo %}
+      <div class="col-lg-6">
+        <div id="chart-commits" class="chart"></div>
+      </div>
+      {% endif %}
+      {% if historic_charts.lines_by_repo %}
+      <div class="col-lg-6">
+        <div id="chart-lines" class="chart"></div>
+      </div>
+      {% endif %}
+      {% if historic_charts.pr_issue_activity %}
+      <div class="col-lg-6">
+        <div id="chart-pr-issue" class="chart"></div>
+      </div>
+      {% endif %}
+      {% if historic_charts.top_contributors %}
+      <div class="col-lg-6">
+        <div id="chart-top" class="chart"></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <h4>Top Contributors</h4>
+    <table id="contributors-table" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Contributor</th>
+          <th>Commits</th>
+          <th>+Lines</th>
+          <th>-Lines</th>
+          <th>PRs Opened</th>
+          <th>PRs Merged</th>
+          <th>Issues Opened</th>
+          <th>Issues Closed</th>
+          <th>Reviews</th>
+          <th>Review Comments</th>
+          <th>Issue Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in top_contributors %}
+        <tr>
+          <td>{{ c.contributor }}</td>
+          <td>{{ c.commits }}</td>
+          <td>{{ c.additions }}</td>
+          <td>{{ c.deletions }}</td>
+          <td>{{ c.prs_opened }}</td>
+          <td>{{ c.prs_merged }}</td>
+          <td>{{ c.issues_opened }}</td>
+          <td>{{ c.issues_closed }}</td>
+          <td>{{ c.reviews }}</td>
+          <td>{{ c.review_comments }}</td>
+          <td>{{ c.issue_comments }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Cashu Momentum -->
+  <section id="momentum" class="section">
+    <h2>Cashu Momentum (Last 7 Days)</h2>
+
+    <h4>By Repo</h4>
+    {% for repo in repos %}
+      {% set data = momentum.by_repo[repo] %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>{{ repo }}</strong>
+          <span class="small-muted">
+            +{{ data.new_issues|length }} issues / +{{ data.opened_prs|length }} PRs /
+            ✓{{ data.merged_prs|length }} merged / +{{ data.releases|length }} releases
+          </span>
+        </div>
+        <div class="card-body">
+          {% if data.new_issues %}
+            <h6>New Issues</h6>
+            <ul>
+              {% for item in data.new_issues %}
+              <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if data.opened_prs %}
+            <h6>Opened PRs</h6>
+            <ul>
+              {% for item in data.opened_prs %}
+              <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if data.merged_prs %}
+            <h6>Merged PRs</h6>
+            <ul>
+              {% for item in data.merged_prs %}
+              <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if data.releases %}
+            <h6>Releases</h6>
+            <ul>
+              {% for item in data.releases %}
+              <li>{{ item.tag_name|e|link(item.url) }} — {{ item.name|e }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if not data.new_issues and not data.opened_prs and not data.merged_prs and not data.releases %}
+            <p class="small-muted mb-0">No notable activity in the last 7 days.</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <h4>By Contributor</h4>
+    <table id="momentum-contributors-table" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Contributor</th>
+          <th>Commits</th>
+          <th>+Lines</th>
+          <th>-Lines</th>
+          <th>Days Active</th>
+          <th>Issues Opened</th>
+          <th>PRs Opened</th>
+          <th>PRs Merged</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in momentum.by_contributor %}
+        <tr>
+          <td>{{ c.login }}</td>
+          <td>{{ c.commits }}</td>
+          <td>{{ c.additions }}</td>
+          <td>{{ c.deletions }}</td>
+          <td>{{ c.days_active }}</td>
+          <td>{{ c.issues_opened }}</td>
+          <td>{{ c.prs_opened }}</td>
+          <td>{{ c.prs_merged }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h5>Assigned Open Work</h5>
+    <div class="row">
+      {% for c in momentum.by_contributor if c.assigned_issues or c.assigned_prs %}
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>{{ c.login }}</strong></div>
+          <div class="card-body">
+            {% if c.assigned_issues %}
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                {% for item in c.assigned_issues %}
+                <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if c.assigned_prs %}
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                {% for item in c.assigned_prs %}
+                <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Health -->
+  <section id="health" class="section">
+    <h2>Issue / PR Health</h2>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Open Issues</div>
+            <div class="fs-3">{{ aging.open_issues_count }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Avg Open Issue Age</div>
+            <div class="fs-3">{{ aging.open_issues_avg_age }}d</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Open PRs</div>
+            <div class="fs-3">{{ aging.open_prs_count }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Avg Open PR Age</div>
+            <div class="fs-3">{{ aging.open_prs_avg_age }}d</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h5>Oldest Open Issues</h5>
+        <ul class="list-group">
+          {% for item in aging.oldest_open_issues %}
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</div>
+              <span class="small-muted">{{ item.repo }} &middot; opened {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else 'unknown' }}</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">{{ item.age_days }}d</span>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted">No open issues.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-lg-6">
+        <h5>Oldest Open PRs</h5>
+        <ul class="list-group">
+          {% for item in aging.oldest_open_prs %}
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</div>
+              <span class="small-muted">{{ item.repo }} &middot; opened {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else 'unknown' }}</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">{{ item.age_days }}d</span>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted">No open PRs.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <p><strong>Average time to merge PRs:</strong> {{ aging.avg_time_to_merge_days if aging.avg_time_to_merge_days is not none else 'N/A' }} days</p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Average time to close issues:</strong> {{ aging.avg_time_to_close_issue_days if aging.avg_time_to_close_issue_days is not none else 'N/A' }} days</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Growth -->
+  <section id="growth" class="section">
+    <h2>Ecosystem Growth</h2>
+    {% if growth.chart_json %}
+    <div id="chart-growth" class="chart mb-4"></div>
+    {% endif %}
+
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Repo</th>
+          <th>Stars</th>
+          <th>Forks</th>
+          <th>Open Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for repo, stats in growth.latest.items() %}
+        <tr>
+          <td>{{ repo }}</td>
+          <td>{{ stats.stars }}</td>
+          <td>{{ stats.forks }}</td>
+          <td>{{ stats.open_issues }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h4>New Contributors (Last 90 Days)</h4>
+    {% if new_contributors %}
+    <ul>
+      {% for c in new_contributors %}
+      <li><strong>{{ c.login }}</strong> — first seen {{ c.first_seen.strftime('%Y-%m-%d') }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">No new contributors in the last 90 days (based on available history).</p>
+    {% endif %}
+  </section>
+
+  <!-- Mint Updates -->
+  <section id="mints" class="section">
+    <h2>Cashu Mint Updates</h2>
+    <p class="small-muted">Diff of <a href="https://ye0man.github.io/cashu-mint-directory/" target="_blank" rel="noopener">Cashu Mint Directory</a> vs the previous snapshot.</p>
+    {% if mint_changes %}
+    <ul>
+      {% for change in mint_changes %}
+      <li>{{ change }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No updates to any tracked mints.</p>
+    {% endif %}
+  </section>
+
+  <!-- NUT Tracking -->
+  <section id="nuts" class="section">
+    <h2>NUT Spec Tracking</h2>
+    <p class="small-muted">Open issues and PRs in <code>cashubtc/nuts</code> that reference a NUT.</p>
+    {% if nut_items %}
+    <table id="nuts-table" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>State</th>
+          <th>Author</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in nut_items %}
+        <tr>
+          <td>{{ item.number }}</td>
+          <td>{{ item.title|e|link(item.url) }}</td>
+          <td>{{ "PR" if item.is_pr else "Issue" }}</td>
+          <td>{{ item.state }}</td>
+          <td>{{ item.author_login }}</td>
+          <td>{{ item.created_at[:10] if item.created_at else '' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No open NUT items found or data unavailable.</p>
+    {% endif %}
+  </section>
+
+  <footer class="text-center">
+    Generated {{ report_date.strftime('%Y-%m-%d %H:%M UTC') }} by Cashu War Room.
+  </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+  const charts = {{ historic_charts | tojson }};
+  if (charts['commits_by_repo']) Plotly.newPlot('chart-commits', JSON.parse(charts['commits_by_repo']));
+  if (charts['lines_by_repo']) Plotly.newPlot('chart-lines', JSON.parse(charts['lines_by_repo']));
+  if (charts['pr_issue_activity']) Plotly.newPlot('chart-pr-issue', JSON.parse(charts['pr_issue_activity']));
+  if (charts['top_contributors']) Plotly.newPlot('chart-top', JSON.parse(charts['top_contributors']));
+
+  const growthChart = {{ growth.chart_json | tojson }};
+  if (growthChart) Plotly.newPlot('chart-growth', JSON.parse(growthChart));
+
+  $(document).ready(function() {
+    $('#contributors-table, #momentum-contributors-table, #nuts-table').DataTable({
+      pageLength: 25,
+      order: [[1, 'desc']]
+    });
+  });
+</script>
+</body>
+</html>
