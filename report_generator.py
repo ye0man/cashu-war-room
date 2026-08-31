@@ -505,11 +505,11 @@ def compute_new_contributors(frames: dict[str, pd.DataFrame], end: datetime, win
     all_people = set(first_commit) | set(first_pr) | set(first_issue)
     newcomers = []
     for person in all_people:
-        first = min(
-            [first_commit.get(person), first_pr.get(person), first_issue.get(person)],
-            key=lambda x: x if x is not None else pd.Timestamp.max,
-        )
-        if first and first >= start_window:
+        dates = [d for d in (first_commit.get(person), first_pr.get(person), first_issue.get(person)) if d is not None]
+        if not dates:
+            continue
+        first = min(dates)
+        if first >= start_window:
             newcomers.append({"login": person, "first_seen": first})
 
     newcomers.sort(key=lambda x: x["first_seen"], reverse=True)
