@@ -1,0 +1,2720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashu War Room — 2026-08-31</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    body { padding-top: 4.5rem; background: #f8f9fa; }
+    .section { margin-bottom: 3rem; }
+    .chart { min-height: 400px; }
+    .metric-card { border-left: 4px solid #0d6efd; }
+    .metric-card.warning { border-left-color: #ffc107; }
+    .metric-card.danger { border-left-color: #dc3545; }
+    .metric-card.success { border-left-color: #198754; }
+    .small-muted { font-size: .85rem; color: #6c757d; }
+    footer { margin-top: 4rem; padding: 2rem 0; border-top: 1px solid #dee2e6; color: #6c757d; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Cashu War Room</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="#summary">Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="#history">History</a></li>
+        <li class="nav-item"><a class="nav-link" href="#momentum">Momentum</a></li>
+        <li class="nav-item"><a class="nav-link" href="#health">Health</a></li>
+        <li class="nav-item"><a class="nav-link" href="#growth">Growth</a></li>
+        <li class="nav-item"><a class="nav-link" href="#mints">Mints</a></li>
+        <li class="nav-item"><a class="nav-link" href="#nuts">NUTs</a></li>
+      </ul>
+      <span class="navbar-text">Report date: 2026-08-31</span>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Header / Summary -->
+  <section id="summary" class="section">
+    <h1>Cashu War Room</h1>
+    <p class="lead">
+      Historic view: <strong>2025-08-31</strong> →
+      <strong>2026-08-31</strong>
+      &nbsp;|&nbsp; Repos:
+      <span class="badge bg-secondary me-1">cashubtc/cdk</span><span class="badge bg-secondary me-1">cashubtc/coco</span><span class="badge bg-secondary me-1">cashubtc/cashu-ts</span><span class="badge bg-secondary me-1">cashubtc/nuts</span><span class="badge bg-secondary me-1">cashubtc/nutshell</span><span class="badge bg-secondary me-1">cashubtc/Numo</span><span class="badge bg-secondary me-1">cashubtc/wallet</span>
+    </p>
+
+    <div class="row g-3">
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">New Issues (7d)</div>
+            <div class="fs-3">29</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">PRs Opened (7d)</div>
+            <div class="fs-3">82</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card success h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">PRs Merged (7d)</div>
+            <div class="fs-3">61</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card warning h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Closed Issues (7d)</div>
+            <div class="fs-3">6</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Active Contributors (7d)</div>
+            <div class="fs-3">18</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-4 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Releases (7d)</div>
+            <div class="fs-3">5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Historic Contributor Analysis -->
+  <section id="history" class="section">
+    <h2>Historic Contributor Analysis</h2>
+    <p class="small-muted">
+      Monthly buckets from 2025-08-31.
+      Use the table filters below to narrow by repo or contributor.
+    </p>
+
+    <div class="row g-4 mb-4">
+      
+      <div class="col-lg-6">
+        <div id="chart-commits" class="chart"></div>
+      </div>
+      
+      
+      <div class="col-lg-6">
+        <div id="chart-lines" class="chart"></div>
+      </div>
+      
+      
+      <div class="col-lg-6">
+        <div id="chart-pr-issue" class="chart"></div>
+      </div>
+      
+      
+      <div class="col-lg-6">
+        <div id="chart-top" class="chart"></div>
+      </div>
+      
+    </div>
+
+    <h4>Top Contributors</h4>
+    <table id="contributors-table" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Contributor</th>
+          <th>Commits</th>
+          <th>+Lines</th>
+          <th>-Lines</th>
+          <th>PRs Opened</th>
+          <th>PRs Merged</th>
+          <th>Issues Opened</th>
+          <th>Issues Closed</th>
+          <th>Reviews</th>
+          <th>Review Comments</th>
+          <th>Issue Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>Egge21M</td>
+          <td>1036</td>
+          <td>319958</td>
+          <td>127576</td>
+          <td>244</td>
+          <td>211</td>
+          <td>148</td>
+          <td>120</td>
+          <td>142</td>
+          <td>203</td>
+          <td>201</td>
+        </tr>
+        
+        <tr>
+          <td>robwoodgate</td>
+          <td>764</td>
+          <td>190756</td>
+          <td>130326</td>
+          <td>567</td>
+          <td>504</td>
+          <td>44</td>
+          <td>38</td>
+          <td>497</td>
+          <td>508</td>
+          <td>624</td>
+        </tr>
+        
+        <tr>
+          <td>thesimplekid</td>
+          <td>744</td>
+          <td>204112</td>
+          <td>46794</td>
+          <td>630</td>
+          <td>566</td>
+          <td>134</td>
+          <td>113</td>
+          <td>671</td>
+          <td>774</td>
+          <td>640</td>
+        </tr>
+        
+        <tr>
+          <td>a1denvalu3</td>
+          <td>565</td>
+          <td>108092</td>
+          <td>54813</td>
+          <td>333</td>
+          <td>286</td>
+          <td>22</td>
+          <td>17</td>
+          <td>249</td>
+          <td>188</td>
+          <td>216</td>
+        </tr>
+        
+        <tr>
+          <td>callebtc</td>
+          <td>387</td>
+          <td>188114</td>
+          <td>67780</td>
+          <td>158</td>
+          <td>127</td>
+          <td>44</td>
+          <td>32</td>
+          <td>178</td>
+          <td>129</td>
+          <td>92</td>
+        </tr>
+        
+        <tr>
+          <td>asmogo</td>
+          <td>253</td>
+          <td>168440</td>
+          <td>40179</td>
+          <td>248</td>
+          <td>210</td>
+          <td>13</td>
+          <td>9</td>
+          <td>113</td>
+          <td>112</td>
+          <td>178</td>
+        </tr>
+        
+        <tr>
+          <td>swedishfrenchpress</td>
+          <td>113</td>
+          <td>109183</td>
+          <td>45642</td>
+          <td>70</td>
+          <td>53</td>
+          <td>9</td>
+          <td>5</td>
+          <td>5</td>
+          <td>3</td>
+          <td>59</td>
+        </tr>
+        
+        <tr>
+          <td>crodas</td>
+          <td>96</td>
+          <td>45514</td>
+          <td>16581</td>
+          <td>108</td>
+          <td>79</td>
+          <td>28</td>
+          <td>16</td>
+          <td>360</td>
+          <td>237</td>
+          <td>227</td>
+        </tr>
+        
+        <tr>
+          <td>KvngMikey</td>
+          <td>84</td>
+          <td>8550</td>
+          <td>2110</td>
+          <td>49</td>
+          <td>40</td>
+          <td>7</td>
+          <td>7</td>
+          <td>211</td>
+          <td>159</td>
+          <td>113</td>
+        </tr>
+        
+        <tr>
+          <td>igbopharaoh</td>
+          <td>48</td>
+          <td>23765</td>
+          <td>6128</td>
+          <td>19</td>
+          <td>10</td>
+          <td>28</td>
+          <td>16</td>
+          <td>14</td>
+          <td>14</td>
+          <td>53</td>
+        </tr>
+        
+        <tr>
+          <td>github-actions[bot]</td>
+          <td>44</td>
+          <td>3084</td>
+          <td>7</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>184</td>
+        </tr>
+        
+        <tr>
+          <td>TheRealCheebs</td>
+          <td>40</td>
+          <td>6280</td>
+          <td>2442</td>
+          <td>19</td>
+          <td>14</td>
+          <td>1</td>
+          <td>1</td>
+          <td>38</td>
+          <td>38</td>
+          <td>62</td>
+        </tr>
+        
+        <tr>
+          <td>d4rp4t</td>
+          <td>28</td>
+          <td>9208</td>
+          <td>519</td>
+          <td>12</td>
+          <td>10</td>
+          <td>1</td>
+          <td>1</td>
+          <td>19</td>
+          <td>6</td>
+          <td>14</td>
+        </tr>
+        
+        <tr>
+          <td>Forte11Cuba</td>
+          <td>24</td>
+          <td>3495</td>
+          <td>687</td>
+          <td>39</td>
+          <td>23</td>
+          <td>9</td>
+          <td>8</td>
+          <td>2</td>
+          <td>2</td>
+          <td>12</td>
+        </tr>
+        
+        <tr>
+          <td>dependabot[bot]</td>
+          <td>13</td>
+          <td>553</td>
+          <td>561</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>2</td>
+        </tr>
+        
+        <tr>
+          <td>davidcaseria</td>
+          <td>13</td>
+          <td>12303</td>
+          <td>3854</td>
+          <td>12</td>
+          <td>11</td>
+          <td>0</td>
+          <td>0</td>
+          <td>16</td>
+          <td>9</td>
+          <td>14</td>
+        </tr>
+        
+        <tr>
+          <td>prusnak</td>
+          <td>13</td>
+          <td>1574</td>
+          <td>1264</td>
+          <td>16</td>
+          <td>9</td>
+          <td>1</td>
+          <td>0</td>
+          <td>35</td>
+          <td>26</td>
+          <td>50</td>
+        </tr>
+        
+        <tr>
+          <td>Kelbie</td>
+          <td>12</td>
+          <td>4038</td>
+          <td>568</td>
+          <td>6</td>
+          <td>2</td>
+          <td>15</td>
+          <td>13</td>
+          <td>3</td>
+          <td>2</td>
+          <td>27</td>
+        </tr>
+        
+        <tr>
+          <td>lescuer97</td>
+          <td>11</td>
+          <td>4542</td>
+          <td>1422</td>
+          <td>16</td>
+          <td>9</td>
+          <td>1</td>
+          <td>1</td>
+          <td>77</td>
+          <td>74</td>
+          <td>34</td>
+        </tr>
+        
+        <tr>
+          <td>gudnuf</td>
+          <td>11</td>
+          <td>971</td>
+          <td>239</td>
+          <td>14</td>
+          <td>11</td>
+          <td>10</td>
+          <td>7</td>
+          <td>17</td>
+          <td>16</td>
+          <td>24</td>
+        </tr>
+        
+        <tr>
+          <td>zk-bits</td>
+          <td>10</td>
+          <td>4225</td>
+          <td>4112</td>
+          <td>7</td>
+          <td>7</td>
+          <td>1</td>
+          <td>1</td>
+          <td>14</td>
+          <td>13</td>
+          <td>14</td>
+        </tr>
+        
+        <tr>
+          <td>ye0man</td>
+          <td>10</td>
+          <td>269</td>
+          <td>108</td>
+          <td>8</td>
+          <td>7</td>
+          <td>48</td>
+          <td>28</td>
+          <td>1</td>
+          <td>0</td>
+          <td>32</td>
+        </tr>
+        
+        <tr>
+          <td>gandlafbtc</td>
+          <td>8</td>
+          <td>2071</td>
+          <td>270</td>
+          <td>7</td>
+          <td>6</td>
+          <td>0</td>
+          <td>0</td>
+          <td>1</td>
+          <td>1</td>
+          <td>14</td>
+        </tr>
+        
+        <tr>
+          <td>TheMhv</td>
+          <td>8</td>
+          <td>1291</td>
+          <td>1186</td>
+          <td>17</td>
+          <td>8</td>
+          <td>7</td>
+          <td>4</td>
+          <td>33</td>
+          <td>32</td>
+          <td>67</td>
+        </tr>
+        
+        <tr>
+          <td>orangeshyguy21</td>
+          <td>8</td>
+          <td>2171</td>
+          <td>458</td>
+          <td>9</td>
+          <td>6</td>
+          <td>17</td>
+          <td>8</td>
+          <td>19</td>
+          <td>32</td>
+          <td>13</td>
+        </tr>
+        
+        <tr>
+          <td>vnprc</td>
+          <td>8</td>
+          <td>1828</td>
+          <td>44</td>
+          <td>18</td>
+          <td>7</td>
+          <td>2</td>
+          <td>2</td>
+          <td>22</td>
+          <td>22</td>
+          <td>36</td>
+        </tr>
+        
+        <tr>
+          <td>cdk-bot</td>
+          <td>8</td>
+          <td>28</td>
+          <td>42</td>
+          <td>74</td>
+          <td>71</td>
+          <td>0</td>
+          <td>0</td>
+          <td>179</td>
+          <td>211</td>
+          <td>81</td>
+        </tr>
+        
+        <tr>
+          <td>b-l-u-e</td>
+          <td>8</td>
+          <td>222</td>
+          <td>141</td>
+          <td>19</td>
+          <td>7</td>
+          <td>2</td>
+          <td>2</td>
+          <td>15</td>
+          <td>15</td>
+          <td>22</td>
+        </tr>
+        
+        <tr>
+          <td>4xvgal</td>
+          <td>5</td>
+          <td>2892</td>
+          <td>130</td>
+          <td>11</td>
+          <td>5</td>
+          <td>6</td>
+          <td>5</td>
+          <td>18</td>
+          <td>19</td>
+          <td>24</td>
+        </tr>
+        
+        <tr>
+          <td>edgarmuyomba</td>
+          <td>5</td>
+          <td>357</td>
+          <td>17</td>
+          <td>4</td>
+          <td>3</td>
+          <td>2</td>
+          <td>2</td>
+          <td>3</td>
+          <td>3</td>
+          <td>12</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Cashu Momentum -->
+  <section id="momentum" class="section">
+    <h2>Cashu Momentum (Last 7 Days)</h2>
+
+    <h4>By Repo</h4>
+    
+      
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>cashubtc/cdk</strong>
+          <span class="small-muted">
+            +12 issues / +26 PRs /
+            ✓21 merged / +3 releases
+          </span>
+        </div>
+        <div class="card-body">
+          
+            <h6>New Issues</h6>
+            <ul>
+              
+              <li>#2452 <a href="https://github.com/cashubtc/cdk/issues/2452" target="_blank" rel="noopener">Update cargo lock before 0.18.0</a></li>
+              
+              <li>#2447 <a href="https://github.com/cashubtc/cdk/issues/2447" target="_blank" rel="noopener">Honor reserved change keysets after rotation</a></li>
+              
+              <li>#2445 <a href="https://github.com/cashubtc/cdk/issues/2445" target="_blank" rel="noopener">🧬 Weekly Mutation Testing Report - 2026-08-28</a></li>
+              
+              <li>#2442 <a href="https://github.com/cashubtc/cdk/issues/2442" target="_blank" rel="noopener">Remove the shared Wallet trait and replace FFI synchronization with an API check</a></li>
+              
+              <li>#2439 <a href="https://github.com/cashubtc/cdk/issues/2439" target="_blank" rel="noopener">Wallet database update_mint_url leaves transactions, melt_quote, and mint rows on the old URL</a></li>
+              
+              <li>#2435 <a href="https://github.com/cashubtc/cdk/issues/2435" target="_blank" rel="noopener">Refactor: Use JOIN to get Mint Quotes `payments` and `issuance`</a></li>
+              
+              <li>#2433 <a href="https://github.com/cashubtc/cdk/issues/2433" target="_blank" rel="noopener">NUT-10: implement nutroot keysets (keysets v3)</a></li>
+              
+              <li>#2426 <a href="https://github.com/cashubtc/cdk/issues/2426" target="_blank" rel="noopener">Store keyset u64 fields as text</a></li>
+              
+              <li>#2425 <a href="https://github.com/cashubtc/cdk/issues/2425" target="_blank" rel="noopener">SQL layer narrows u64 to i64 with unchecked casts, so one wrapped value makes a whole table unreadable</a></li>
+              
+              <li>#2422 <a href="https://github.com/cashubtc/cdk/issues/2422" target="_blank" rel="noopener">Rerunning binding flow often errors as branch is already created on the cdk-* repo</a></li>
+              
+              <li>#2421 <a href="https://github.com/cashubtc/cdk/issues/2421" target="_blank" rel="noopener">Bindings release for backport branch uses the workflow from main not the backport branch</a></li>
+              
+              <li>#2415 <a href="https://github.com/cashubtc/cdk/issues/2415" target="_blank" rel="noopener">Update Rust to 1.98.0</a></li>
+              
+            </ul>
+          
+          
+            <h6>Opened PRs</h6>
+            <ul>
+              
+              <li>#2451 <a href="https://github.com/cashubtc/cdk/pull/2451" target="_blank" rel="noopener">chore: bump 0.18.0-rc.2</a></li>
+              
+              <li>#2450 <a href="https://github.com/cashubtc/cdk/pull/2450" target="_blank" rel="noopener">Pending melt hardening</a></li>
+              
+              <li>#2449 <a href="https://github.com/cashubtc/cdk/pull/2449" target="_blank" rel="noopener">Ci improvements</a></li>
+              
+              <li>#2448 <a href="https://github.com/cashubtc/cdk/pull/2448" target="_blank" rel="noopener">Re-issue melt change under the active keyset after a rotation</a></li>
+              
+              <li>#2446 <a href="https://github.com/cashubtc/cdk/pull/2446" target="_blank" rel="noopener">fix: disable gRPC quote state overrides by default</a></li>
+              
+              <li>#2444 <a href="https://github.com/cashubtc/cdk/pull/2444" target="_blank" rel="noopener">Fix/mint input length bounds</a></li>
+              
+              <li>#2443 <a href="https://github.com/cashubtc/cdk/pull/2443" target="_blank" rel="noopener">Automated nightly rustfmt (2026-08-28)</a></li>
+              
+              <li>#2441 <a href="https://github.com/cashubtc/cdk/pull/2441" target="_blank" rel="noopener">feat: add reversible mint database migrations</a></li>
+              
+              <li>#2440 <a href="https://github.com/cashubtc/cdk/pull/2440" target="_blank" rel="noopener">feat(wallet): add WalletRepository::update_mint_url and expose it over FFI</a></li>
+              
+              <li>#2438 <a href="https://github.com/cashubtc/cdk/pull/2438" target="_blank" rel="noopener">feat(wallet): sign P2PK-locked inputs in prepare_melt_proofs/token</a></li>
+              
+              <li>#2437 <a href="https://github.com/cashubtc/cdk/pull/2437" target="_blank" rel="noopener">fix(wallet): bound untrusted input sizes</a></li>
+              
+              <li>#2436 <a href="https://github.com/cashubtc/cdk/pull/2436" target="_blank" rel="noopener">Source keyset unit and expiry from the info</a></li>
+              
+              <li>#2434 <a href="https://github.com/cashubtc/cdk/pull/2434" target="_blank" rel="noopener">fix: ci jobs</a></li>
+              
+              <li>#2432 <a href="https://github.com/cashubtc/cdk/pull/2432" target="_blank" rel="noopener">fix(cdk-bdk): strengthen on-chain send recovery</a></li>
+              
+              <li>#2431 <a href="https://github.com/cashubtc/cdk/pull/2431" target="_blank" rel="noopener">fix: escape untrusted strings before terminal and log output</a></li>
+              
+              <li>#2430 <a href="https://github.com/cashubtc/cdk/pull/2430" target="_blank" rel="noopener">fix(cashu): preserve mint URL path and query data in format_url</a></li>
+              
+              <li>#2429 <a href="https://github.com/cashubtc/cdk/pull/2429" target="_blank" rel="noopener">Fix/hygiene secret redaction 2</a></li>
+              
+              <li>#2428 <a href="https://github.com/cashubtc/cdk/pull/2428" target="_blank" rel="noopener">fix(wallet): return AmountOverflow instead of panicking</a></li>
+              
+              <li>#2427 <a href="https://github.com/cashubtc/cdk/pull/2427" target="_blank" rel="noopener">Store keyset u64 fields as text</a></li>
+              
+              <li>#2424 <a href="https://github.com/cashubtc/cdk/pull/2424" target="_blank" rel="noopener">Sign the mint info per NUT-06</a></li>
+              
+              <li>#2423 <a href="https://github.com/cashubtc/cdk/pull/2423" target="_blank" rel="noopener">fix(mint): preserve proof state for duplicate Ys</a></li>
+              
+              <li>#2420 <a href="https://github.com/cashubtc/cdk/pull/2420" target="_blank" rel="noopener">refactor(mint): simplify melt quote dispatch</a></li>
+              
+              <li>#2419 <a href="https://github.com/cashubtc/cdk/pull/2419" target="_blank" rel="noopener">Weekly Meeting Agenda - 2026-08-26</a></li>
+              
+              <li>#2418 <a href="https://github.com/cashubtc/cdk/pull/2418" target="_blank" rel="noopener">chore: bump v0.17.6</a></li>
+              
+              <li>#2417 <a href="https://github.com/cashubtc/cdk/pull/2417" target="_blank" rel="noopener">fix(wallet): fail Nostr delivery when all relays reject event</a></li>
+              
+              <li>#2416 <a href="https://github.com/cashubtc/cdk/pull/2416" target="_blank" rel="noopener">chore: bump 0.18.0-rc.1</a></li>
+              
+            </ul>
+          
+          
+            <h6>Merged PRs</h6>
+            <ul>
+              
+              <li>#2451 <a href="https://github.com/cashubtc/cdk/pull/2451" target="_blank" rel="noopener">chore: bump 0.18.0-rc.2</a></li>
+              
+              <li>#2450 <a href="https://github.com/cashubtc/cdk/pull/2450" target="_blank" rel="noopener">Pending melt hardening</a></li>
+              
+              <li>#2444 <a href="https://github.com/cashubtc/cdk/pull/2444" target="_blank" rel="noopener">Fix/mint input length bounds</a></li>
+              
+              <li>#2327 <a href="https://github.com/cashubtc/cdk/pull/2327" target="_blank" rel="noopener">feat(wallet): persist proof age for coin selection</a></li>
+              
+              <li>#2423 <a href="https://github.com/cashubtc/cdk/pull/2423" target="_blank" rel="noopener">fix(mint): preserve proof state for duplicate Ys</a></li>
+              
+              <li>#2446 <a href="https://github.com/cashubtc/cdk/pull/2446" target="_blank" rel="noopener">fix: disable gRPC quote state overrides by default</a></li>
+              
+              <li>#2431 <a href="https://github.com/cashubtc/cdk/pull/2431" target="_blank" rel="noopener">fix: escape untrusted strings before terminal and log output</a></li>
+              
+              <li>#2434 <a href="https://github.com/cashubtc/cdk/pull/2434" target="_blank" rel="noopener">fix: ci jobs</a></li>
+              
+              <li>#2443 <a href="https://github.com/cashubtc/cdk/pull/2443" target="_blank" rel="noopener">Automated nightly rustfmt (2026-08-28)</a></li>
+              
+              <li>#2436 <a href="https://github.com/cashubtc/cdk/pull/2436" target="_blank" rel="noopener">Source keyset unit and expiry from the info</a></li>
+              
+              <li>#2429 <a href="https://github.com/cashubtc/cdk/pull/2429" target="_blank" rel="noopener">Fix/hygiene secret redaction 2</a></li>
+              
+              <li>#2428 <a href="https://github.com/cashubtc/cdk/pull/2428" target="_blank" rel="noopener">fix(wallet): return AmountOverflow instead of panicking</a></li>
+              
+              <li>#2420 <a href="https://github.com/cashubtc/cdk/pull/2420" target="_blank" rel="noopener">refactor(mint): simplify melt quote dispatch</a></li>
+              
+              <li>#2419 <a href="https://github.com/cashubtc/cdk/pull/2419" target="_blank" rel="noopener">Weekly Meeting Agenda - 2026-08-26</a></li>
+              
+              <li>#2418 <a href="https://github.com/cashubtc/cdk/pull/2418" target="_blank" rel="noopener">chore: bump v0.17.6</a></li>
+              
+              <li>#2417 <a href="https://github.com/cashubtc/cdk/pull/2417" target="_blank" rel="noopener">fix(wallet): fail Nostr delivery when all relays reject event</a></li>
+              
+              <li>#2416 <a href="https://github.com/cashubtc/cdk/pull/2416" target="_blank" rel="noopener">chore: bump 0.18.0-rc.1</a></li>
+              
+              <li>#2413 <a href="https://github.com/cashubtc/cdk/pull/2413" target="_blank" rel="noopener">feat(wallet)!: require confirmation for payment requests</a></li>
+              
+              <li>#2356 <a href="https://github.com/cashubtc/cdk/pull/2356" target="_blank" rel="noopener">feat(cdk-nostr): consolidate Nostr crates </a></li>
+              
+              <li>#2414 <a href="https://github.com/cashubtc/cdk/pull/2414" target="_blank" rel="noopener">fix: preserve NUT-18 request case in BIP 321 URIs</a></li>
+              
+              <li>#2411 <a href="https://github.com/cashubtc/cdk/pull/2411" target="_blank" rel="noopener">fix: code cov regression</a></li>
+              
+            </ul>
+          
+          
+            <h6>Releases</h6>
+            <ul>
+              
+              <li><a href="https://github.com/cashubtc/cdk/releases/tag/v0.18.0-rc.2" target="_blank" rel="noopener">v0.18.0-rc.2</a> — v0.18.0-rc.2</li>
+              
+              <li><a href="https://github.com/cashubtc/cdk/releases/tag/v0.17.6" target="_blank" rel="noopener">v0.17.6</a> — v0.17.6</li>
+              
+              <li><a href="https://github.com/cashubtc/cdk/releases/tag/v0.18.0-rc.1" target="_blank" rel="noopener">v0.18.0-rc.1</a> — v0.18.0-rc.1</li>
+              
+            </ul>
+          
+          
+        </div>
+      </div>
+    
+      
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>cashubtc/coco</strong>
+          <span class="small-muted">
+            +11 issues / +6 PRs /
+            ✓3 merged / +0 releases
+          </span>
+        </div>
+        <div class="card-body">
+          
+            <h6>New Issues</h6>
+            <ul>
+              
+              <li>#455 <a href="https://github.com/cashubtc/coco/issues/455" target="_blank" rel="noopener">refactor(core): harden Receive Operation Recovery</a></li>
+              
+              <li>#454 <a href="https://github.com/cashubtc/coco/issues/454" target="_blank" rel="noopener">refactor(core): apply Receive results atomically</a></li>
+              
+              <li>#453 <a href="https://github.com/cashubtc/coco/issues/453" target="_blank" rel="noopener">refactor(core): make Receive preparation atomic</a></li>
+              
+              <li>#452 <a href="https://github.com/cashubtc/coco/issues/452" target="_blank" rel="noopener">refactor(core): make Send completion and recovery transaction-safe</a></li>
+              
+              <li>#451 <a href="https://github.com/cashubtc/coco/issues/451" target="_blank" rel="noopener">refactor(core): harden swap Send across the remote boundary</a></li>
+              
+              <li>#450 <a href="https://github.com/cashubtc/coco/issues/450" target="_blank" rel="noopener">fix(core): execute exact-match Send as one local transition</a></li>
+              
+              <li>#449 <a href="https://github.com/cashubtc/coco/issues/449" target="_blank" rel="noopener">refactor(core): make Send preparation atomic</a></li>
+              
+              <li>#448 <a href="https://github.com/cashubtc/coco/issues/448" target="_blank" rel="noopener">refactor(core): route Keypair Allocation through a domain transaction gateway</a></li>
+              
+              <li>#447 <a href="https://github.com/cashubtc/coco/issues/447" target="_blank" rel="noopener">feat(core): establish strong Wallet transaction scopes across adapters</a></li>
+              
+              <li>#445 <a href="https://github.com/cashubtc/coco/issues/445" target="_blank" rel="noopener">feat(core): add a generic durable event outbox foundation</a></li>
+              
+              <li>#444 <a href="https://github.com/cashubtc/coco/issues/444" target="_blank" rel="noopener">feat(core): harden critical Wallet transactions through Send and Receive</a></li>
+              
+            </ul>
+          
+          
+            <h6>Opened PRs</h6>
+            <ul>
+              
+              <li>#457 <a href="https://github.com/cashubtc/coco/pull/457" target="_blank" rel="noopener">feat: enforce strong wallet repository transactions</a></li>
+              
+              <li>#456 <a href="https://github.com/cashubtc/coco/pull/456" target="_blank" rel="noopener">feat(core): add durable event outbox foundation</a></li>
+              
+              <li>#446 <a href="https://github.com/cashubtc/coco/pull/446" target="_blank" rel="noopener">fix(core): upgrade cashu-ts to rc.7 with safe keyset recovery</a></li>
+              
+              <li>#443 <a href="https://github.com/cashubtc/coco/pull/443" target="_blank" rel="noopener">docs(agents): refresh repository guidance</a></li>
+              
+              <li>#442 <a href="https://github.com/cashubtc/coco/pull/442" target="_blank" rel="noopener">fix: rehydrate persisted melt change amounts</a></li>
+              
+              <li>#441 <a href="https://github.com/cashubtc/coco/pull/441" target="_blank" rel="noopener">refactor(cocod): simplify v1 HTTP and schema infrastructure</a></li>
+              
+            </ul>
+          
+          
+            <h6>Merged PRs</h6>
+            <ul>
+              
+              <li>#443 <a href="https://github.com/cashubtc/coco/pull/443" target="_blank" rel="noopener">docs(agents): refresh repository guidance</a></li>
+              
+              <li>#442 <a href="https://github.com/cashubtc/coco/pull/442" target="_blank" rel="noopener">fix: rehydrate persisted melt change amounts</a></li>
+              
+              <li>#441 <a href="https://github.com/cashubtc/coco/pull/441" target="_blank" rel="noopener">refactor(cocod): simplify v1 HTTP and schema infrastructure</a></li>
+              
+            </ul>
+          
+          
+          
+        </div>
+      </div>
+    
+      
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>cashubtc/cashu-ts</strong>
+          <span class="small-muted">
+            +2 issues / +36 PRs /
+            ✓28 merged / +2 releases
+          </span>
+        </div>
+        <div class="card-body">
+          
+            <h6>New Issues</h6>
+            <ul>
+              
+              <li>#1007 <a href="https://github.com/cashubtc/cashu-ts/issues/1007" target="_blank" rel="noopener">🧬 Weekly mutation report — score 88.7%</a></li>
+              
+              <li>#997 <a href="https://github.com/cashubtc/cashu-ts/issues/997" target="_blank" rel="noopener">Cashu-TS Development Meeting — 2026-08-26</a></li>
+              
+            </ul>
+          
+          
+            <h6>Opened PRs</h6>
+            <ul>
+              
+              <li>#1032 <a href="https://github.com/cashubtc/cashu-ts/pull/1032" target="_blank" rel="noopener">Authenticate protected websockets in-band</a></li>
+              
+              <li>#1031 <a href="https://github.com/cashubtc/cashu-ts/pull/1031" target="_blank" rel="noopener">fix(nut18): encode payment requests url-safe [backport v4-dev]</a></li>
+              
+              <li>#1029 <a href="https://github.com/cashubtc/cashu-ts/pull/1029" target="_blank" rel="noopener">fix(nut18): encode payment requests url-safe, and retire Bytes</a></li>
+              
+              <li>#1028 <a href="https://github.com/cashubtc/cashu-ts/pull/1028" target="_blank" rel="noopener">refactor(utils): remove obsolete byte helpers</a></li>
+              
+              <li>#1027 <a href="https://github.com/cashubtc/cashu-ts/pull/1027" target="_blank" rel="noopener">feat(utils): export strict hex byte codecs</a></li>
+              
+              <li>#1026 <a href="https://github.com/cashubtc/cashu-ts/pull/1026" target="_blank" rel="noopener">chore(v4-dev): release 4.10.1</a></li>
+              
+              <li>#1025 <a href="https://github.com/cashubtc/cashu-ts/pull/1025" target="_blank" rel="noopener">fix(utils): index the reviver holder by its actual shape [backport v4-dev]</a></li>
+              
+              <li>#1024 <a href="https://github.com/cashubtc/cashu-ts/pull/1024" target="_blank" rel="noopener">fix(utils): index the reviver holder by its actual shape</a></li>
+              
+              <li>#1023 <a href="https://github.com/cashubtc/cashu-ts/pull/1023" target="_blank" rel="noopener">chore(deps): split dependency groups and surface runtime bumps</a></li>
+              
+              <li>#1022 <a href="https://github.com/cashubtc/cashu-ts/pull/1022" target="_blank" rel="noopener">chore(deps): bump the noble-scure group with 4 updates [backport v4-dev]</a></li>
+              
+              <li>#1021 <a href="https://github.com/cashubtc/cashu-ts/pull/1021" target="_blank" rel="noopener">chore(deps-dev): bump @eslint/js from 9.39.4 to 10.0.1</a></li>
+              
+              <li>#1020 <a href="https://github.com/cashubtc/cashu-ts/pull/1020" target="_blank" rel="noopener">chore(deps-dev): bump globals from 16.5.0 to 17.11.0</a></li>
+              
+              <li>#1019 <a href="https://github.com/cashubtc/cashu-ts/pull/1019" target="_blank" rel="noopener">chore(deps-dev): bump vite-plugin-dts from 4.5.4 to 5.0.3</a></li>
+              
+              <li>#1018 <a href="https://github.com/cashubtc/cashu-ts/pull/1018" target="_blank" rel="noopener">chore(deps-dev): bump the dev-tooling group across 1 directory with 16 updates</a></li>
+              
+              <li>#1017 <a href="https://github.com/cashubtc/cashu-ts/pull/1017" target="_blank" rel="noopener">chore(deps): bump the noble-scure group with 4 updates</a></li>
+              
+              <li>#1016 <a href="https://github.com/cashubtc/cashu-ts/pull/1016" target="_blank" rel="noopener">docs: drop the TL;DR heading from the PR template</a></li>
+              
+              <li>#1015 <a href="https://github.com/cashubtc/cashu-ts/pull/1015" target="_blank" rel="noopener">chore(deps-dev): bump postcss from 8.5.16 to 8.5.26</a></li>
+              
+              <li>#1014 <a href="https://github.com/cashubtc/cashu-ts/pull/1014" target="_blank" rel="noopener">chore(deps-dev): bump js-yaml from 4.3.0 to 4.3.2</a></li>
+              
+              <li>#1013 <a href="https://github.com/cashubtc/cashu-ts/pull/1013" target="_blank" rel="noopener">chore(deps-dev): bump brace-expansion from 1.1.14 to 1.1.18</a></li>
+              
+              <li>#1012 <a href="https://github.com/cashubtc/cashu-ts/pull/1012" target="_blank" rel="noopener">chore(deps-dev): bump @vitest/browser from 4.1.9 to 4.1.10</a></li>
+              
+              <li>#1011 <a href="https://github.com/cashubtc/cashu-ts/pull/1011" target="_blank" rel="noopener">chore(deps): bump fast-uri from 3.1.3 to 3.1.6</a></li>
+              
+              <li>#1010 <a href="https://github.com/cashubtc/cashu-ts/pull/1010" target="_blank" rel="noopener">chore(deps): let Dependabot manage npm dependencies</a></li>
+              
+              <li>#1009 <a href="https://github.com/cashubtc/cashu-ts/pull/1009" target="_blank" rel="noopener">chore(main): release 5.0.0-rc.9</a></li>
+              
+              <li>#1008 <a href="https://github.com/cashubtc/cashu-ts/pull/1008" target="_blank" rel="noopener">chore(scripts): use the scoped package name in make-experimental</a></li>
+              
+              <li>#1005 <a href="https://github.com/cashubtc/cashu-ts/pull/1005" target="_blank" rel="noopener">feat(nutroot): adapt NIP-07 browser signers to both lock families</a></li>
+              
+              <li>#1004 <a href="https://github.com/cashubtc/cashu-ts/pull/1004" target="_blank" rel="noopener">feat(model): expose NUT-06 urls, time and tos_url on MintInfo [backport v4-dev]</a></li>
+              
+              <li>#1003 <a href="https://github.com/cashubtc/cashu-ts/pull/1003" target="_blank" rel="noopener">feat(model): expose NUT-06 urls, time and tos_url on MintInfo</a></li>
+              
+              <li>#1002 <a href="https://github.com/cashubtc/cashu-ts/pull/1002" target="_blank" rel="noopener">fix(wallet): keep large proofs in the close-match selection pool [backport v4-dev]</a></li>
+              
+              <li>#1001 <a href="https://github.com/cashubtc/cashu-ts/pull/1001" target="_blank" rel="noopener">fix(wallet): keep large proofs in the close-match selection pool</a></li>
+              
+              <li>#1000 <a href="https://github.com/cashubtc/cashu-ts/pull/1000" target="_blank" rel="noopener">chore(docker): update CDK_IMAGE to cashubtc/mintd:0.17.6</a></li>
+              
+              <li>#999 <a href="https://github.com/cashubtc/cashu-ts/pull/999" target="_blank" rel="noopener">test: pin the NUT-13 V2 secret derivation vectors [backport v4-dev]</a></li>
+              
+              <li>#998 <a href="https://github.com/cashubtc/cashu-ts/pull/998" target="_blank" rel="noopener">test: pin the NUT-13 V2 secret derivation vectors</a></li>
+              
+              <li>#996 <a href="https://github.com/cashubtc/cashu-ts/pull/996" target="_blank" rel="noopener">feat(wallet): add LockBuilder and asLocked as forward-compatible names [backport v4-dev]</a></li>
+              
+              <li>#995 <a href="https://github.com/cashubtc/cashu-ts/pull/995" target="_blank" rel="noopener">feat(wallet): add LockBuilder and asLocked as forward-compatible names</a></li>
+              
+              <li>#994 <a href="https://github.com/cashubtc/cashu-ts/pull/994" target="_blank" rel="noopener">chore(docker): update CDK_IMAGE_RC to cashubtc/mintd:0.18.0-rc.1</a></li>
+              
+              <li>#993 <a href="https://github.com/cashubtc/cashu-ts/pull/993" target="_blank" rel="noopener">test(integration): accept nutshell&#39;s post-#1008 p2pk witness error</a></li>
+              
+            </ul>
+          
+          
+            <h6>Merged PRs</h6>
+            <ul>
+              
+              <li>#1018 <a href="https://github.com/cashubtc/cashu-ts/pull/1018" target="_blank" rel="noopener">chore(deps-dev): bump the dev-tooling group across 1 directory with 16 updates</a></li>
+              
+              <li>#1023 <a href="https://github.com/cashubtc/cashu-ts/pull/1023" target="_blank" rel="noopener">chore(deps): split dependency groups and surface runtime bumps</a></li>
+              
+              <li>#1025 <a href="https://github.com/cashubtc/cashu-ts/pull/1025" target="_blank" rel="noopener">fix(utils): index the reviver holder by its actual shape [backport v4-dev]</a></li>
+              
+              <li>#1024 <a href="https://github.com/cashubtc/cashu-ts/pull/1024" target="_blank" rel="noopener">fix(utils): index the reviver holder by its actual shape</a></li>
+              
+              <li>#1022 <a href="https://github.com/cashubtc/cashu-ts/pull/1022" target="_blank" rel="noopener">chore(deps): bump the noble-scure group with 4 updates [backport v4-dev]</a></li>
+              
+              <li>#1020 <a href="https://github.com/cashubtc/cashu-ts/pull/1020" target="_blank" rel="noopener">chore(deps-dev): bump globals from 16.5.0 to 17.11.0</a></li>
+              
+              <li>#1017 <a href="https://github.com/cashubtc/cashu-ts/pull/1017" target="_blank" rel="noopener">chore(deps): bump the noble-scure group with 4 updates</a></li>
+              
+              <li>#1010 <a href="https://github.com/cashubtc/cashu-ts/pull/1010" target="_blank" rel="noopener">chore(deps): let Dependabot manage npm dependencies</a></li>
+              
+              <li>#1011 <a href="https://github.com/cashubtc/cashu-ts/pull/1011" target="_blank" rel="noopener">chore(deps): bump fast-uri from 3.1.3 to 3.1.6</a></li>
+              
+              <li>#1013 <a href="https://github.com/cashubtc/cashu-ts/pull/1013" target="_blank" rel="noopener">chore(deps-dev): bump brace-expansion from 1.1.14 to 1.1.18</a></li>
+              
+              <li>#1014 <a href="https://github.com/cashubtc/cashu-ts/pull/1014" target="_blank" rel="noopener">chore(deps-dev): bump js-yaml from 4.3.0 to 4.3.2</a></li>
+              
+              <li>#1015 <a href="https://github.com/cashubtc/cashu-ts/pull/1015" target="_blank" rel="noopener">chore(deps-dev): bump postcss from 8.5.16 to 8.5.26</a></li>
+              
+              <li>#1012 <a href="https://github.com/cashubtc/cashu-ts/pull/1012" target="_blank" rel="noopener">chore(deps-dev): bump @vitest/browser from 4.1.9 to 4.1.10</a></li>
+              
+              <li>#1016 <a href="https://github.com/cashubtc/cashu-ts/pull/1016" target="_blank" rel="noopener">docs: drop the TL;DR heading from the PR template</a></li>
+              
+              <li>#1008 <a href="https://github.com/cashubtc/cashu-ts/pull/1008" target="_blank" rel="noopener">chore(scripts): use the scoped package name in make-experimental</a></li>
+              
+              <li>#987 <a href="https://github.com/cashubtc/cashu-ts/pull/987" target="_blank" rel="noopener">chore(main): release 5.0.0-rc.8</a></li>
+              
+              <li>#988 <a href="https://github.com/cashubtc/cashu-ts/pull/988" target="_blank" rel="noopener">chore(v4-dev): release 4.10.0</a></li>
+              
+              <li>#1004 <a href="https://github.com/cashubtc/cashu-ts/pull/1004" target="_blank" rel="noopener">feat(model): expose NUT-06 urls, time and tos_url on MintInfo [backport v4-dev]</a></li>
+              
+              <li>#1003 <a href="https://github.com/cashubtc/cashu-ts/pull/1003" target="_blank" rel="noopener">feat(model): expose NUT-06 urls, time and tos_url on MintInfo</a></li>
+              
+              <li>#996 <a href="https://github.com/cashubtc/cashu-ts/pull/996" target="_blank" rel="noopener">feat(wallet): add LockBuilder and asLocked as forward-compatible names [backport v4-dev]</a></li>
+              
+              <li>#1002 <a href="https://github.com/cashubtc/cashu-ts/pull/1002" target="_blank" rel="noopener">fix(wallet): keep large proofs in the close-match selection pool [backport v4-dev]</a></li>
+              
+              <li>#1001 <a href="https://github.com/cashubtc/cashu-ts/pull/1001" target="_blank" rel="noopener">fix(wallet): keep large proofs in the close-match selection pool</a></li>
+              
+              <li>#1000 <a href="https://github.com/cashubtc/cashu-ts/pull/1000" target="_blank" rel="noopener">chore(docker): update CDK_IMAGE to cashubtc/mintd:0.17.6</a></li>
+              
+              <li>#999 <a href="https://github.com/cashubtc/cashu-ts/pull/999" target="_blank" rel="noopener">test: pin the NUT-13 V2 secret derivation vectors [backport v4-dev]</a></li>
+              
+              <li>#998 <a href="https://github.com/cashubtc/cashu-ts/pull/998" target="_blank" rel="noopener">test: pin the NUT-13 V2 secret derivation vectors</a></li>
+              
+              <li>#995 <a href="https://github.com/cashubtc/cashu-ts/pull/995" target="_blank" rel="noopener">feat(wallet): add LockBuilder and asLocked as forward-compatible names</a></li>
+              
+              <li>#994 <a href="https://github.com/cashubtc/cashu-ts/pull/994" target="_blank" rel="noopener">chore(docker): update CDK_IMAGE_RC to cashubtc/mintd:0.18.0-rc.1</a></li>
+              
+              <li>#993 <a href="https://github.com/cashubtc/cashu-ts/pull/993" target="_blank" rel="noopener">test(integration): accept nutshell&#39;s post-#1008 p2pk witness error</a></li>
+              
+            </ul>
+          
+          
+            <h6>Releases</h6>
+            <ul>
+              
+              <li><a href="https://github.com/cashubtc/cashu-ts/releases/tag/v5.0.0-rc.8" target="_blank" rel="noopener">v5.0.0-rc.8</a> — v5.0.0-rc.8</li>
+              
+              <li><a href="https://github.com/cashubtc/cashu-ts/releases/tag/v4.10.0" target="_blank" rel="noopener">v4.10.0</a> — v4.10.0</li>
+              
+            </ul>
+          
+          
+        </div>
+      </div>
+    
+      
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>cashubtc/nuts</strong>
+          <span class="small-muted">
+            +0 issues / +0 PRs /
+            ✓0 merged / +0 releases
+          </span>
+        </div>
+        <div class="card-body">
+          
+          
+          
+          
+          
+            <p class="small-muted mb-0">No notable activity in the last 7 days.</p>
+          
+        </div>
+      </div>
+    
+      
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>cashubtc/nutshell</strong>
+          <span class="small-muted">
+            +1 issues / +6 PRs /
+            ✓3 merged / +0 releases
+          </span>
+        </div>
+        <div class="card-body">
+          
+            <h6>New Issues</h6>
+            <ul>
+              
+              <li>#1138 <a href="https://github.com/cashubtc/nutshell/issues/1138" target="_blank" rel="noopener">🧬 Weekly Mutation Testing Report - 2026-08-29</a></li>
+              
+            </ul>
+          
+          
+            <h6>Opened PRs</h6>
+            <ul>
+              
+              <li>#1137 <a href="https://github.com/cashubtc/nutshell/pull/1137" target="_blank" rel="noopener">test: sync the shared nutroot vectors with the spec</a></li>
+              
+              <li>#1136 <a href="https://github.com/cashubtc/nutshell/pull/1136" target="_blank" rel="noopener">fix(ci): restore mutation testing reports</a></li>
+              
+              <li>#1135 <a href="https://github.com/cashubtc/nutshell/pull/1135" target="_blank" rel="noopener">fix: v3 blind signatures carry no DLEQ</a></li>
+              
+              <li>#1134 <a href="https://github.com/cashubtc/nutshell/pull/1134" target="_blank" rel="noopener">feat: version 02 BATs sign the request they authorize (NUT-22)</a></li>
+              
+              <li>#1133 <a href="https://github.com/cashubtc/nutshell/pull/1133" target="_blank" rel="noopener">fix: the six regtest-mint failures on the v3 keysets branch</a></li>
+              
+              <li>#1132 <a href="https://github.com/cashubtc/nutshell/pull/1132" target="_blank" rel="noopener">refactor(lightning): use Pydantic models for Lightning API responses</a></li>
+              
+            </ul>
+          
+          
+            <h6>Merged PRs</h6>
+            <ul>
+              
+              <li>#1136 <a href="https://github.com/cashubtc/nutshell/pull/1136" target="_blank" rel="noopener">fix(ci): restore mutation testing reports</a></li>
+              
+              <li>#1133 <a href="https://github.com/cashubtc/nutshell/pull/1133" target="_blank" rel="noopener">fix: the six regtest-mint failures on the v3 keysets branch</a></li>
+              
+              <li>#1111 <a href="https://github.com/cashubtc/nutshell/pull/1111" target="_blank" rel="noopener">feat(nutroot): nutroot secrets for v3 keysets (NUT-10 POC)</a></li>
+              
+            </ul>
+          
+          
+          
+        </div>
+      </div>
+    
+      
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>cashubtc/Numo</strong>
+          <span class="small-muted">
+            +0 issues / +3 PRs /
+            ✓2 merged / +0 releases
+          </span>
+        </div>
+        <div class="card-body">
+          
+          
+            <h6>Opened PRs</h6>
+            <ul>
+              
+              <li>#374 <a href="https://github.com/cashubtc/Numo/pull/374" target="_blank" rel="noopener">Polish mint discovery and settings UI</a></li>
+              
+              <li>#373 <a href="https://github.com/cashubtc/Numo/pull/373" target="_blank" rel="noopener">Polish mint discovery and settings UI</a></li>
+              
+              <li>#372 <a href="https://github.com/cashubtc/Numo/pull/372" target="_blank" rel="noopener">chore: bump version and versionCode</a></li>
+              
+            </ul>
+          
+          
+            <h6>Merged PRs</h6>
+            <ul>
+              
+              <li>#374 <a href="https://github.com/cashubtc/Numo/pull/374" target="_blank" rel="noopener">Polish mint discovery and settings UI</a></li>
+              
+              <li>#372 <a href="https://github.com/cashubtc/Numo/pull/372" target="_blank" rel="noopener">chore: bump version and versionCode</a></li>
+              
+            </ul>
+          
+          
+          
+        </div>
+      </div>
+    
+      
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>cashubtc/wallet</strong>
+          <span class="small-muted">
+            +3 issues / +5 PRs /
+            ✓4 merged / +0 releases
+          </span>
+        </div>
+        <div class="card-body">
+          
+            <h6>New Issues</h6>
+            <ul>
+              
+              <li>#316 <a href="https://github.com/cashubtc/wallet/issues/316" target="_blank" rel="noopener">bug(ios): SAT-only mint triggers repeated USD wallet lookup errors</a></li>
+              
+              <li>#315 <a href="https://github.com/cashubtc/wallet/issues/315" target="_blank" rel="noopener">bug(android): Cashu Request receipt loses the known input fee</a></li>
+              
+              <li>#314 <a href="https://github.com/cashubtc/wallet/issues/314" target="_blank" rel="noopener">test: cover payment-request delivery failure and revokeSend recovery</a></li>
+              
+            </ul>
+          
+          
+            <h6>Opened PRs</h6>
+            <ul>
+              
+              <li>#317 <a href="https://github.com/cashubtc/wallet/pull/317" target="_blank" rel="noopener">Payments UX overhaul: one sheet canon, honest payment terminals, staged success</a></li>
+              
+              <li>#313 <a href="https://github.com/cashubtc/wallet/pull/313" target="_blank" rel="noopener">Redesign send and receive method sheets</a></li>
+              
+              <li>#312 <a href="https://github.com/cashubtc/wallet/pull/312" target="_blank" rel="noopener">Fix Android UI retry temp-file portability</a></li>
+              
+              <li>#311 <a href="https://github.com/cashubtc/wallet/pull/311" target="_blank" rel="noopener">Update CDK bindings to v0.18.0-rc.1</a></li>
+              
+              <li>#310 <a href="https://github.com/cashubtc/wallet/pull/310" target="_blank" rel="noopener">feat: derive the app Nostr identity via NIP-06 on iOS and Android</a></li>
+              
+            </ul>
+          
+          
+            <h6>Merged PRs</h6>
+            <ul>
+              
+              <li>#313 <a href="https://github.com/cashubtc/wallet/pull/313" target="_blank" rel="noopener">Redesign send and receive method sheets</a></li>
+              
+              <li>#311 <a href="https://github.com/cashubtc/wallet/pull/311" target="_blank" rel="noopener">Update CDK bindings to v0.18.0-rc.1</a></li>
+              
+              <li>#308 <a href="https://github.com/cashubtc/wallet/pull/308" target="_blank" rel="noopener">Improve payment flows, mint selection, and bottom sheets</a></li>
+              
+              <li>#312 <a href="https://github.com/cashubtc/wallet/pull/312" target="_blank" rel="noopener">Fix Android UI retry temp-file portability</a></li>
+              
+            </ul>
+          
+          
+          
+        </div>
+      </div>
+    
+
+    <h4>By Contributor</h4>
+    <table id="momentum-contributors-table" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Contributor</th>
+          <th>Commits</th>
+          <th>+Lines</th>
+          <th>-Lines</th>
+          <th>Days Active</th>
+          <th>Issues Opened</th>
+          <th>PRs Opened</th>
+          <th>PRs Merged</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>thesimplekid</td>
+          <td>24</td>
+          <td>4198</td>
+          <td>2592</td>
+          <td>6</td>
+          <td>4</td>
+          <td>17</td>
+          <td>16</td>
+        </tr>
+        
+        <tr>
+          <td>robwoodgate</td>
+          <td>12</td>
+          <td>525</td>
+          <td>90</td>
+          <td>5</td>
+          <td>0</td>
+          <td>28</td>
+          <td>21</td>
+        </tr>
+        
+        <tr>
+          <td>dependabot[bot]</td>
+          <td>8</td>
+          <td>516</td>
+          <td>524</td>
+          <td>1</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>a1denvalu3</td>
+          <td>7</td>
+          <td>1254</td>
+          <td>337</td>
+          <td>4</td>
+          <td>0</td>
+          <td>2</td>
+          <td>3</td>
+        </tr>
+        
+        <tr>
+          <td>asmogo</td>
+          <td>7</td>
+          <td>6995</td>
+          <td>2178</td>
+          <td>3</td>
+          <td>3</td>
+          <td>5</td>
+          <td>4</td>
+        </tr>
+        
+        <tr>
+          <td>Egge21M</td>
+          <td>4</td>
+          <td>452</td>
+          <td>398</td>
+          <td>1</td>
+          <td>10</td>
+          <td>5</td>
+          <td>3</td>
+        </tr>
+        
+        <tr>
+          <td>swedishfrenchpress</td>
+          <td>2</td>
+          <td>1638</td>
+          <td>1182</td>
+          <td>2</td>
+          <td>0</td>
+          <td>3</td>
+          <td>2</td>
+        </tr>
+        
+        <tr>
+          <td>cdk-bot</td>
+          <td>1</td>
+          <td>7</td>
+          <td>3</td>
+          <td>1</td>
+          <td>0</td>
+          <td>1</td>
+          <td>1</td>
+        </tr>
+        
+        <tr>
+          <td>crodas</td>
+          <td>1</td>
+          <td>104</td>
+          <td>2</td>
+          <td>1</td>
+          <td>3</td>
+          <td>5</td>
+          <td>1</td>
+        </tr>
+        
+        <tr>
+          <td>github-actions[bot]</td>
+          <td>1</td>
+          <td>77</td>
+          <td>0</td>
+          <td>1</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>KvngMikey</td>
+          <td>1</td>
+          <td>10</td>
+          <td>3</td>
+          <td>1</td>
+          <td>0</td>
+          <td>1</td>
+          <td>1</td>
+        </tr>
+        
+        <tr>
+          <td>github-actions</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>5</td>
+          <td>1</td>
+          <td>1</td>
+        </tr>
+        
+        <tr>
+          <td>kaloudis</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>1</td>
+          <td>2</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>TheMhv</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>1</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>ye0man</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>1</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>igbopharaoh</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>1</td>
+          <td>1</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>dependabot</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>10</td>
+          <td>8</td>
+        </tr>
+        
+        <tr>
+          <td>ryanduguid</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>1</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>Kelbie</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>callebtc</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>sihamon</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>vincenzopalazzo</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>Hardeezah</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>prusnak</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>mvuk</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>j-kon</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>joemphilips</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>d4rp4t</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>GEET3001</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>lescuer97</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>Forte11Cuba</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>sotach1</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>gudnuf</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+        <tr>
+          <td>Delgado74</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        
+      </tbody>
+    </table>
+
+    <h5>Assigned Open Work</h5>
+    <div class="row">
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>thesimplekid</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#1945 <a href="https://github.com/cashubtc/cdk/issues/1945" target="_blank" rel="noopener">`rotate_keyset` does not validate that expiry is in the future</a></li>
+                
+                <li>#2415 <a href="https://github.com/cashubtc/cdk/issues/2415" target="_blank" rel="noopener">Update Rust to 1.98.0</a></li>
+                
+                <li>#2162 <a href="https://github.com/cashubtc/cdk/issues/2162" target="_blank" rel="noopener">Split wallet and mint into their own crates instead of using wallet and mint features</a></li>
+                
+                <li>#385 <a href="https://github.com/cashubtc/nuts/issues/385" target="_blank" rel="noopener">Add a flag to the bolt12 spec for reusable</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2437 <a href="https://github.com/cashubtc/cdk/pull/2437" target="_blank" rel="noopener">fix(wallet): bound untrusted input sizes</a></li>
+                
+                <li>#2407 <a href="https://github.com/cashubtc/cdk/pull/2407" target="_blank" rel="noopener">feat(payjoin): add backend-independent NUT-31 plumbing</a></li>
+                
+                <li>#2430 <a href="https://github.com/cashubtc/cdk/pull/2430" target="_blank" rel="noopener">fix(cashu): preserve mint URL path and query data in format_url</a></li>
+                
+                <li>#2268 <a href="https://github.com/cashubtc/cdk/pull/2268" target="_blank" rel="noopener">fix(signatory): reject non-future keyset expiries</a></li>
+                
+                <li>#2202 <a href="https://github.com/cashubtc/cdk/pull/2202" target="_blank" rel="noopener">fix(tor): use patched Arti git dependency</a></li>
+                
+                <li>#2194 <a href="https://github.com/cashubtc/cdk/pull/2194" target="_blank" rel="noopener">Bls</a></li>
+                
+                <li>#2049 <a href="https://github.com/cashubtc/cdk/pull/2049" target="_blank" rel="noopener">Payjoin</a></li>
+                
+                <li>#376 <a href="https://github.com/cashubtc/nuts/pull/376" target="_blank" rel="noopener">NUT-XX: Payjoin</a></li>
+                
+                <li>#415 <a href="https://github.com/cashubtc/nuts/pull/415" target="_blank" rel="noopener">Wallet request expiry for mint quotes</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>robwoodgate</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2232 <a href="https://github.com/cashubtc/cdk/pull/2232" target="_blank" rel="noopener">feat: verify and sign the length-framed NUT-11 SIG_ALL message</a></li>
+                
+                <li>#421 <a href="https://github.com/cashubtc/nuts/pull/421" target="_blank" rel="noopener">NUT-10: Nutroot secrets (v3 keysets)</a></li>
+                
+                <li>#424 <a href="https://github.com/cashubtc/nuts/pull/424" target="_blank" rel="noopener">NUT-07: define UNSPENT as the absence of a pending or spent record</a></li>
+                
+                <li>#402 <a href="https://github.com/cashubtc/nuts/pull/402" target="_blank" rel="noopener">tests: add NUT-28 HTLC example proof</a></li>
+                
+                <li>#406 <a href="https://github.com/cashubtc/nuts/pull/406" target="_blank" rel="noopener">NUT-03/05: state unit consistency normatively</a></li>
+                
+                <li>#405 <a href="https://github.com/cashubtc/nuts/pull/405" target="_blank" rel="noopener">NUT-29: use valid curve points in the batch mint example</a></li>
+                
+                <li>#343 <a href="https://github.com/cashubtc/nuts/pull/343" target="_blank" rel="noopener">Define canonical JSON encoding for unsigned 64-bit integers</a></li>
+                
+                <li>#359 <a href="https://github.com/cashubtc/nuts/pull/359" target="_blank" rel="noopener">nut10: Add witness section and warning</a></li>
+                
+                <li>#371 <a href="https://github.com/cashubtc/nuts/pull/371" target="_blank" rel="noopener">NUT-00: add BLS12-381 (v3) protocol</a></li>
+                
+                <li>#404 <a href="https://github.com/cashubtc/nuts/pull/404" target="_blank" rel="noopener">NUT-11: length-frame the SIG_ALL message aggregation</a></li>
+                
+                <li>#407 <a href="https://github.com/cashubtc/nuts/pull/407" target="_blank" rel="noopener">NUT-14: add HTLC test vectors</a></li>
+                
+                <li>#427 <a href="https://github.com/cashubtc/nuts/pull/427" target="_blank" rel="noopener">NUT-04: clarify expiry as a payment deadline</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>a1denvalu3</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#349 <a href="https://github.com/cashubtc/Numo/issues/349" target="_blank" rel="noopener">Add analytics and crash report collection</a></li>
+                
+                <li>#292 <a href="https://github.com/cashubtc/Numo/issues/292" target="_blank" rel="noopener">Feature: Tile view option for items</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#388 <a href="https://github.com/cashubtc/nuts/pull/388" target="_blank" rel="noopener">NUT-XX: Proof of Liabilities (PoL)</a></li>
+                
+                <li>#416 <a href="https://github.com/cashubtc/nuts/pull/416" target="_blank" rel="noopener">NUT-06: require signed mint info</a></li>
+                
+                <li>#1058 <a href="https://github.com/cashubtc/nutshell/pull/1058" target="_blank" rel="noopener">feat(mint): introduce automatic keyset rotations</a></li>
+                
+                <li>#360 <a href="https://github.com/cashubtc/Numo/pull/360" target="_blank" rel="noopener">Add anonymous encrypted issue reporting</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>asmogo</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2441 <a href="https://github.com/cashubtc/cdk/pull/2441" target="_blank" rel="noopener">feat: add reversible mint database migrations</a></li>
+                
+                <li>#2288 <a href="https://github.com/cashubtc/cdk/pull/2288" target="_blank" rel="noopener">feat(ci): add nightly mintd docker image builds</a></li>
+                
+                <li>#2275 <a href="https://github.com/cashubtc/cdk/pull/2275" target="_blank" rel="noopener">analyze payment processor interfaces</a></li>
+                
+                <li>#2193 <a href="https://github.com/cashubtc/cdk/pull/2193" target="_blank" rel="noopener">append only database with signed merkle tree and checkpoint anchoring </a></li>
+                
+                <li>#2185 <a href="https://github.com/cashubtc/cdk/pull/2185" target="_blank" rel="noopener">feat: expose tor in ffi</a></li>
+                
+                <li>#2079 <a href="https://github.com/cashubtc/cdk/pull/2079" target="_blank" rel="noopener">Rework Docker release workflow ordering</a></li>
+                
+                <li>#2078 <a href="https://github.com/cashubtc/cdk/pull/2078" target="_blank" rel="noopener">docker hard image</a></li>
+                
+                <li>#2289 <a href="https://github.com/cashubtc/cdk/pull/2289" target="_blank" rel="noopener">kotlin jitpack</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>Egge21M</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#422 <a href="https://github.com/cashubtc/coco/issues/422" target="_blank" rel="noopener">Make in-memory repository transactions rollback-safe</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#439 <a href="https://github.com/cashubtc/coco/pull/439" target="_blank" rel="noopener">feat(cocod): complete machine-oriented v1 API</a></li>
+                
+                <li>#440 <a href="https://github.com/cashubtc/coco/pull/440" target="_blank" rel="noopener">feat(cocod): add Bruno protocol collection</a></li>
+                
+                <li>#429 <a href="https://github.com/cashubtc/coco/pull/429" target="_blank" rel="noopener">fix(core): make memory transactions rollback-safe</a></li>
+                
+                <li>#415 <a href="https://github.com/cashubtc/coco/pull/415" target="_blank" rel="noopener">test: add Cashu Fault Lab mint recovery lane</a></li>
+                
+                <li>#308 <a href="https://github.com/cashubtc/coco/pull/308" target="_blank" rel="noopener">fix(core): canonicalize P2PK keys with legacy aliases</a></li>
+                
+                <li>#389 <a href="https://github.com/cashubtc/nuts/pull/389" target="_blank" rel="noopener">WIP: Define V3 binary secret encoding</a></li>
+                
+                <li>#422 <a href="https://github.com/cashubtc/nuts/pull/422" target="_blank" rel="noopener">Loosen NUT-29 batch quote checks</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>swedishfrenchpress</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#357 <a href="https://github.com/cashubtc/Numo/issues/357" target="_blank" rel="noopener">Hide Base Unit selector when mint only supports one unit</a></li>
+                
+              </ul>
+            
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>crodas</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#2447 <a href="https://github.com/cashubtc/cdk/issues/2447" target="_blank" rel="noopener">Honor reserved change keysets after rotation</a></li>
+                
+                <li>#2425 <a href="https://github.com/cashubtc/cdk/issues/2425" target="_blank" rel="noopener">SQL layer narrows u64 to i64 with unchecked casts, so one wrapped value makes a whole table unreadable</a></li>
+                
+                <li>#2426 <a href="https://github.com/cashubtc/cdk/issues/2426" target="_blank" rel="noopener">Store keyset u64 fields as text</a></li>
+                
+                <li>#2422 <a href="https://github.com/cashubtc/cdk/issues/2422" target="_blank" rel="noopener">Rerunning binding flow often errors as branch is already created on the cdk-* repo</a></li>
+                
+                <li>#2421 <a href="https://github.com/cashubtc/cdk/issues/2421" target="_blank" rel="noopener">Bindings release for backport branch uses the workflow from main not the backport branch</a></li>
+                
+                <li>#2406 <a href="https://github.com/cashubtc/cdk/issues/2406" target="_blank" rel="noopener">Check CONSTANTS_SCHEMA_VERSION in the signatory grpc server</a></li>
+                
+                <li>#2388 <a href="https://github.com/cashubtc/cdk/issues/2388" target="_blank" rel="noopener">Sign mint info, to proof the mint owns the public key they claim</a></li>
+                
+                <li>#2387 <a href="https://github.com/cashubtc/cdk/issues/2387" target="_blank" rel="noopener">Sign arbitrary data with the mint private key</a></li>
+                
+                <li>#2371 <a href="https://github.com/cashubtc/cdk/issues/2371" target="_blank" rel="noopener">feat: NUT-17 notifications distributed across mint instances</a></li>
+                
+                <li>#2370 <a href="https://github.com/cashubtc/cdk/issues/2370" target="_blank" rel="noopener">feat: server-side counterpart of MintConnector</a></li>
+                
+                <li>#2297 <a href="https://github.com/cashubtc/cdk/issues/2297" target="_blank" rel="noopener">Use the pubkey instead of the mint_url as the mint identifier</a></li>
+                
+                <li>#2121 <a href="https://github.com/cashubtc/cdk/issues/2121" target="_blank" rel="noopener">Maven central introducing limits that we exceed</a></li>
+                
+                <li>#2350 <a href="https://github.com/cashubtc/cdk/issues/2350" target="_blank" rel="noopener">Improve the WebSocket types for the wallet</a></li>
+                
+                <li>#1999 <a href="https://github.com/cashubtc/cdk/issues/1999" target="_blank" rel="noopener">Feature Request: Mint Keyset Autorotate &amp; Auto-Prune</a></li>
+                
+                <li>#1902 <a href="https://github.com/cashubtc/cdk/issues/1902" target="_blank" rel="noopener">Publish React native nitro module for `cashu` crate</a></li>
+                
+                <li>#2031 <a href="https://github.com/cashubtc/cdk/issues/2031" target="_blank" rel="noopener">Create a simple way to test the wallet trait and not the rust wallet</a></li>
+                
+                <li>#2097 <a href="https://github.com/cashubtc/cdk/issues/2097" target="_blank" rel="noopener">Build bindings release artifacts from the CDK lockfile</a></li>
+                
+                <li>#2309 <a href="https://github.com/cashubtc/cdk/issues/2309" target="_blank" rel="noopener">Move refresh keyset to the config</a></li>
+                
+                <li>#2311 <a href="https://github.com/cashubtc/cdk/issues/2311" target="_blank" rel="noopener">Track wallet rate-limit follow-up work</a></li>
+                
+                <li>#1927 <a href="https://github.com/cashubtc/cdk/issues/1927" target="_blank" rel="noopener">Wallet handle receive when offline</a></li>
+                
+                <li>#1801 <a href="https://github.com/cashubtc/cdk/issues/1801" target="_blank" rel="noopener">Reduced public wallet api fns in favor or private fns </a></li>
+                
+                <li>#1767 <a href="https://github.com/cashubtc/cdk/issues/1767" target="_blank" rel="noopener">Here is a list of missing methods from the trait and the FFI.</a></li>
+                
+                <li>#2262 <a href="https://github.com/cashubtc/cdk/issues/2262" target="_blank" rel="noopener">Unify how Auth wallet are constructed</a></li>
+                
+                <li>#1792 <a href="https://github.com/cashubtc/cdk/issues/1792" target="_blank" rel="noopener">Add first-class support and CI checks for multi-language bindings (Kotlin, Swift, Dart, Go, React Native)</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2448 <a href="https://github.com/cashubtc/cdk/pull/2448" target="_blank" rel="noopener">Re-issue melt change under the active keyset after a rotation</a></li>
+                
+                <li>#2126 <a href="https://github.com/cashubtc/cdk/pull/2126" target="_blank" rel="noopener">Copy Cargo.lock to binding target repos for reproducible builds</a></li>
+                
+                <li>#1982 <a href="https://github.com/cashubtc/cdk/pull/1982" target="_blank" rel="noopener">Add React Native Nitro bindings for CDK</a></li>
+                
+                <li>#2427 <a href="https://github.com/cashubtc/cdk/pull/2427" target="_blank" rel="noopener">Store keyset u64 fields as text</a></li>
+                
+                <li>#2424 <a href="https://github.com/cashubtc/cdk/pull/2424" target="_blank" rel="noopener">Sign the mint info per NUT-06</a></li>
+                
+                <li>#2280 <a href="https://github.com/cashubtc/cdk/pull/2280" target="_blank" rel="noopener">Authenticate protected websocket connections in-band</a></li>
+                
+                <li>#2386 <a href="https://github.com/cashubtc/cdk/pull/2386" target="_blank" rel="noopener">Sign arbitrary payloads with the identity key</a></li>
+                
+                <li>#2263 <a href="https://github.com/cashubtc/cdk/pull/2263" target="_blank" rel="noopener">Distribute NUT-17 notifications across mint instances</a></li>
+                
+                <li>#2253 <a href="https://github.com/cashubtc/cdk/pull/2253" target="_blank" rel="noopener">Auto-rotate keysets on an age interval</a></li>
+                
+                <li>#2298 <a href="https://github.com/cashubtc/cdk/pull/2298" target="_blank" rel="noopener">Server-side MintServer trait, a connector suite, and a stream seam</a></li>
+                
+                <li>#2218 <a href="https://github.com/cashubtc/cdk/pull/2218" target="_blank" rel="noopener">feat(mint): add a replayable append-only journal for mint state</a></li>
+                
+                <li>#2173 <a href="https://github.com/cashubtc/cdk/pull/2173" target="_blank" rel="noopener">ADR for append-only change log in mint database</a></li>
+                
+                <li>#413 <a href="https://github.com/cashubtc/nuts/pull/413" target="_blank" rel="noopener">NUT-22: add in-band WebSocket authentication</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>KvngMikey</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#164 <a href="https://github.com/cashubtc/coco/issues/164" target="_blank" rel="noopener">feat: multi-mint payments</a></li>
+                
+                <li>#850 <a href="https://github.com/cashubtc/cashu-ts/issues/850" target="_blank" rel="noopener">feat(crypto): detect legacy keyset ID derivation collisions</a></li>
+                
+                <li>#848 <a href="https://github.com/cashubtc/cashu-ts/issues/848" target="_blank" rel="noopener">feat(errors): named mint error code constants and predicates</a></li>
+                
+                <li>#1126 <a href="https://github.com/cashubtc/nutshell/issues/1126" target="_blank" rel="noopener">#1008 changed P2PK witness error codes and messages: intentional?</a></li>
+                
+                <li>#865 <a href="https://github.com/cashubtc/nutshell/issues/865" target="_blank" rel="noopener">Split ledger.py into more modules</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#345 <a href="https://github.com/cashubtc/nuts/pull/345" target="_blank" rel="noopener">NUT-11: Add SigAllSigningPackage transport format for multi-party SIG_ALL signing</a></li>
+                
+                <li>#390 <a href="https://github.com/cashubtc/nuts/pull/390" target="_blank" rel="noopener">NUT-XX: Non-Interactive Mint Delegation on Liveness Failure (Nimdolf)</a></li>
+                
+                <li>#1059 <a href="https://github.com/cashubtc/nutshell/pull/1059" target="_blank" rel="noopener">feat(core): Updates to nut18 and nut26 payment request</a></li>
+                
+                <li>#1032 <a href="https://github.com/cashubtc/nutshell/pull/1032" target="_blank" rel="noopener">refactor(mint): split monolithic ledger.py into ledger/ package</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>kaloudis</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2438 <a href="https://github.com/cashubtc/cdk/pull/2438" target="_blank" rel="noopener">feat(wallet): sign P2PK-locked inputs in prepare_melt_proofs/token</a></li>
+                
+                <li>#2440 <a href="https://github.com/cashubtc/cdk/pull/2440" target="_blank" rel="noopener">feat(wallet): add WalletRepository::update_mint_url and expose it over FFI</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>TheMhv</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#1310 <a href="https://github.com/cashubtc/cdk/issues/1310" target="_blank" rel="noopener">Consider removeing clone from Mint and Wallet structs</a></li>
+                
+                <li>#1746 <a href="https://github.com/cashubtc/cdk/issues/1746" target="_blank" rel="noopener">New Nut: Implement get quotes by pubkeys</a></li>
+                
+                <li>#2129 <a href="https://github.com/cashubtc/cdk/issues/2129" target="_blank" rel="noopener">Deterministic DLEQ&#39;s make storing redundant</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2226 <a href="https://github.com/cashubtc/cdk/pull/2226" target="_blank" rel="noopener">Fix: Remove DLEQ&#39;s storing redundant</a></li>
+                
+                <li>#1834 <a href="https://github.com/cashubtc/cdk/pull/1834" target="_blank" rel="noopener">NUT-XX: Mint Quote Lookup by Public Key</a></li>
+                
+                <li>#2302 <a href="https://github.com/cashubtc/cdk/pull/2302" target="_blank" rel="noopener">feat(regtest): Add custom path to regtest dir</a></li>
+                
+                <li>#1932 <a href="https://github.com/cashubtc/cdk/pull/1932" target="_blank" rel="noopener">NUT-XX: Mint Quote Lookup by Public Key - Wallet Side</a></li>
+                
+                <li>#1799 <a href="https://github.com/cashubtc/cdk/pull/1799" target="_blank" rel="noopener">chore: Removes `clone` from Mint struct</a></li>
+                
+                <li>#1762 <a href="https://github.com/cashubtc/cdk/pull/1762" target="_blank" rel="noopener">chore: Removes `clone` from Wallet struct</a></li>
+                
+                <li>#420 <a href="https://github.com/cashubtc/nuts/pull/420" target="_blank" rel="noopener">NUT-XX: Bitcoin External Fee</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>ye0man</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#350 <a href="https://github.com/cashubtc/nuts/issues/350" target="_blank" rel="noopener">Add CONTRIBUTING.md (contribution &amp; review guidelines)</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#357 <a href="https://github.com/cashubtc/nuts/pull/357" target="_blank" rel="noopener">Add AGENTS.md for AI coding agent guidance</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>igbopharaoh</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#372 <a href="https://github.com/cashubtc/coco/issues/372" target="_blank" rel="noopener">feat: verify and activate mint-swap v1</a></li>
+                
+                <li>#370 <a href="https://github.com/cashubtc/coco/issues/370" target="_blank" rel="noopener">feat: add mint-swap runtime and consumer surfaces</a></li>
+                
+                <li>#369 <a href="https://github.com/cashubtc/coco/issues/369" target="_blank" rel="noopener">feat(core): implement the mint-swap coordinator and recovery</a></li>
+                
+                <li>#367 <a href="https://github.com/cashubtc/coco/issues/367" target="_blank" rel="noopener">feat(storage): persist the mint-swap adapter capability</a></li>
+                
+                <li>#366 <a href="https://github.com/cashubtc/coco/issues/366" target="_blank" rel="noopener">feat(core): add durable mint-swap orchestration foundations</a></li>
+                
+                <li>#364 <a href="https://github.com/cashubtc/coco/issues/364" target="_blank" rel="noopener">Implement recoverable cross-mint swaps</a></li>
+                
+                <li>#163 <a href="https://github.com/cashubtc/coco/issues/163" target="_blank" rel="noopener">feat: mint swaps</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#402 <a href="https://github.com/cashubtc/coco/pull/402" target="_blank" rel="noopener">feat(core): add durable mint swap orchestration foundation</a></li>
+                
+                <li>#420 <a href="https://github.com/cashubtc/coco/pull/420" target="_blank" rel="noopener">feat: activate mint swap v1</a></li>
+                
+                <li>#419 <a href="https://github.com/cashubtc/coco/pull/419" target="_blank" rel="noopener">feat(core): add mint swap runtime consumers</a></li>
+                
+                <li>#418 <a href="https://github.com/cashubtc/coco/pull/418" target="_blank" rel="noopener">feat(core): coordinate recoverable mint swaps</a></li>
+                
+                <li>#417 <a href="https://github.com/cashubtc/coco/pull/417" target="_blank" rel="noopener">feat(storage): persist mint swap operations</a></li>
+                
+                <li>#383 <a href="https://github.com/cashubtc/coco/pull/383" target="_blank" rel="noopener">feat: add recoverable cross-mint swaps</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>Kelbie</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#46 <a href="https://github.com/cashubtc/coco/issues/46" target="_blank" rel="noopener">Improvement: Receive later</a></li>
+                
+                <li>#45 <a href="https://github.com/cashubtc/coco/issues/45" target="_blank" rel="noopener">Errors: Improve error message (Failed to create outputs for receive)</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#436 <a href="https://github.com/cashubtc/coco/pull/436" target="_blank" rel="noopener">feat(cocod): add BOLT12 send and receive</a></li>
+                
+                <li>#316 <a href="https://github.com/cashubtc/coco/pull/316" target="_blank" rel="noopener">feat(core)!: defer dust and unreachable-mint receives, redeem in batches</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>callebtc</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#286 <a href="https://github.com/cashubtc/nutshell/issues/286" target="_blank" rel="noopener">[Wallet] Parse URL from tokens correctly</a></li>
+                
+              </ul>
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2285 <a href="https://github.com/cashubtc/cdk/pull/2285" target="_blank" rel="noopener">feat: add Iroh wallet-mint transport</a></li>
+                
+                <li>#341 <a href="https://github.com/cashubtc/nuts/pull/341" target="_blank" rel="noopener">NUT-XX: Get quotes by pubkeys</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>sihamon</strong></div>
+          <div class="card-body">
+            
+              <h6 class="small">Assigned Issues</h6>
+              <ul class="small">
+                
+                <li>#286 <a href="https://github.com/cashubtc/nutshell/issues/286" target="_blank" rel="noopener">[Wallet] Parse URL from tokens correctly</a></li>
+                
+              </ul>
+            
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>vincenzopalazzo</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2409 <a href="https://github.com/cashubtc/cdk/pull/2409" target="_blank" rel="noopener">Support BOLT12 offer descriptions (NUT-25)</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>Hardeezah</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2375 <a href="https://github.com/cashubtc/cdk/pull/2375" target="_blank" rel="noopener">fix(cdk-cli): scope send, melt, and transfer mint selection by currency unit.</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>prusnak</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2231 <a href="https://github.com/cashubtc/cdk/pull/2231" target="_blank" rel="noopener">feat(enclavia): add attested wallet transport</a></li>
+                
+                <li>#408 <a href="https://github.com/cashubtc/nuts/pull/408" target="_blank" rel="noopener">fix missing nuts in navigation</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>mvuk</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2128 <a href="https://github.com/cashubtc/cdk/pull/2128" target="_blank" rel="noopener">cdk-axum: Proof-of-Reserves /audit endpoint + experimental-features info page</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>j-kon</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#2217 <a href="https://github.com/cashubtc/cdk/pull/2217" target="_blank" rel="noopener">feat(ffi): expose mint quote query methods</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>joemphilips</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#1666 <a href="https://github.com/cashubtc/cdk/pull/1666" target="_blank" rel="noopener">feat: NUT-CTF conditional tokens for prediction markets</a></li>
+                
+                <li>#360 <a href="https://github.com/cashubtc/nuts/pull/360" target="_blank" rel="noopener">NUT-XX: Token possession proof</a></li>
+                
+                <li>#410 <a href="https://github.com/cashubtc/nuts/pull/410" target="_blank" rel="noopener">NUT-Exchange: Atomic Multi-Asset Exchange</a></li>
+                
+                <li>#412 <a href="https://github.com/cashubtc/nuts/pull/412" target="_blank" rel="noopener">NUT-CTF-settle: Multi-Party Atomic Settlement</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>d4rp4t</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#1997 <a href="https://github.com/cashubtc/cdk/pull/1997" target="_blank" rel="noopener">chore: settings stream</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>GEET3001</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#1931 <a href="https://github.com/cashubtc/cdk/pull/1931" target="_blank" rel="noopener">feat(wallet): add offline ecash receiving with DLEQ verification</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>lescuer97</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#121 <a href="https://github.com/cashubtc/coco/pull/121" target="_blank" rel="noopener">add test vectors</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>Forte11Cuba</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#342 <a href="https://github.com/cashubtc/nuts/pull/342" target="_blank" rel="noopener">NUT-XX: Efficient wallet recovery</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>sotach1</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#417 <a href="https://github.com/cashubtc/nuts/pull/417" target="_blank" rel="noopener">NUT-23: add per-quote description hashes</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>gudnuf</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#280 <a href="https://github.com/cashubtc/nuts/pull/280" target="_blank" rel="noopener">abstract NUT-17 subscription kinds</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-header"><strong>Delgado74</strong></div>
+          <div class="card-body">
+            
+            
+              <h6 class="small">Assigned PRs</h6>
+              <ul class="small">
+                
+                <li>#340 <a href="https://github.com/cashubtc/Numo/pull/340" target="_blank" rel="noopener">Add German language translation</a></li>
+                
+              </ul>
+            
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- Health -->
+  <section id="health" class="section">
+    <h2>Issue / PR Health</h2>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Open Issues</div>
+            <div class="fs-3">176</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Avg Open Issue Age</div>
+            <div class="fs-3">105.7d</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Open PRs</div>
+            <div class="fs-3">184</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card metric-card h-100">
+          <div class="card-body">
+            <div class="card-title small-muted">Avg Open PR Age</div>
+            <div class="fs-3">113.1d</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h5>Oldest Open Issues</h5>
+        <ul class="list-group">
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#244 <a href="https://github.com/cashubtc/nutshell/issues/244" target="_blank" rel="noopener">[Nuts] Notes: Async LN payment endpoint design</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2023-05-28</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">1190d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#286 <a href="https://github.com/cashubtc/nutshell/issues/286" target="_blank" rel="noopener">[Wallet] Parse URL from tokens correctly</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2023-07-14</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">1143d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#519 <a href="https://github.com/cashubtc/nutshell/issues/519" target="_blank" rel="noopener">[Mint] Feature request: use LND and CLN RPC backends (instead of only REST)</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2024-04-19</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">863d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#140 <a href="https://github.com/cashubtc/nuts/issues/140" target="_blank" rel="noopener">Token Space Efficiency Enhancement</a></div>
+              <span class="small-muted">cashubtc/nuts &middot; opened 2024-06-25</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">796d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#671 <a href="https://github.com/cashubtc/nutshell/issues/671" target="_blank" rel="noopener">Feature request: `WALLET_MAX_FEE_PPK` flag to avoid overpaying fees</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2024-11-15</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">653d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#683 <a href="https://github.com/cashubtc/nutshell/issues/683" target="_blank" rel="noopener">Bug: Mint tries to invalidate proofs twice in race condition</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2024-12-20</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">618d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#716 <a href="https://github.com/cashubtc/nutshell/issues/716" target="_blank" rel="noopener">Bug: MintQuote returns `pubkey=None` if the field is empty</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2025-03-06</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">542d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#771 <a href="https://github.com/cashubtc/nutshell/issues/771" target="_blank" rel="noopener">bug: melt quote state updates don&#39;t include change</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2025-07-16</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">410d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#278 <a href="https://github.com/cashubtc/nuts/issues/278" target="_blank" rel="noopener">NUT10/NUT11 canonical serialization of secret.</a></div>
+              <span class="small-muted">cashubtc/nuts &middot; opened 2025-08-06</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">389d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#284 <a href="https://github.com/cashubtc/nuts/issues/284" target="_blank" rel="noopener">NUT-17: `proof_state` command should be specified outside of the methods</a></div>
+              <span class="small-muted">cashubtc/nuts &middot; opened 2025-09-03</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">361d</span>
+          </li>
+          
+        </ul>
+      </div>
+      <div class="col-lg-6">
+        <h5>Oldest Open PRs</h5>
+        <ul class="list-group">
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#306 <a href="https://github.com/cashubtc/nutshell/pull/306" target="_blank" rel="noopener">check lightning invoice in-flight</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2023-08-25</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">1101d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#311 <a href="https://github.com/cashubtc/nutshell/pull/311" target="_blank" rel="noopener">Store proofs used for paying a lightning invoice</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2023-09-07</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">1088d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#464 <a href="https://github.com/cashubtc/nutshell/pull/464" target="_blank" rel="noopener">Mint: fix `.env` Lightning fee reserve msat</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2024-02-29</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">913d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#608 <a href="https://github.com/cashubtc/nutshell/pull/608" target="_blank" rel="noopener">[Mint] Synthetic USD E-Cash with LNMarketsWallet</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2024-08-12</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">748d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#694 <a href="https://github.com/cashubtc/nutshell/pull/694" target="_blank" rel="noopener">include preimage in melt quotes settled internally</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2025-01-16</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">591d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#250 <a href="https://github.com/cashubtc/nuts/pull/250" target="_blank" rel="noopener">NUT-XX  - Mint Remote signer standard</a></div>
+              <span class="small-muted">cashubtc/nuts &middot; opened 2025-04-23</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">494d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#253 <a href="https://github.com/cashubtc/nuts/pull/253" target="_blank" rel="noopener">Protocol Extension: Anonymous Credentials</a></div>
+              <span class="small-muted">cashubtc/nuts &middot; opened 2025-04-28</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">489d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#740 <a href="https://github.com/cashubtc/nutshell/pull/740" target="_blank" rel="noopener">feat: Add Unit Specific Limits</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2025-05-08</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">479d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#765 <a href="https://github.com/cashubtc/nutshell/pull/765" target="_blank" rel="noopener">persist the database when launching through docker compose</a></div>
+              <span class="small-muted">cashubtc/nutshell &middot; opened 2025-06-08</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">448d</span>
+          </li>
+          
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">#280 <a href="https://github.com/cashubtc/nuts/pull/280" target="_blank" rel="noopener">abstract NUT-17 subscription kinds</a></div>
+              <span class="small-muted">cashubtc/nuts &middot; opened 2025-08-19</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill">376d</span>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <p><strong>Average time to merge PRs:</strong> 5.0 days</p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Average time to close issues:</strong> 58.1 days</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Growth -->
+  <section id="growth" class="section">
+    <h2>Ecosystem Growth</h2>
+    
+    <div id="chart-growth" class="chart mb-4"></div>
+    
+
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Repo</th>
+          <th>Stars</th>
+          <th>Forks</th>
+          <th>Open Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>cashubtc/Numo</td>
+          <td>67</td>
+          <td>20</td>
+          <td>10</td>
+        </tr>
+        
+        <tr>
+          <td>cashubtc/cashu-ts</td>
+          <td>106</td>
+          <td>66</td>
+          <td>23</td>
+        </tr>
+        
+        <tr>
+          <td>cashubtc/cdk</td>
+          <td>226</td>
+          <td>140</td>
+          <td>100</td>
+        </tr>
+        
+        <tr>
+          <td>cashubtc/coco</td>
+          <td>43</td>
+          <td>19</td>
+          <td>62</td>
+        </tr>
+        
+        <tr>
+          <td>cashubtc/nuts</td>
+          <td>238</td>
+          <td>84</td>
+          <td>78</td>
+        </tr>
+        
+        <tr>
+          <td>cashubtc/nutshell</td>
+          <td>497</td>
+          <td>177</td>
+          <td>145</td>
+        </tr>
+        
+        <tr>
+          <td>cashubtc/wallet</td>
+          <td>15</td>
+          <td>10</td>
+          <td>32</td>
+        </tr>
+        
+      </tbody>
+    </table>
+
+    <h4>New Contributors (Last 90 Days)</h4>
+    
+    <ul>
+      
+      <li><strong>ryanduguid</strong> — first seen 2026-08-24</li>
+      
+      <li><strong>afbase</strong> — first seen 2026-08-20</li>
+      
+      <li><strong>ashen0x</strong> — first seen 2026-08-15</li>
+      
+      <li><strong>kaloudis</strong> — first seen 2026-08-13</li>
+      
+      <li><strong>Hardeezah</strong> — first seen 2026-08-04</li>
+      
+      <li><strong>sotach1</strong> — first seen 2026-08-04</li>
+      
+      <li><strong>Supremesv715</strong> — first seen 2026-07-31</li>
+      
+      <li><strong>emtreulapollaguera</strong> — first seen 2026-07-28</li>
+      
+      <li><strong>MarkovianProtocol</strong> — first seen 2026-07-26</li>
+      
+      <li><strong>areebahmeddd</strong> — first seen 2026-07-15</li>
+      
+      <li><strong>connected-l</strong> — first seen 2026-07-14</li>
+      
+      <li><strong>vicjuma</strong> — first seen 2026-07-13</li>
+      
+      <li><strong>dependabot[bot]</strong> — first seen 2026-07-02</li>
+      
+      <li><strong>dependabot</strong> — first seen 2026-07-02</li>
+      
+      <li><strong>vincenzopalazzo</strong> — first seen 2026-06-27</li>
+      
+      <li><strong>j-kon</strong> — first seen 2026-06-26</li>
+      
+      <li><strong>silentgeckoaudit3801</strong> — first seen 2026-06-21</li>
+      
+      <li><strong>freeyao</strong> — first seen 2026-06-19</li>
+      
+      <li><strong>mvuk</strong> — first seen 2026-06-18</li>
+      
+      <li><strong>prusnak</strong> — first seen 2026-06-14</li>
+      
+      <li><strong>kcres001</strong> — first seen 2026-06-14</li>
+      
+      <li><strong>m0wer</strong> — first seen 2026-06-10</li>
+      
+      <li><strong>mvanhorn</strong> — first seen 2026-06-08</li>
+      
+    </ul>
+    
+  </section>
+
+  <!-- Mint Updates -->
+  <section id="mints" class="section">
+    <h2>Cashu Mint Updates</h2>
+    <p class="small-muted">Diff of <a href="https://ye0man.github.io/cashu-mint-directory/" target="_blank" rel="noopener">Cashu Mint Directory</a> vs the previous snapshot.</p>
+    
+    <ul>
+      
+      <li>No previous mint snapshot available for comparison.</li>
+      
+    </ul>
+    
+  </section>
+
+  <!-- NUT Tracking -->
+  <section id="nuts" class="section">
+    <h2>NUT Spec Tracking</h2>
+    <p class="small-muted">Open issues and PRs in <code>cashubtc/nuts</code> that reference a NUT.</p>
+    
+    <p class="text-muted">No open NUT items found or data unavailable.</p>
+    
+  </section>
+
+  <footer class="text-center">
+    Generated 2026-08-31 00:00 UTC by Cashu War Room.
+  </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+  const charts = {"commits_by_repo": "{\"data\":[{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fNumo\",\"stackgroup\":\"one\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,0,50,280,23,18,20,37,48,15,14,12,7],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fcashu-ts\",\"stackgroup\":\"one\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,226,87,118,107,60,31,47,49,38,17,100,69],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fcdk\",\"stackgroup\":\"one\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[3,79,46,68,68,67,75,88,76,81,151,94,153],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fcoco\",\"stackgroup\":\"one\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[1,66,54,94,74,110,36,64,28,173,155,118,57],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fnuts\",\"stackgroup\":\"one\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,0,3,6,1,13,5,10,0,4,21,18,3],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fnutshell\",\"stackgroup\":\"one\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,3,8,14,7,9,18,56,23,41,110,99,24],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fwallet\",\"stackgroup\":\"one\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,0,0,0,0,0,2,2,48,32,21,210,79],\"type\":\"scatter\"}],\"layout\":{\"template\":{\"data\":{\"barpolar\":[{\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"barpolar\"}],\"bar\":[{\"error_x\":{\"color\":\"#2a3f5f\"},\"error_y\":{\"color\":\"#2a3f5f\"},\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"bar\"}],\"carpet\":[{\"aaxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"baxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"type\":\"carpet\"}],\"choropleth\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"choropleth\"}],\"contourcarpet\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"contourcarpet\"}],\"contour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"contour\"}],\"heatmap\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"heatmap\"}],\"histogram2dcontour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2dcontour\"}],\"histogram2d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2d\"}],\"histogram\":[{\"marker\":{\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"histogram\"}],\"mesh3d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"mesh3d\"}],\"parcoords\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"parcoords\"}],\"pie\":[{\"automargin\":true,\"type\":\"pie\"}],\"scatter3d\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatter3d\"}],\"scattercarpet\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattercarpet\"}],\"scattergeo\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergeo\"}],\"scattergl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergl\"}],\"scattermap\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattermap\"}],\"scatterpolargl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolargl\"}],\"scatterpolar\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolar\"}],\"scatter\":[{\"fillpattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2},\"type\":\"scatter\"}],\"scatterternary\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterternary\"}],\"surface\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"surface\"}],\"table\":[{\"cells\":{\"fill\":{\"color\":\"#EBF0F8\"},\"line\":{\"color\":\"white\"}},\"header\":{\"fill\":{\"color\":\"#C8D4E3\"},\"line\":{\"color\":\"white\"}},\"type\":\"table\"}]},\"layout\":{\"annotationdefaults\":{\"arrowcolor\":\"#2a3f5f\",\"arrowhead\":0,\"arrowwidth\":1},\"autotypenumbers\":\"strict\",\"coloraxis\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"colorscale\":{\"diverging\":[[0,\"#8e0152\"],[0.1,\"#c51b7d\"],[0.2,\"#de77ae\"],[0.3,\"#f1b6da\"],[0.4,\"#fde0ef\"],[0.5,\"#f7f7f7\"],[0.6,\"#e6f5d0\"],[0.7,\"#b8e186\"],[0.8,\"#7fbc41\"],[0.9,\"#4d9221\"],[1,\"#276419\"]],\"sequential\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"sequentialminus\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]},\"colorway\":[\"#636efa\",\"#EF553B\",\"#00cc96\",\"#ab63fa\",\"#FFA15A\",\"#19d3f3\",\"#FF6692\",\"#B6E880\",\"#FF97FF\",\"#FECB52\"],\"font\":{\"color\":\"#2a3f5f\"},\"geo\":{\"bgcolor\":\"white\",\"lakecolor\":\"white\",\"landcolor\":\"white\",\"showlakes\":true,\"showland\":true,\"subunitcolor\":\"#C8D4E3\"},\"hoverlabel\":{\"align\":\"left\"},\"hovermode\":\"closest\",\"paper_bgcolor\":\"white\",\"plot_bgcolor\":\"white\",\"polar\":{\"angularaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"radialaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"}},\"scene\":{\"xaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"yaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"zaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"}},\"shapedefaults\":{\"line\":{\"color\":\"#2a3f5f\"}},\"ternary\":{\"aaxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"baxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"caxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"}},\"title\":{\"x\":0.05},\"xaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2},\"yaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2}}},\"title\":{\"text\":\"Monthly Commits by Repo\"},\"xaxis\":{\"title\":{\"text\":\"Month\"}},\"yaxis\":{\"title\":{\"text\":\"Commits\"}},\"hovermode\":\"x unified\"}}", "lines_by_repo": "{\"data\":[{\"name\":\"cashubtc\\u002fNumo\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,0,7512,232236,15193,3316,6844,11754,17936,19001,6469,3126,3549],\"type\":\"bar\"},{\"name\":\"cashubtc\\u002fcashu-ts\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,59847,109739,20344,33332,25874,4436,31683,84052,33963,1788,20665,8820],\"type\":\"bar\"},{\"name\":\"cashubtc\\u002fcdk\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[160,30759,21691,24643,45184,63143,26395,33705,15448,37157,23700,29813,67815],\"type\":\"bar\"},{\"name\":\"cashubtc\\u002fcoco\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[342,12499,7033,23329,23891,22000,10559,42596,10786,104134,55149,41381,41976],\"type\":\"bar\"},{\"name\":\"cashubtc\\u002fnuts\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,0,10,395,18,1891,434,562,0,535,522,1165,66],\"type\":\"bar\"},{\"name\":\"cashubtc\\u002fnutshell\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,289,2796,2114,2096,2493,2325,20932,971,6133,21374,25967,10192],\"type\":\"bar\"},{\"name\":\"cashubtc\\u002fwallet\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,0,0,0,0,0,13914,1014,50891,64579,25700,106937,56792],\"type\":\"bar\"}],\"layout\":{\"template\":{\"data\":{\"barpolar\":[{\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"barpolar\"}],\"bar\":[{\"error_x\":{\"color\":\"#2a3f5f\"},\"error_y\":{\"color\":\"#2a3f5f\"},\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"bar\"}],\"carpet\":[{\"aaxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"baxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"type\":\"carpet\"}],\"choropleth\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"choropleth\"}],\"contourcarpet\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"contourcarpet\"}],\"contour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"contour\"}],\"heatmap\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"heatmap\"}],\"histogram2dcontour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2dcontour\"}],\"histogram2d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2d\"}],\"histogram\":[{\"marker\":{\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"histogram\"}],\"mesh3d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"mesh3d\"}],\"parcoords\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"parcoords\"}],\"pie\":[{\"automargin\":true,\"type\":\"pie\"}],\"scatter3d\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatter3d\"}],\"scattercarpet\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattercarpet\"}],\"scattergeo\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergeo\"}],\"scattergl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergl\"}],\"scattermap\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattermap\"}],\"scatterpolargl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolargl\"}],\"scatterpolar\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolar\"}],\"scatter\":[{\"fillpattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2},\"type\":\"scatter\"}],\"scatterternary\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterternary\"}],\"surface\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"surface\"}],\"table\":[{\"cells\":{\"fill\":{\"color\":\"#EBF0F8\"},\"line\":{\"color\":\"white\"}},\"header\":{\"fill\":{\"color\":\"#C8D4E3\"},\"line\":{\"color\":\"white\"}},\"type\":\"table\"}]},\"layout\":{\"annotationdefaults\":{\"arrowcolor\":\"#2a3f5f\",\"arrowhead\":0,\"arrowwidth\":1},\"autotypenumbers\":\"strict\",\"coloraxis\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"colorscale\":{\"diverging\":[[0,\"#8e0152\"],[0.1,\"#c51b7d\"],[0.2,\"#de77ae\"],[0.3,\"#f1b6da\"],[0.4,\"#fde0ef\"],[0.5,\"#f7f7f7\"],[0.6,\"#e6f5d0\"],[0.7,\"#b8e186\"],[0.8,\"#7fbc41\"],[0.9,\"#4d9221\"],[1,\"#276419\"]],\"sequential\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"sequentialminus\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]},\"colorway\":[\"#636efa\",\"#EF553B\",\"#00cc96\",\"#ab63fa\",\"#FFA15A\",\"#19d3f3\",\"#FF6692\",\"#B6E880\",\"#FF97FF\",\"#FECB52\"],\"font\":{\"color\":\"#2a3f5f\"},\"geo\":{\"bgcolor\":\"white\",\"lakecolor\":\"white\",\"landcolor\":\"white\",\"showlakes\":true,\"showland\":true,\"subunitcolor\":\"#C8D4E3\"},\"hoverlabel\":{\"align\":\"left\"},\"hovermode\":\"closest\",\"paper_bgcolor\":\"white\",\"plot_bgcolor\":\"white\",\"polar\":{\"angularaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"radialaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"}},\"scene\":{\"xaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"yaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"zaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"}},\"shapedefaults\":{\"line\":{\"color\":\"#2a3f5f\"}},\"ternary\":{\"aaxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"baxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"caxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"}},\"title\":{\"x\":0.05},\"xaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2},\"yaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2}}},\"title\":{\"text\":\"Monthly Lines Changed by Repo\"},\"xaxis\":{\"title\":{\"text\":\"Month\"}},\"yaxis\":{\"title\":{\"text\":\"Lines\"}},\"barmode\":\"stack\"}}", "pr_issue_activity": "{\"data\":[{\"mode\":\"lines+markers\",\"name\":\"prs_opened\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[4,112,142,256,161,159,194,248,282,213,300,470,407],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"prs_merged\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[3,77,94,209,143,137,146,229,218,165,251,413,337],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"issues_opened\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,44,36,57,71,51,31,61,61,35,98,158,90],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"issues_closed\",\"x\":[\"2025-08-01T00:00:00\",\"2025-09-01T00:00:00\",\"2025-10-01T00:00:00\",\"2025-11-01T00:00:00\",\"2025-12-01T00:00:00\",\"2026-01-01T00:00:00\",\"2026-02-01T00:00:00\",\"2026-03-01T00:00:00\",\"2026-04-01T00:00:00\",\"2026-05-01T00:00:00\",\"2026-06-01T00:00:00\",\"2026-07-01T00:00:00\",\"2026-08-01T00:00:00\"],\"y\":[0,13,18,30,61,40,40,74,57,38,73,121,61],\"type\":\"scatter\"}],\"layout\":{\"template\":{\"data\":{\"barpolar\":[{\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"barpolar\"}],\"bar\":[{\"error_x\":{\"color\":\"#2a3f5f\"},\"error_y\":{\"color\":\"#2a3f5f\"},\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"bar\"}],\"carpet\":[{\"aaxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"baxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"type\":\"carpet\"}],\"choropleth\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"choropleth\"}],\"contourcarpet\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"contourcarpet\"}],\"contour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"contour\"}],\"heatmap\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"heatmap\"}],\"histogram2dcontour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2dcontour\"}],\"histogram2d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2d\"}],\"histogram\":[{\"marker\":{\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"histogram\"}],\"mesh3d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"mesh3d\"}],\"parcoords\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"parcoords\"}],\"pie\":[{\"automargin\":true,\"type\":\"pie\"}],\"scatter3d\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatter3d\"}],\"scattercarpet\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattercarpet\"}],\"scattergeo\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergeo\"}],\"scattergl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergl\"}],\"scattermap\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattermap\"}],\"scatterpolargl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolargl\"}],\"scatterpolar\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolar\"}],\"scatter\":[{\"fillpattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2},\"type\":\"scatter\"}],\"scatterternary\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterternary\"}],\"surface\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"surface\"}],\"table\":[{\"cells\":{\"fill\":{\"color\":\"#EBF0F8\"},\"line\":{\"color\":\"white\"}},\"header\":{\"fill\":{\"color\":\"#C8D4E3\"},\"line\":{\"color\":\"white\"}},\"type\":\"table\"}]},\"layout\":{\"annotationdefaults\":{\"arrowcolor\":\"#2a3f5f\",\"arrowhead\":0,\"arrowwidth\":1},\"autotypenumbers\":\"strict\",\"coloraxis\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"colorscale\":{\"diverging\":[[0,\"#8e0152\"],[0.1,\"#c51b7d\"],[0.2,\"#de77ae\"],[0.3,\"#f1b6da\"],[0.4,\"#fde0ef\"],[0.5,\"#f7f7f7\"],[0.6,\"#e6f5d0\"],[0.7,\"#b8e186\"],[0.8,\"#7fbc41\"],[0.9,\"#4d9221\"],[1,\"#276419\"]],\"sequential\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"sequentialminus\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]},\"colorway\":[\"#636efa\",\"#EF553B\",\"#00cc96\",\"#ab63fa\",\"#FFA15A\",\"#19d3f3\",\"#FF6692\",\"#B6E880\",\"#FF97FF\",\"#FECB52\"],\"font\":{\"color\":\"#2a3f5f\"},\"geo\":{\"bgcolor\":\"white\",\"lakecolor\":\"white\",\"landcolor\":\"white\",\"showlakes\":true,\"showland\":true,\"subunitcolor\":\"#C8D4E3\"},\"hoverlabel\":{\"align\":\"left\"},\"hovermode\":\"closest\",\"paper_bgcolor\":\"white\",\"plot_bgcolor\":\"white\",\"polar\":{\"angularaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"radialaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"}},\"scene\":{\"xaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"yaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"zaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"}},\"shapedefaults\":{\"line\":{\"color\":\"#2a3f5f\"}},\"ternary\":{\"aaxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"baxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"caxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"}},\"title\":{\"x\":0.05},\"xaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2},\"yaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2}}},\"title\":{\"text\":\"Monthly PR \u0026 Issue Activity\"},\"xaxis\":{\"title\":{\"text\":\"Month\"}},\"yaxis\":{\"title\":{\"text\":\"Count\"}},\"hovermode\":\"x unified\"}}", "top_contributors": "{\"data\":[{\"x\":[\"Egge21M\",\"robwoodgate\",\"thesimplekid\",\"a1denvalu3\",\"callebtc\",\"asmogo\",\"swedishfrenchpress\",\"crodas\",\"KvngMikey\",\"igbopharaoh\",\"github-actions[bot]\",\"TheRealCheebs\",\"d4rp4t\",\"Forte11Cuba\",\"dependabot[bot]\"],\"y\":[1036,764,744,565,387,253,113,96,84,48,44,40,28,24,13],\"type\":\"bar\"}],\"layout\":{\"template\":{\"data\":{\"barpolar\":[{\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"barpolar\"}],\"bar\":[{\"error_x\":{\"color\":\"#2a3f5f\"},\"error_y\":{\"color\":\"#2a3f5f\"},\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"bar\"}],\"carpet\":[{\"aaxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"baxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"type\":\"carpet\"}],\"choropleth\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"choropleth\"}],\"contourcarpet\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"contourcarpet\"}],\"contour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"contour\"}],\"heatmap\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"heatmap\"}],\"histogram2dcontour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2dcontour\"}],\"histogram2d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2d\"}],\"histogram\":[{\"marker\":{\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"histogram\"}],\"mesh3d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"mesh3d\"}],\"parcoords\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"parcoords\"}],\"pie\":[{\"automargin\":true,\"type\":\"pie\"}],\"scatter3d\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatter3d\"}],\"scattercarpet\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattercarpet\"}],\"scattergeo\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergeo\"}],\"scattergl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergl\"}],\"scattermap\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattermap\"}],\"scatterpolargl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolargl\"}],\"scatterpolar\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolar\"}],\"scatter\":[{\"fillpattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2},\"type\":\"scatter\"}],\"scatterternary\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterternary\"}],\"surface\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"surface\"}],\"table\":[{\"cells\":{\"fill\":{\"color\":\"#EBF0F8\"},\"line\":{\"color\":\"white\"}},\"header\":{\"fill\":{\"color\":\"#C8D4E3\"},\"line\":{\"color\":\"white\"}},\"type\":\"table\"}]},\"layout\":{\"annotationdefaults\":{\"arrowcolor\":\"#2a3f5f\",\"arrowhead\":0,\"arrowwidth\":1},\"autotypenumbers\":\"strict\",\"coloraxis\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"colorscale\":{\"diverging\":[[0,\"#8e0152\"],[0.1,\"#c51b7d\"],[0.2,\"#de77ae\"],[0.3,\"#f1b6da\"],[0.4,\"#fde0ef\"],[0.5,\"#f7f7f7\"],[0.6,\"#e6f5d0\"],[0.7,\"#b8e186\"],[0.8,\"#7fbc41\"],[0.9,\"#4d9221\"],[1,\"#276419\"]],\"sequential\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"sequentialminus\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]},\"colorway\":[\"#636efa\",\"#EF553B\",\"#00cc96\",\"#ab63fa\",\"#FFA15A\",\"#19d3f3\",\"#FF6692\",\"#B6E880\",\"#FF97FF\",\"#FECB52\"],\"font\":{\"color\":\"#2a3f5f\"},\"geo\":{\"bgcolor\":\"white\",\"lakecolor\":\"white\",\"landcolor\":\"white\",\"showlakes\":true,\"showland\":true,\"subunitcolor\":\"#C8D4E3\"},\"hoverlabel\":{\"align\":\"left\"},\"hovermode\":\"closest\",\"paper_bgcolor\":\"white\",\"plot_bgcolor\":\"white\",\"polar\":{\"angularaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"radialaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"}},\"scene\":{\"xaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"yaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"zaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"}},\"shapedefaults\":{\"line\":{\"color\":\"#2a3f5f\"}},\"ternary\":{\"aaxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"baxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"caxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"}},\"title\":{\"x\":0.05},\"xaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2},\"yaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2}}},\"title\":{\"text\":\"Top Contributors by Commits (Selected Period)\"},\"xaxis\":{\"title\":{\"text\":\"Contributor\"}},\"yaxis\":{\"title\":{\"text\":\"Commits\"}}}}"};
+  if (charts['commits_by_repo']) Plotly.newPlot('chart-commits', JSON.parse(charts['commits_by_repo']));
+  if (charts['lines_by_repo']) Plotly.newPlot('chart-lines', JSON.parse(charts['lines_by_repo']));
+  if (charts['pr_issue_activity']) Plotly.newPlot('chart-pr-issue', JSON.parse(charts['pr_issue_activity']));
+  if (charts['top_contributors']) Plotly.newPlot('chart-top', JSON.parse(charts['top_contributors']));
+
+  const growthChart = "{\"data\":[{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fNumo\",\"x\":[\"2026-08-31T06:13:36.452124+00:00\",\"2026-08-31T06:16:35.413723+00:00\",\"2026-08-31T06:49:22.491229+00:00\",\"2026-08-31T06:50:52.994878+00:00\",\"2026-08-31T06:53:43.407098+00:00\",\"2026-08-31T06:56:21.432964+00:00\",\"2026-08-31T06:58:47.167977+00:00\"],\"y\":[null,null,null,null,null,67.0,null],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fcashu-ts\",\"x\":[\"2026-08-31T06:13:36.452124+00:00\",\"2026-08-31T06:16:35.413723+00:00\",\"2026-08-31T06:49:22.491229+00:00\",\"2026-08-31T06:50:52.994878+00:00\",\"2026-08-31T06:53:43.407098+00:00\",\"2026-08-31T06:56:21.432964+00:00\",\"2026-08-31T06:58:47.167977+00:00\"],\"y\":[null,null,106.0,null,null,null,null],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fcdk\",\"x\":[\"2026-08-31T06:13:36.452124+00:00\",\"2026-08-31T06:16:35.413723+00:00\",\"2026-08-31T06:49:22.491229+00:00\",\"2026-08-31T06:50:52.994878+00:00\",\"2026-08-31T06:53:43.407098+00:00\",\"2026-08-31T06:56:21.432964+00:00\",\"2026-08-31T06:58:47.167977+00:00\"],\"y\":[226.0,null,null,null,null,null,null],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fcoco\",\"x\":[\"2026-08-31T06:13:36.452124+00:00\",\"2026-08-31T06:16:35.413723+00:00\",\"2026-08-31T06:49:22.491229+00:00\",\"2026-08-31T06:50:52.994878+00:00\",\"2026-08-31T06:53:43.407098+00:00\",\"2026-08-31T06:56:21.432964+00:00\",\"2026-08-31T06:58:47.167977+00:00\"],\"y\":[null,43.0,null,null,null,null,null],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fnuts\",\"x\":[\"2026-08-31T06:13:36.452124+00:00\",\"2026-08-31T06:16:35.413723+00:00\",\"2026-08-31T06:49:22.491229+00:00\",\"2026-08-31T06:50:52.994878+00:00\",\"2026-08-31T06:53:43.407098+00:00\",\"2026-08-31T06:56:21.432964+00:00\",\"2026-08-31T06:58:47.167977+00:00\"],\"y\":[null,null,null,238.0,null,null,null],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fnutshell\",\"x\":[\"2026-08-31T06:13:36.452124+00:00\",\"2026-08-31T06:16:35.413723+00:00\",\"2026-08-31T06:49:22.491229+00:00\",\"2026-08-31T06:50:52.994878+00:00\",\"2026-08-31T06:53:43.407098+00:00\",\"2026-08-31T06:56:21.432964+00:00\",\"2026-08-31T06:58:47.167977+00:00\"],\"y\":[null,null,null,null,497.0,null,null],\"type\":\"scatter\"},{\"mode\":\"lines+markers\",\"name\":\"cashubtc\\u002fwallet\",\"x\":[\"2026-08-31T06:13:36.452124+00:00\",\"2026-08-31T06:16:35.413723+00:00\",\"2026-08-31T06:49:22.491229+00:00\",\"2026-08-31T06:50:52.994878+00:00\",\"2026-08-31T06:53:43.407098+00:00\",\"2026-08-31T06:56:21.432964+00:00\",\"2026-08-31T06:58:47.167977+00:00\"],\"y\":[null,null,null,null,null,null,15.0],\"type\":\"scatter\"}],\"layout\":{\"template\":{\"data\":{\"barpolar\":[{\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"barpolar\"}],\"bar\":[{\"error_x\":{\"color\":\"#2a3f5f\"},\"error_y\":{\"color\":\"#2a3f5f\"},\"marker\":{\"line\":{\"color\":\"white\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"bar\"}],\"carpet\":[{\"aaxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"baxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"#C8D4E3\",\"linecolor\":\"#C8D4E3\",\"minorgridcolor\":\"#C8D4E3\",\"startlinecolor\":\"#2a3f5f\"},\"type\":\"carpet\"}],\"choropleth\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"choropleth\"}],\"contourcarpet\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"contourcarpet\"}],\"contour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"contour\"}],\"heatmap\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"heatmap\"}],\"histogram2dcontour\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2dcontour\"}],\"histogram2d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"histogram2d\"}],\"histogram\":[{\"marker\":{\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"histogram\"}],\"mesh3d\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"type\":\"mesh3d\"}],\"parcoords\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"parcoords\"}],\"pie\":[{\"automargin\":true,\"type\":\"pie\"}],\"scatter3d\":[{\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatter3d\"}],\"scattercarpet\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattercarpet\"}],\"scattergeo\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergeo\"}],\"scattergl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattergl\"}],\"scattermap\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scattermap\"}],\"scatterpolargl\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolargl\"}],\"scatterpolar\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterpolar\"}],\"scatter\":[{\"fillpattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2},\"type\":\"scatter\"}],\"scatterternary\":[{\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"type\":\"scatterternary\"}],\"surface\":[{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"type\":\"surface\"}],\"table\":[{\"cells\":{\"fill\":{\"color\":\"#EBF0F8\"},\"line\":{\"color\":\"white\"}},\"header\":{\"fill\":{\"color\":\"#C8D4E3\"},\"line\":{\"color\":\"white\"}},\"type\":\"table\"}]},\"layout\":{\"annotationdefaults\":{\"arrowcolor\":\"#2a3f5f\",\"arrowhead\":0,\"arrowwidth\":1},\"autotypenumbers\":\"strict\",\"coloraxis\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"colorscale\":{\"diverging\":[[0,\"#8e0152\"],[0.1,\"#c51b7d\"],[0.2,\"#de77ae\"],[0.3,\"#f1b6da\"],[0.4,\"#fde0ef\"],[0.5,\"#f7f7f7\"],[0.6,\"#e6f5d0\"],[0.7,\"#b8e186\"],[0.8,\"#7fbc41\"],[0.9,\"#4d9221\"],[1,\"#276419\"]],\"sequential\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"sequentialminus\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]},\"colorway\":[\"#636efa\",\"#EF553B\",\"#00cc96\",\"#ab63fa\",\"#FFA15A\",\"#19d3f3\",\"#FF6692\",\"#B6E880\",\"#FF97FF\",\"#FECB52\"],\"font\":{\"color\":\"#2a3f5f\"},\"geo\":{\"bgcolor\":\"white\",\"lakecolor\":\"white\",\"landcolor\":\"white\",\"showlakes\":true,\"showland\":true,\"subunitcolor\":\"#C8D4E3\"},\"hoverlabel\":{\"align\":\"left\"},\"hovermode\":\"closest\",\"paper_bgcolor\":\"white\",\"plot_bgcolor\":\"white\",\"polar\":{\"angularaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"radialaxis\":{\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\"}},\"scene\":{\"xaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"yaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"},\"zaxis\":{\"backgroundcolor\":\"white\",\"gridcolor\":\"#DFE8F3\",\"gridwidth\":2,\"linecolor\":\"#EBF0F8\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"#EBF0F8\"}},\"shapedefaults\":{\"line\":{\"color\":\"#2a3f5f\"}},\"ternary\":{\"aaxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"baxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"},\"bgcolor\":\"white\",\"caxis\":{\"gridcolor\":\"#DFE8F3\",\"linecolor\":\"#A2B1C6\",\"ticks\":\"\"}},\"title\":{\"x\":0.05},\"xaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2},\"yaxis\":{\"automargin\":true,\"gridcolor\":\"#EBF0F8\",\"linecolor\":\"#EBF0F8\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"#EBF0F8\",\"zerolinewidth\":2}}},\"title\":{\"text\":\"Star Growth by Repo\"},\"xaxis\":{\"title\":{\"text\":\"Date\"}},\"yaxis\":{\"title\":{\"text\":\"Stars\"}},\"hovermode\":\"x unified\"}}";
+  if (growthChart) Plotly.newPlot('chart-growth', JSON.parse(growthChart));
+
+  $(document).ready(function() {
+    $('#contributors-table, #momentum-contributors-table, #nuts-table').DataTable({
+      pageLength: 25,
+      order: [[1, 'desc']]
+    });
+  });
+</script>
+</body>
+</html>
