@@ -22,7 +22,6 @@ from data_store import DataStore
 from github_client import GitHubClient
 from mint_tracker import (
     fetch_mint_directory,
-    latest_snapshot_path,
     load_snapshot,
     save_snapshot,
     summarize_changes,
@@ -192,46 +191,49 @@ def _fetch_github_data(client: GitHubClient, store: DataStore, end: datetime, fo
     start = default_start_date(end)
     for repo in REPOS:
         logger.info("Fetching %s", repo.full_name)
+        try:
+            # Commits
+            since_commits = start if force else (store.get_max_datetime(repo.full_name, "commits", "committed_at") or start)
+            commits = client.fetch_commits(repo.owner, repo.name, since=since_commits)
+            store.append_records(repo.full_name, "commits", commits, id_field="id")
+            logger.info("  commits: %d", len(commits))
 
-        # Commits
-        since_commits = start if force else (store.get_max_datetime(repo.full_name, "commits", "committed_at") or start)
-        commits = client.fetch_commits(repo.owner, repo.name, since=since_commits)
-        store.append_records(repo.full_name, "commits", commits, id_field="id")
-        logger.info("  commits: %d", len(commits))
+            # Issues and PRs updated since last run
+            since_issues = start if force else (store.get_max_datetime(repo.full_name, "issues", "updated_at") or start)
+            issues = client.fetch_issues(repo.owner, repo.name, since=since_issues)
+            store.append_records(repo.full_name, "issues", issues, id_field="id")
+            logger.info("  issues: %d", len(issues))
 
-        # Issues and PRs updated since last run
-        since_issues = start if force else (store.get_max_datetime(repo.full_name, "issues", "updated_at") or start)
-        issues = client.fetch_issues(repo.owner, repo.name, since=since_issues)
-        store.append_records(repo.full_name, "issues", issues, id_field="id")
-        logger.info("  issues: %d", len(issues))
+            since_prs = start if force else (store.get_max_datetime(repo.full_name, "pull_requests", "updated_at") or start)
+            prs = client.fetch_pull_requests(repo.owner, repo.name, since=since_prs)
+            store.append_records(repo.full_name, "pull_requests", prs, id_field="id")
+            logger.info("  pull requests: %d", len(prs))
 
-        since_prs = start if force else (store.get_max_datetime(repo.full_name, "pull_requests", "updated_at") or start)
-        prs = client.fetch_pull_requests(repo.owner, repo.name, since=since_prs)
-        store.append_records(repo.full_name, "pull_requests", prs, id_field="id")
-        logger.info("  pull requests: %d", len(prs))
+            # Issue comments
+            since_ic = start if force else (store.get_max_datetime(repo.full_name, "issue_comments", "created_at") or start)
+            issue_comments = client.fetch_issue_comments(repo.owner, repo.name, since=since_ic)
+            store.append_records(repo.full_name, "issue_comments", issue_comments, id_field="id")
+            logger.info("  issue comments: %d", len(issue_comments))
 
-        # Issue comments
-        since_ic = start if force else (store.get_max_datetime(repo.full_name, "issue_comments", "created_at") or start)
-        issue_comments = client.fetch_issue_comments(repo.owner, repo.name, since=since_ic)
-        store.append_records(repo.full_name, "issue_comments", issue_comments, id_field="id")
-        logger.info("  issue comments: %d", len(issue_comments))
+            # Releases
+            releases = client.fetch_releases(repo.owner, repo.name, since=start)
+            store.append_records(repo.full_name, "releases", releases, id_field="id")
+            logger.info("  releases: %d", len(releases))
 
-        # Releases
-        releases = client.fetch_releases(repo.owner, repo.name, since=start)
-        store.append_records(repo.full_name, "releases", releases, id_field="id")
-        logger.info("  releases: %d", len(releases))
+            # PR reviews and review comments for PRs touched in this run
+            for pr in prs:
+                pr_number = pr["number"]
+                reviews = client.fetch_pr_reviews(repo.owner, repo.name, pr_number)
+                store.append_records(repo.full_name, "pr_reviews", reviews, id_field="id")
+                review_comments = client.fetch_pr_review_comments(repo.owner, repo.name, pr_number, since=start)
+                store.append_records(repo.full_name, "pr_review_comments", review_comments, id_field="id")
 
-        # PR reviews and review comments for PRs touched in this run
-        for pr in prs:
-            pr_number = pr["number"]
-            reviews = client.fetch_pr_reviews(repo.owner, repo.name, pr_number)
-            store.append_records(repo.full_name, "pr_reviews", reviews, id_field="id")
-            review_comments = client.fetch_pr_review_comments(repo.owner, repo.name, pr_number, since=start)
-            store.append_records(repo.full_name, "pr_review_comments", review_comments, id_field="id")
-
-        # Snapshot
-        snapshot = client.fetch_repo_snapshot(repo.owner, repo.name)
-        store.append_records(repo.full_name, "repo_snapshots", [snapshot], id_field="id")
+            # Snapshot
+            snapshot = client.fetch_repo_snapshot(repo.owner, repo.name)
+            store.append_records(repo.full_name, "repo_snapshots", [snapshot], id_field="id")
+        except Exception as exc:
+            logger.error("Failed to fetch %s: %s", repo.full_name, exc, exc_info=True)
+            logger.error("If this is a permission error, make sure GH_TOKEN can read %s.", repo.full_name)
 
 
 def _fetch_mint_updates() -> list[str]:
@@ -251,7 +253,11 @@ def _fetch_mint_updates() -> list[str]:
 
 def _fetch_nut_items(client: GitHubClient) -> list[dict[str, Any]]:
     nuts_repo = next(r for r in REPOS if r.name == "nuts")
-    return client.search_nut_items(nuts_repo.owner, nuts_repo.name, state="open")
+    try:
+        return client.search_nut_items(nuts_repo.owner, nuts_repo.name, state="open")
+    except Exception as exc:
+        logger.error("Failed to fetch NUT items: %s", exc)
+        return []
 
 
 def main() -> int:

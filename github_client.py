@@ -85,6 +85,16 @@ class GitHubClient:
     def _iso(dt: datetime) -> str:
         return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+    @staticmethod
+    def _login(data: dict[str, Any] | None, *keys: str) -> str | None:
+        """Safely extract a nested string value (e.g. login) from a possibly-null dict."""
+        current: Any = data
+        for key in keys:
+            if not isinstance(current, dict):
+                return None
+            current = current.get(key)
+        return current if isinstance(current, str) else None
+
     # ------------------------------------------------------------------
     # GraphQL paginated fetchers
     # ------------------------------------------------------------------
@@ -129,8 +139,8 @@ class GitHubClient:
                     "message": node["message"],
                     "authored_at": node["authoredDate"],
                     "committed_at": node["committedDate"],
-                    "author_login": (node.get("author") or {}).get("user", {}).get("login"),
-                    "committer_login": (node.get("committer") or {}).get("user", {}).get("login"),
+                    "author_login": self._login(node.get("author"), "user", "login"),
+                    "committer_login": self._login(node.get("committer"), "user", "login"),
                     "additions": node.get("additions", 0),
                     "deletions": node.get("deletions", 0),
                     "changed_files": node.get("changedFiles", 0),
@@ -189,7 +199,7 @@ class GitHubClient:
                     "created_at": node["createdAt"],
                     "closed_at": node.get("closedAt"),
                     "updated_at": node["updatedAt"],
-                    "author_login": node.get("author", {}).get("login"),
+                    "author_login": self._login(node.get("author"), "login"),
                     "assignee_logins": [a["login"] for a in node.get("assignees", {}).get("nodes", [])],
                     "labels": [l["name"] for l in node.get("labels", {}).get("nodes", [])],
                     "comments_count": node.get("comments", {}).get("totalCount", 0),
@@ -254,8 +264,8 @@ class GitHubClient:
                     "merged_at": node.get("mergedAt"),
                     "closed_at": node.get("closedAt"),
                     "updated_at": node["updatedAt"],
-                    "author_login": node.get("author", {}).get("login"),
-                    "merged_by_login": node.get("mergedBy", {}).get("login"),
+                    "author_login": self._login(node.get("author"), "login"),
+                    "merged_by_login": self._login(node.get("mergedBy"), "login"),
                     "assignee_logins": [a["login"] for a in node.get("assignees", {}).get("nodes", [])],
                     "labels": [l["name"] for l in node.get("labels", {}).get("nodes", [])],
                     "additions": node.get("additions", 0),
@@ -285,7 +295,7 @@ class GitHubClient:
                 "id": str(c["id"]),
                 "repo": f"{owner}/{name}",
                 "issue_number": c.get("issue_url", "").split("/")[-1],
-                "author_login": c.get("user", {}).get("login"),
+                "author_login": self._login(c.get("user"), "login"),
                 "created_at": c["created_at"],
                 "updated_at": c["updated_at"],
                 "body": c.get("body", ""),
@@ -302,7 +312,7 @@ class GitHubClient:
                 "id": str(r["id"]),
                 "repo": f"{owner}/{name}",
                 "pr_number": pr_number,
-                "author_login": r.get("user", {}).get("login"),
+                "author_login": self._login(r.get("user"), "login"),
                 "state": r.get("state"),
                 "submitted_at": r.get("submitted_at"),
                 "url": r.get("html_url"),
@@ -324,7 +334,7 @@ class GitHubClient:
                 "repo": f"{owner}/{name}",
                 "pr_number": pr_number,
                 "review_id": c.get("pull_request_review_id"),
-                "author_login": c.get("user", {}).get("login"),
+                "author_login": self._login(c.get("user"), "login"),
                 "created_at": c["created_at"],
                 "updated_at": c["updated_at"],
                 "url": c["html_url"],
@@ -349,7 +359,7 @@ class GitHubClient:
                 "tag_name": r.get("tag_name"),
                 "name": r.get("name"),
                 "published_at": published,
-                "author_login": r.get("author", {}).get("login"),
+                "author_login": self._login(r.get("author"), "login"),
                 "prerelease": r.get("prerelease", False),
                 "url": r.get("html_url"),
             })
@@ -391,7 +401,7 @@ class GitHubClient:
                     "created_at": item["created_at"],
                     "updated_at": item["updated_at"],
                     "closed_at": item.get("closed_at"),
-                    "author_login": item.get("user", {}).get("login"),
+                    "author_login": self._login(item.get("user"), "login"),
                     "labels": [l["name"] for l in item.get("labels", [])],
                     "is_pr": "pull_request" in item,
                     "url": item["html_url"],
