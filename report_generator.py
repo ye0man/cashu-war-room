@@ -1,22 +1,17 @@
 """Compute metrics and render the static HTML report."""
 from __future__ import annotations
 
-import json
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
-import plotly.graph_objects as go
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
-from plotly.subplots import make_subplots
 
 from config import (
-    DATA_DIR,
-    RAW_DIR,
     REPORT_DIR,
     REPOS,
     TEMPLATE_DIR,
@@ -32,33 +27,16 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-def _dt(value: str | datetime | None) -> pd.Timestamp | pd.NaTType:
-    if pd.isna(value):
-        return pd.NaT
-    if isinstance(value, datetime):
-        return pd.Timestamp(value)
-    if isinstance(value, str):
-        if value.endswith("Z"):
-            value = value[:-1] + "+00:00"
-        try:
-            return pd.Timestamp(value)
-        except ValueError:
-            return pd.NaT
-    return pd.NaT
-
-
-def _month_bucket(ts: pd.Timestamp | None) -> str:
-    if pd.isna(ts):
-        return "unknown"
-    return ts.strftime("%Y-%m")
-
-
 def _link(text: str, url: str) -> str:
     return Markup(f'<a href="{url}" target="_blank" rel="noopener">{text}</a>')
 
 
-def _figure_to_json(fig: go.Figure) -> str:
-    return fig.to_json(engine="json")
+def _user_link(login: str | None) -> str:
+    if not login:
+        return ""
+    return Markup(
+        f'<a href="https://github.com/{login}" target="_blank" rel="noopener">@{login}</a>'
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -107,184 +85,6 @@ def load_repo_snapshots(store: DataStore | None = None) -> pd.DataFrame:
     if not df.empty:
         df["snapshot_at"] = pd.to_datetime(df["snapshot_at"], utc=True)
     return df
-
-
-# ---------------------------------------------------------------------------
-# Historic contributor analysis
-# ---------------------------------------------------------------------------
-
-
-def compute_historic_metrics(
-    frames: dict[str, pd.DataFrame],
-    start: datetime,
-    end: datetime,
-) -> pd.DataFrame:
-    """Return monthly aggregated metrics by repo and contributor."""
-    start = pd.Timestamp(start).tz_convert("UTC")
-    end = pd.Timestamp(end).tz_convert("UTC")
-
-    rows: list[dict[str, Any]] = []
-
-    commits = frames.get("commits", pd.DataFrame())
-    if not commits.empty:
-        commits = commits[(commits["committed_at"] >= start) & (commits["committed_at"] <= end)].copy()
-        commits["month"] = commits["committed_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in commits.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "commits": len(group),
-                "additions": int(group["additions"].sum()),
-                "deletions": int(group["deletions"].sum()),
-                "lines_changed": int(group["additions"].sum() + group["deletions"].sum()),
-            })
-
-    prs = frames.get("pull_requests", pd.DataFrame())
-    if not prs.empty:
-        prs = prs[(prs["created_at"] >= start) & (prs["created_at"] <= end)].copy()
-        prs["month"] = prs["created_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in prs.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "prs_opened": len(group),
-            })
-        merged = prs[prs["merged_at"].notna()].copy()
-        merged["month"] = merged["merged_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in merged.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "prs_merged": len(group),
-            })
-
-    issues = frames.get("issues", pd.DataFrame())
-    if not issues.empty:
-        issues = issues[(issues["created_at"] >= start) & (issues["created_at"] <= end)].copy()
-        issues["month"] = issues["created_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in issues.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "issues_opened": len(group),
-            })
-        closed = issues[issues["closed_at"].notna()].copy()
-        closed["month"] = closed["closed_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in closed.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "issues_closed": len(group),
-            })
-
-    comments = frames.get("issue_comments", pd.DataFrame())
-    if not comments.empty:
-        comments = comments[(comments["created_at"] >= start) & (comments["created_at"] <= end)].copy()
-        comments["month"] = comments["created_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in comments.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "issue_comments": len(group),
-            })
-
-    reviews = frames.get("pr_reviews", pd.DataFrame())
-    if not reviews.empty:
-        reviews = reviews[(reviews["created_at"] >= start) & (reviews["created_at"] <= end)].copy()
-        reviews["month"] = reviews["created_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in reviews.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "reviews": len(group),
-            })
-
-    review_comments = frames.get("pr_review_comments", pd.DataFrame())
-    if not review_comments.empty:
-        review_comments = review_comments[(review_comments["created_at"] >= start) & (review_comments["created_at"] <= end)].copy()
-        review_comments["month"] = review_comments["created_at"].dt.to_period("M").dt.to_timestamp()
-        for (month, repo, author), group in review_comments.groupby(["month", "repo", "author_login"]):
-            rows.append({
-                "month": month,
-                "repo": repo,
-                "contributor": author or "unknown",
-                "review_comments": len(group),
-            })
-
-    if not rows:
-        return pd.DataFrame()
-
-    metrics = pd.DataFrame(rows)
-    metric_cols = ["commits", "additions", "deletions", "lines_changed", "prs_opened", "prs_merged",
-                   "issues_opened", "issues_closed", "issue_comments", "reviews", "review_comments"]
-    for col in metric_cols:
-        if col not in metrics.columns:
-            metrics[col] = 0
-    metrics[metric_cols] = metrics[metric_cols].fillna(0).astype(int)
-    return metrics
-
-
-def make_historic_charts(metrics: pd.DataFrame) -> dict[str, str]:
-    charts: dict[str, str] = {}
-    if metrics.empty:
-        return charts
-
-    # Overall monthly activity by repo (commits)
-    overall = metrics.groupby(["month", "repo"])["commits"].sum().unstack(fill_value=0).reset_index()
-    fig = go.Figure()
-    for repo in overall.columns[1:]:
-        fig.add_trace(go.Scatter(x=overall["month"].tolist(), y=overall[repo].tolist(), mode="lines+markers", name=repo, stackgroup="one"))
-    fig.update_layout(
-        title="Monthly Commits by Repo",
-        xaxis_title="Month",
-        yaxis_title="Commits",
-        hovermode="x unified",
-        template="plotly_white",
-    )
-    charts["commits_by_repo"] = _figure_to_json(fig)
-
-    # Lines changed by repo
-    lines = metrics.groupby(["month", "repo"])["lines_changed"].sum().unstack(fill_value=0).reset_index()
-    fig2 = go.Figure()
-    for repo in lines.columns[1:]:
-        fig2.add_trace(go.Bar(x=lines["month"].tolist(), y=lines[repo].tolist(), name=repo))
-    fig2.update_layout(
-        title="Monthly Lines Changed by Repo",
-        xaxis_title="Month",
-        yaxis_title="Lines",
-        barmode="stack",
-        template="plotly_white",
-    )
-    charts["lines_by_repo"] = _figure_to_json(fig2)
-
-    # PRs / issues by repo
-    pr_issue = metrics.groupby("month")[["prs_opened", "prs_merged", "issues_opened", "issues_closed"]].sum().reset_index()
-    fig3 = go.Figure()
-    for col in ["prs_opened", "prs_merged", "issues_opened", "issues_closed"]:
-        fig3.add_trace(go.Scatter(x=pr_issue["month"].tolist(), y=pr_issue[col].tolist(), mode="lines+markers", name=col))
-    fig3.update_layout(
-        title="Monthly PR & Issue Activity",
-        xaxis_title="Month",
-        yaxis_title="Count",
-        hovermode="x unified",
-        template="plotly_white",
-    )
-    charts["pr_issue_activity"] = _figure_to_json(fig3)
-
-    # Top contributors by commits (last 12 months)
-    top = metrics.groupby("contributor")["commits"].sum().sort_values(ascending=False).head(15)
-    fig4 = go.Figure(go.Bar(x=top.index.tolist(), y=top.tolist()))
-    fig4.update_layout(title="Top Contributors by Commits (Selected Period)", xaxis_title="Contributor", yaxis_title="Commits", template="plotly_white")
-    charts["top_contributors"] = _figure_to_json(fig4)
-
-    return charts
 
 
 # ---------------------------------------------------------------------------
@@ -448,22 +248,9 @@ def compute_aging(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str, A
 
 
 def compute_growth(snapshot_df: pd.DataFrame) -> dict[str, Any]:
-    result: dict[str, Any] = {"chart_json": None, "latest": {}}
+    result: dict[str, Any] = {"latest": {}}
     if snapshot_df.empty:
         return result
-
-    pivot = snapshot_df.pivot_table(index="snapshot_at", columns="repo", values="stars", aggfunc="last").sort_index()
-    fig = go.Figure()
-    for repo in pivot.columns:
-        fig.add_trace(go.Scatter(x=pivot.index.tolist(), y=pivot[repo].tolist(), mode="lines+markers", name=repo))
-    fig.update_layout(
-        title="Star Growth by Repo",
-        xaxis_title="Date",
-        yaxis_title="Stars",
-        hovermode="x unified",
-        template="plotly_white",
-    )
-    result["chart_json"] = _figure_to_json(fig)
 
     latest = snapshot_df.sort_values("snapshot_at").groupby("repo").last()
     for repo, row in latest.iterrows():
@@ -476,47 +263,6 @@ def compute_growth(snapshot_df: pd.DataFrame) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# New contributors
-# ---------------------------------------------------------------------------
-
-
-def compute_new_contributors(frames: dict[str, pd.DataFrame], end: datetime, window_days: int = 90) -> list[dict[str, Any]]:
-    end = pd.Timestamp(end).tz_convert("UTC")
-    start_window = end - timedelta(days=window_days)
-    start_historical = end - timedelta(days=365)
-
-    commits = frames.get("commits", pd.DataFrame())
-    prs = frames.get("pull_requests", pd.DataFrame())
-    issues = frames.get("issues", pd.DataFrame())
-
-    def first_event_dates(df: pd.DataFrame, date_col: str, actor_col: str, label: str) -> dict[str, pd.Timestamp]:
-        if df.empty:
-            return {}
-        df = df[(df[date_col] >= start_historical) & (df[date_col] <= end)]
-        subset = df[[date_col, actor_col]].dropna()
-        subset = subset[subset[actor_col] != "unknown"]
-        firsts = subset.groupby(actor_col)[date_col].min().to_dict()
-        return firsts
-
-    first_commit = first_event_dates(commits, "committed_at", "author_login", "commit")
-    first_pr = first_event_dates(prs, "created_at", "author_login", "pr")
-    first_issue = first_event_dates(issues, "created_at", "author_login", "issue")
-
-    all_people = set(first_commit) | set(first_pr) | set(first_issue)
-    newcomers = []
-    for person in all_people:
-        dates = [d for d in (first_commit.get(person), first_pr.get(person), first_issue.get(person)) if d is not None]
-        if not dates:
-            continue
-        first = min(dates)
-        if first >= start_window:
-            newcomers.append({"login": person, "first_seen": first})
-
-    newcomers.sort(key=lambda x: x["first_seen"], reverse=True)
-    return newcomers
-
-
-# ---------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------
 
@@ -526,50 +272,28 @@ def render_report(
     frames: dict[str, pd.DataFrame],
     snapshot_df: pd.DataFrame,
     mint_changes: list[str],
-    nut_items: list[dict[str, Any]],
 ) -> str:
     start = default_start_date(report_date)
-    historic_metrics = compute_historic_metrics(frames, start, report_date)
-    historic_charts = make_historic_charts(historic_metrics)
     momentum = compute_momentum(frames, report_date)
     aging = compute_aging(frames, report_date)
     growth = compute_growth(snapshot_df)
-    new_contributors = compute_new_contributors(frames, report_date, window_days=90)
 
     env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=select_autoescape(["html", "xml"]),
     )
     env.filters["link"] = _link
+    env.filters["user_link"] = _user_link
     template = env.get_template("report.html")
-
-    # Top contributors table
-    top_contributors = (
-        historic_metrics.groupby("contributor")[
-            ["commits", "additions", "deletions", "prs_opened", "prs_merged", "issues_opened", "issues_closed", "reviews", "review_comments", "issue_comments"]
-        ]
-        .sum()
-        .sort_values("commits", ascending=False)
-        .head(30)
-        .reset_index()
-        .fillna(0)
-        .to_dict("records")
-        if not historic_metrics.empty
-        else []
-    )
 
     context = {
         "report_date": report_date,
         "start_date": start,
         "repos": [r.full_name for r in REPOS],
-        "historic_charts": historic_charts,
-        "top_contributors": top_contributors,
         "momentum": momentum,
         "aging": aging,
         "growth": growth,
-        "new_contributors": new_contributors,
         "mint_changes": mint_changes,
-        "nut_items": nut_items,
     }
     return template.render(context)
 
@@ -585,4 +309,4 @@ def save_report(html: str, date: datetime | None = None) -> Path:
 
 
 def default_start_date(end: datetime) -> datetime:
-    return end - timedelta(days=365)
+    return end - timedelta(days=7)

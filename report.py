@@ -3,17 +3,13 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 import random
 import sys
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from typing import Any
 
 from config import (
     MINT_SNAPSHOT_DIR,
     REPOS,
-    REPORT_DIR,
     default_start_date,
     github_token,
     today,
@@ -158,7 +154,7 @@ def _generate_sample_data(store: DataStore, end: datetime) -> None:
 
         releases = []
         for i in range(random.randint(0, 4)):
-            ts = start + timedelta(days=random.randint(0, 365))
+            ts = start + timedelta(seconds=random.randint(0, int((end - start).total_seconds())))
             releases.append({
                 "id": f"rel-{repo.full_name}-{i}",
                 "repo": repo.full_name,
@@ -192,41 +188,56 @@ def _fetch_github_data(client: GitHubClient, store: DataStore, end: datetime, fo
     for repo in REPOS:
         logger.info("Fetching %s", repo.full_name)
         try:
-            # Commits
+            # Commits touched in the window
             since_commits = start if force else (store.get_max_datetime(repo.full_name, "commits", "committed_at") or start)
             commits = client.fetch_commits(repo.owner, repo.name, since=since_commits)
             store.append_records(repo.full_name, "commits", commits, id_field="id")
             logger.info("  commits: %d", len(commits))
 
-            # Issues and PRs updated since last run
+            # Issues: recently-updated (for momentum) plus the full open snapshot
             since_issues = start if force else (store.get_max_datetime(repo.full_name, "issues", "updated_at") or start)
             issues = client.fetch_issues(repo.owner, repo.name, since=since_issues)
-            store.append_records(repo.full_name, "issues", issues, id_field="id")
-            logger.info("  issues: %d", len(issues))
+            open_issues = client.fetch_issues(repo.owner, repo.name, since=None, states=["OPEN"])
+            store.append_records(repo.full_name, "issues", issues + open_issues, id_field="id")
+            logger.info("  issues: %d recent, %d open", len(issues), len(open_issues))
+            store.prune_records(
+                repo.full_name, "issues", start,
+                ["created_at", "closed_at", "updated_at"], keep_open=True,
+            )
 
+            # Pull requests: recently-updated plus the full open snapshot
             since_prs = start if force else (store.get_max_datetime(repo.full_name, "pull_requests", "updated_at") or start)
             prs = client.fetch_pull_requests(repo.owner, repo.name, since=since_prs)
-            store.append_records(repo.full_name, "pull_requests", prs, id_field="id")
-            logger.info("  pull requests: %d", len(prs))
+            open_prs = client.fetch_pull_requests(repo.owner, repo.name, since=None, states=["OPEN"])
+            store.append_records(repo.full_name, "pull_requests", prs + open_prs, id_field="id")
+            logger.info("  pull requests: %d recent, %d open", len(prs), len(open_prs))
+            store.prune_records(
+                repo.full_name, "pull_requests", start,
+                ["created_at", "merged_at", "closed_at", "updated_at"], keep_open=True,
+            )
 
             # Issue comments
             since_ic = start if force else (store.get_max_datetime(repo.full_name, "issue_comments", "created_at") or start)
             issue_comments = client.fetch_issue_comments(repo.owner, repo.name, since=since_ic)
             store.append_records(repo.full_name, "issue_comments", issue_comments, id_field="id")
             logger.info("  issue comments: %d", len(issue_comments))
+            store.prune_records(repo.full_name, "issue_comments", start, ["created_at"])
 
             # Releases
             releases = client.fetch_releases(repo.owner, repo.name, since=start)
             store.append_records(repo.full_name, "releases", releases, id_field="id")
             logger.info("  releases: %d", len(releases))
+            store.prune_records(repo.full_name, "releases", start, ["published_at"])
 
             # PR reviews and review comments for PRs touched in this run
-            for pr in prs:
-                pr_number = pr["number"]
+            touched_prs = {p["number"]: p for p in (prs + open_prs)}
+            for pr_number in touched_prs:
                 reviews = client.fetch_pr_reviews(repo.owner, repo.name, pr_number)
                 store.append_records(repo.full_name, "pr_reviews", reviews, id_field="id")
                 review_comments = client.fetch_pr_review_comments(repo.owner, repo.name, pr_number, since=start)
                 store.append_records(repo.full_name, "pr_review_comments", review_comments, id_field="id")
+            store.prune_records(repo.full_name, "pr_reviews", start, ["submitted_at"])
+            store.prune_records(repo.full_name, "pr_review_comments", start, ["created_at"])
 
             # Snapshot
             snapshot = client.fetch_repo_snapshot(repo.owner, repo.name)
@@ -251,15 +262,6 @@ def _fetch_mint_updates() -> list[str]:
     return changes
 
 
-def _fetch_nut_items(client: GitHubClient) -> list[dict[str, Any]]:
-    nuts_repo = next(r for r in REPOS if r.name == "nuts")
-    try:
-        return client.search_nut_items(nuts_repo.owner, nuts_repo.name, state="open")
-    except Exception as exc:
-        logger.error("Failed to fetch NUT items: %s", exc)
-        return []
-
-
 def main() -> int:
     args = _parse_args()
     report_date = _parse_date(args.date)
@@ -268,7 +270,6 @@ def main() -> int:
     if args.sample:
         _generate_sample_data(store, report_date)
         mint_changes = ["Sample mint update: no real data fetched."]
-        nut_items = []
     else:
         token = github_token()
         if not token and not args.no_fetch:
@@ -283,11 +284,10 @@ def main() -> int:
             logger.info("Skipping GitHub fetch; using existing local data.")
 
         mint_changes = _fetch_mint_updates()
-        nut_items = _fetch_nut_items(client) if client.token else []
 
     frames = load_dataframes(store)
     snapshot_df = load_repo_snapshots(store)
-    html = render_report(report_date, frames, snapshot_df, mint_changes, nut_items)
+    html = render_report(report_date, frames, snapshot_df, mint_changes)
     report_path = save_report(html, report_date)
     logger.info("Report saved to %s", report_path)
     return 0

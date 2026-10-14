@@ -153,16 +153,24 @@ class GitHubClient:
         return records
 
     def fetch_issues(
-        self, owner: str, name: str, since: datetime, states: list[str] | None = None
+        self, owner: str, name: str, since: datetime | None = None,
+        states: list[str] | None = None,
     ) -> list[dict[str, Any]]:
-        """Fetch issues updated since `since`. Captures state changes on older records."""
-        query = """
-        query($owner: String!, $name: String!, $after: String) {
-          repository(owner: $owner, name: $name) {
-            issues(first: 100, after: $after, orderBy: {field: UPDATED_AT, direction: DESC},
-                   states: [OPEN, CLOSED]) {
-              pageInfo { hasNextPage endCursor }
-              nodes {
+        """Fetch issues, optionally updating since `since`.
+
+        When `since` is None the full set for `states` is returned (used to
+        capture the current open snapshot); otherwise only issues updated at or
+        after `since` are returned, oldest pages stopping at the cutoff.
+        """
+        states = states or ["OPEN", "CLOSED"]
+        state_list = ", ".join(states)
+        query = f"""
+        query($owner: String!, $name: String!, $after: String) {{
+          repository(owner: $owner, name: $name) {{
+            issues(first: 100, after: $after, orderBy: {{field: UPDATED_AT, direction: DESC}},
+                   states: [{state_list}]) {{
+              pageInfo {{ hasNextPage endCursor }}
+              nodes {{
                 id
                 number
                 title
@@ -170,26 +178,27 @@ class GitHubClient:
                 createdAt
                 closedAt
                 updatedAt
-                author { login }
-                assignees(first: 10) { nodes { login } }
-                labels(first: 20) { nodes { name } }
-                comments(first: 1) { totalCount }
+                author {{ login }}
+                assignees(first: 10) {{ nodes {{ login }} }}
+                labels(first: 20) {{ nodes {{ name }} }}
+                comments(first: 1) {{ totalCount }}
                 url
-              }
-            }
-          }
-        }
+              }}
+            }}
+          }}
+        }}
         """
         records: list[dict[str, Any]] = []
         after: str | None = None
-        cutoff = since.astimezone(timezone.utc)
+        cutoff = since.astimezone(timezone.utc) if since else None
         while True:
             data = self._graphql(query, {"owner": owner, "name": name, "after": after})
             issues = data.get("repository", {}).get("issues", {})
             for node in issues.get("nodes", []):
-                updated = datetime.fromisoformat(node["updatedAt"].replace("Z", "+00:00"))
-                if updated < cutoff:
-                    return records
+                if cutoff is not None:
+                    updated = datetime.fromisoformat(node["updatedAt"].replace("Z", "+00:00"))
+                    if updated < cutoff:
+                        return records
                 records.append({
                     "id": node["id"],
                     "repo": f"{owner}/{name}",
@@ -211,15 +220,24 @@ class GitHubClient:
             after = page_info.get("endCursor")
         return records
 
-    def fetch_pull_requests(self, owner: str, name: str, since: datetime) -> list[dict[str, Any]]:
-        """Fetch PRs updated since `since`."""
-        query = """
-        query($owner: String!, $name: String!, $after: String) {
-          repository(owner: $owner, name: $name) {
-            pullRequests(first: 100, after: $after, orderBy: {field: UPDATED_AT, direction: DESC},
-                         states: [OPEN, CLOSED, MERGED]) {
-              pageInfo { hasNextPage endCursor }
-              nodes {
+    def fetch_pull_requests(
+        self, owner: str, name: str, since: datetime | None = None,
+        states: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Fetch pull requests, optionally updated since `since`.
+
+        When `since` is None the full set for `states` is returned (used to
+        capture the current open snapshot).
+        """
+        states = states or ["OPEN", "CLOSED", "MERGED"]
+        state_list = ", ".join(states)
+        query = f"""
+        query($owner: String!, $name: String!, $after: String) {{
+          repository(owner: $owner, name: $name) {{
+            pullRequests(first: 100, after: $after, orderBy: {{field: UPDATED_AT, direction: DESC}},
+                         states: [{state_list}]) {{
+              pageInfo {{ hasNextPage endCursor }}
+              nodes {{
                 id
                 number
                 title
@@ -228,32 +246,33 @@ class GitHubClient:
                 mergedAt
                 closedAt
                 updatedAt
-                author { login }
-                mergedBy { login }
-                assignees(first: 10) { nodes { login } }
-                labels(first: 20) { nodes { name } }
+                author {{ login }}
+                mergedBy {{ login }}
+                assignees(first: 10) {{ nodes {{ login }} }}
+                labels(first: 20) {{ nodes {{ name }} }}
                 additions
                 deletions
                 changedFiles
-                comments(first: 1) { totalCount }
-                reviews(first: 1) { totalCount }
-                reviewThreads(first: 1) { totalCount }
+                comments(first: 1) {{ totalCount }}
+                reviews(first: 1) {{ totalCount }}
+                reviewThreads(first: 1) {{ totalCount }}
                 url
-              }
-            }
-          }
-        }
+              }}
+            }}
+          }}
+        }}
         """
         records: list[dict[str, Any]] = []
         after: str | None = None
-        cutoff = since.astimezone(timezone.utc)
+        cutoff = since.astimezone(timezone.utc) if since else None
         while True:
             data = self._graphql(query, {"owner": owner, "name": name, "after": after})
             prs = data.get("repository", {}).get("pullRequests", {})
             for node in prs.get("nodes", []):
-                updated = datetime.fromisoformat(node["updatedAt"].replace("Z", "+00:00"))
-                if updated < cutoff:
-                    return records
+                if cutoff is not None:
+                    updated = datetime.fromisoformat(node["updatedAt"].replace("Z", "+00:00"))
+                    if updated < cutoff:
+                        return records
                 records.append({
                     "id": node["id"],
                     "repo": f"{owner}/{name}",
@@ -379,34 +398,3 @@ class GitHubClient:
             "pushed_at": data.get("pushed_at"),
             "default_branch": data.get("default_branch"),
         }
-
-    def search_nut_items(
-        self, owner: str, name: str, state: str = "open", per_page: int = 100
-    ) -> list[dict[str, Any]]:
-        """Search issues/PRs in a repo whose title or body references NUT-XX."""
-        query = f"repo:{owner}/{name} is:{state} NUT- in:title,body"
-        path = "/search/issues"
-        params = {"q": query, "per_page": per_page, "page": 1}
-        results: list[dict[str, Any]] = []
-        while True:
-            data = self._rest_get(path, params)
-            items = data.get("items", [])
-            for item in items:
-                results.append({
-                    "id": str(item["id"]),
-                    "repo": f"{owner}/{name}",
-                    "number": item["number"],
-                    "title": item["title"],
-                    "state": item["state"],
-                    "created_at": item["created_at"],
-                    "updated_at": item["updated_at"],
-                    "closed_at": item.get("closed_at"),
-                    "author_login": self._login(item.get("user"), "login"),
-                    "labels": [l["name"] for l in item.get("labels", [])],
-                    "is_pr": "pull_request" in item,
-                    "url": item["html_url"],
-                })
-            if len(items) < per_page:
-                break
-            params["page"] += 1
-        return results

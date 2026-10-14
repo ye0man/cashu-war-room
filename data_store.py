@@ -94,6 +94,42 @@ class DataStore:
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")
         return added, updated
 
+    def prune_records(
+        self,
+        repo_full_name: str,
+        entity: str,
+        cutoff: datetime,
+        date_fields: list[str],
+        keep_open: bool = False,
+    ) -> int:
+        """Drop records older than `cutoff`, keeping currently-open ones.
+
+        A record is retained if it is open (when `keep_open`) or any of its
+        `date_fields` is at or after `cutoff`. Returns the number removed.
+        """
+        path = self._path(repo_full_name, entity)
+        if not path.exists():
+            return 0
+        records = self.load_records(repo_full_name, entity)
+
+        def keep(record: dict[str, Any]) -> bool:
+            if keep_open and record.get("state") == "OPEN":
+                return True
+            for field in date_fields:
+                ts = _parse_ts(record.get(field))
+                if ts and ts >= cutoff:
+                    return True
+            return False
+
+        kept = [r for r in records if keep(r)]
+        removed = len(records) - len(kept)
+        if removed == 0:
+            return 0
+        with path.open("w", encoding="utf-8") as f:
+            for record in kept:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        return removed
+
     def get_max_datetime(
         self, repo_full_name: str, entity: str, date_field: str
     ) -> datetime | None:
