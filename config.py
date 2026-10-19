@@ -22,6 +22,7 @@ REPOS = [
     Repo("cashubtc", "cdk", "cdk"),
     Repo("cashubtc", "coco", "coco"),
     Repo("cashubtc", "cashu-ts", "cashu-ts"),
+    Repo("cashubtc", "cashu.me", "cashu.me"),
     Repo("cashubtc", "nuts", "nuts"),
     Repo("cashubtc", "nutshell", "nutshell"),
     Repo("cashubtc", "Numo", "numo"),

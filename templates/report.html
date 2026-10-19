@@ -4,355 +4,652 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cashu War Room — {{ report_date.strftime('%Y-%m-%d') }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { padding-top: 4.5rem; background: #f8f9fa; }
-    .section { margin-bottom: 3rem; }
-    .metric-card { border-left: 4px solid #0d6efd; }
-    .metric-card.warning { border-left-color: #ffc107; }
-    .metric-card.danger { border-left-color: #dc3545; }
-    .metric-card.success { border-left-color: #198754; }
-    .small-muted { font-size: .85rem; color: #6c757d; }
-    footer { margin-top: 4rem; padding: 2rem 0; border-top: 1px solid #dee2e6; color: #6c757d; }
+    :root {
+      --sky-top: #c9e2f5;
+      --sky-bottom: #dcedf9;
+      --background: #cfe5f7;
+      --foreground: #090d14;
+      --card: #e0edf8;
+      --muted: #e0edf8;
+      --muted-foreground: #424e5e;
+      --border: #a4bbcc;
+      --primary: #5b46d4;
+      --primary-foreground: #f6f9fc;
+      --secondary: #c0d8e9;
+      --success: #16a34a;
+      --destructive: #b71b10;
+      --glass-border: #ffffff80;
+      --glass-border-strong: #ffffffb3;
+      --glass-shadow: inset 0 1px 0 0 #ffffff8c, 0 8px 24px -12px #1e407847;
+      --radius-lg: .5rem;
+      --radius-2xl: 1rem;
+      --radius-3xl: 1.5rem;
+      --font-display: "Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --font-mono: "Azeret Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      color: var(--foreground);
+      background-color: var(--background);
+      background-image: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(224, 237, 248, .72);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .topbar-inner {
+      max-width: 1200px; margin: 0 auto; padding: .95rem 1.5rem;
+      display: flex; align-items: center; gap: 1.75rem; flex-wrap: wrap;
+    }
+    .brand {
+      font-family: var(--font-mono); font-size: .78rem; font-weight: 500;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--foreground);
+    }
+    .brand:hover { text-decoration: none; color: var(--primary); }
+    .nav { display: flex; gap: 1.35rem; flex: 1; flex-wrap: wrap; }
+    .nav a {
+      font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted-foreground); padding: .35rem 0;
+    }
+    .nav a:hover { color: var(--primary); text-decoration: none; }
+    .report-date {
+      font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted-foreground);
+    }
+
+    /* Typography */
+    .type-label {
+      font-family: var(--font-mono); font-size: .75rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted-foreground); margin: 0 0 .85rem;
+    }
+    .hero-title {
+      font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 500; letter-spacing: -.035em; line-height: 1;
+      text-transform: uppercase; margin: 0 0 1.35rem;
+    }
+    .section-title {
+      font-family: var(--font-display); font-size: clamp(1.75rem, 3vw, 2.75rem);
+      font-weight: 500; letter-spacing: -.03em; line-height: 1.05; margin: 0 0 1.35rem;
+    }
+    .type-subhead {
+      font-family: var(--font-display); font-size: clamp(1.125rem, 1.4vw + .5rem, 1.5rem);
+      font-weight: 500; letter-spacing: -.015em; margin: 2.75rem 0 1rem;
+    }
+    .type-lead {
+      font-size: clamp(1.05rem, 1.3vw + .7rem, 1.35rem); line-height: 1.55;
+      letter-spacing: -.008em; color: var(--muted-foreground); max-width: 48rem; margin: 0 0 2.5rem;
+    }
+    .type-lead strong { color: var(--foreground); font-weight: 500; }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--glass-shadow);
+    }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; padding: 1.05rem 1.25rem .45rem;
+    }
+    .card-head h4 {
+      margin: 0; font-family: var(--font-mono); font-size: .72rem; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted-foreground);
+    }
+    .group-label {
+      margin: 1.15rem 1.25rem .35rem;
+      font-family: var(--font-mono); font-size: .68rem; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted-foreground);
+    }
+    .small-note { color: var(--muted-foreground); font-size: .875rem; margin: -.5rem 0 1.15rem; }
+    .empty { color: var(--muted-foreground); padding: .5rem 0; }
+
+    /* Metrics */
+    .metric-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+      gap: 1rem;
+    }
+    .metric { padding: 1.2rem 1.3rem 1.35rem; }
+    .metric .label {
+      font-family: var(--font-mono); font-size: .68rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted-foreground); margin-bottom: .65rem;
+    }
+    .metric .value {
+      font-family: var(--font-display); font-size: 2.35rem; font-weight: 500;
+      letter-spacing: -.025em; line-height: 1;
+    }
+    .metric .value .suffix { font-size: 1.15rem; color: var(--muted-foreground); }
+
+    /* Repo ribbon */
+    .ribbon-wrap { position: sticky; top: 3.55rem; z-index: 40; margin: 0 0 1.75rem; }
+    .ribbon {
+      display: flex; flex-wrap: wrap; gap: .55rem;
+      padding: .7rem; border-radius: var(--radius-3xl);
+      background: rgba(224, 237, 248, .72);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+    .pill {
+      font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em;
+      text-transform: uppercase; font-weight: 500;
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .48rem 1rem; border-radius: 999px; cursor: pointer;
+      border: 1px solid var(--glass-border-strong);
+      background: rgba(255, 255, 255, .32);
+      color: var(--foreground);
+    }
+    .pill:hover { border-color: var(--primary); color: var(--primary); }
+    .pill.is-active {
+      background: var(--primary); border-color: var(--primary); color: var(--primary-foreground);
+    }
+    .pill-count { font-size: .66rem; opacity: .75; }
+
+    /* Activity lists */
+    .list-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+      gap: 1rem; margin-bottom: .5rem;
+    }
+    .list-card { padding-bottom: .55rem; }
+    .item-list { list-style: none; margin: 0; padding: .35rem .75rem .65rem; }
+    .item {
+      display: flex; align-items: baseline; gap: .65rem; flex-wrap: wrap;
+      padding: .55rem .5rem; border-top: 1px solid rgba(164, 187, 204, .35);
+      font-size: .925rem;
+    }
+    .item-num {
+      font-family: var(--font-mono); font-size: .78rem; color: var(--muted-foreground);
+      min-width: 2.75rem;
+    }
+    .item-link { font-weight: 500; color: var(--foreground); }
+    .item-link:hover { color: var(--primary); text-decoration: underline; }
+    .item-meta {
+      margin-left: auto; display: flex; align-items: center; gap: .55rem; flex-wrap: wrap;
+      font-family: var(--font-mono); font-size: .72rem; color: var(--muted-foreground); white-space: nowrap;
+    }
+    .item-meta a { color: var(--muted-foreground); }
+    .item-meta a:hover { color: var(--primary); }
+
+    /* Badges */
+    .badge {
+      display: inline-flex; align-items: center;
+      font-family: var(--font-mono); font-size: .66rem; letter-spacing: .06em;
+      text-transform: uppercase; padding: .16rem .6rem; border-radius: 999px;
+      background: var(--secondary); color: var(--foreground);
+    }
+    .badge-authored { background: rgba(91, 70, 212, .16); color: var(--primary); }
+    .badge-merged { background: rgba(22, 163, 74, .18); color: #14713a; }
+    .badge-age { background: var(--secondary); color: var(--foreground); }
+    .badge-age.stale { background: rgba(183, 27, 16, .15); color: var(--destructive); }
+
+    /* Tables */
+    .table-card { padding: .45rem 1.25rem 1.15rem; overflow-x: auto; }
+    .table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    .table th {
+      font-family: var(--font-mono); font-size: .68rem; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted-foreground);
+      text-align: left; padding: .7rem .75rem; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .table th.sortable { cursor: pointer; user-select: none; }
+    .table th.sortable:hover { color: var(--primary); }
+    .table td {
+      padding: .62rem .75rem; border-bottom: 1px solid rgba(164, 187, 204, .35); vertical-align: baseline;
+    }
+    .table tbody tr:last-child td { border-bottom: 0; }
+    .table td.num, .table th.num { font-family: var(--font-mono); font-size: .82rem; }
+
+    /* Assigned open work */
+    .assigned-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem;
+    }
+    .person-card { padding-bottom: .8rem; }
+    .person {
+      font-family: var(--font-display); font-size: 1.05rem; font-weight: 600;
+      letter-spacing: -.015em; color: var(--foreground);
+    }
+    .person:hover { color: var(--primary); text-decoration: none; }
+    .mini-list { list-style: none; margin: 0; padding: .2rem 1.25rem .35rem; }
+    .mini-list li {
+      display: flex; align-items: baseline; gap: .55rem; flex-wrap: wrap;
+      padding: .42rem 0; border-top: 1px solid rgba(164, 187, 204, .35); font-size: .875rem;
+    }
+
+    /* Mint updates */
+    .mint-list { list-style: none; margin: 0; padding: 0; }
+    .mint-list li {
+      padding: .95rem 1.35rem; border-top: 1px solid rgba(164, 187, 204, .35); font-size: .925rem;
+    }
+    .mint-list li:first-child { border-top: 0; }
+
+    /* Sections & footer */
+    .section { padding-top: 5rem; }
+    .hero { padding-top: 4.5rem; }
+    .footer { margin-top: 5.5rem; padding: 2.35rem 0 3.25rem; border-top: 1px solid var(--glass-border); }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+      font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted-foreground);
+    }
+
+    @media (max-width: 640px) {
+      .item-meta { margin-left: 0; width: 100%; }
+      .ribbon-wrap { top: 5.25rem; }
+    }
   </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Cashu War Room</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="#summary">Summary</a></li>
-        <li class="nav-item"><a class="nav-link" href="#momentum">Momentum</a></li>
-        <li class="nav-item"><a class="nav-link" href="#health">Health</a></li>
-        <li class="nav-item"><a class="nav-link" href="#growth">Growth</a></li>
-        <li class="nav-item"><a class="nav-link" href="#mints">Mints</a></li>
-      </ul>
-      <span class="navbar-text">Report date: {{ report_date.strftime('%Y-%m-%d') }}</span>
-    </div>
-  </div>
-</nav>
 
-<div class="container">
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#summary">Cashu War Room</a>
+    <nav class="nav">
+      <a href="#summary">Summary</a>
+      <a href="#momentum">Momentum</a>
+      <a href="#health">Health</a>
+      <a href="#growth">Growth</a>
+      <a href="#mints">Mints</a>
+    </nav>
+    <span class="report-date">{{ report_date.strftime('%Y-%m-%d') }}</span>
+  </div>
+</header>
+
+<main class="container">
+
+  {% macro item_row(item, show_repo, is_release=false) %}
+  <li class="item">
+    {% if is_release %}
+    <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.tag_name }}{% if item.name %} — {{ item.name }}{% endif %}</a>
+    {% else %}
+    <span class="item-num">#{{ item.number }}</span>
+    <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+    {% endif %}
+    <span class="item-meta">
+      {% if not is_release and item.author_login %}<a href="https://github.com/{{ item.author_login }}" target="_blank" rel="noopener">@{{ item.author_login }}</a>{% endif %}
+      {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
+      {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
+    </span>
+  </li>
+  {% endmacro %}
+
+  {% macro activity_card(title, items, show_repo, is_release=false) %}
+    {% if items %}
+    <div class="card list-card">
+      <div class="card-head">
+        <h4>{{ title }}</h4>
+        <span class="badge">{{ items|length }}</span>
+      </div>
+      <ul class="item-list">
+        {% for item in items %}{{ item_row(item, show_repo, is_release) }}{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro contributor_table(contributors) %}
+    {% set active = contributors | selectattr('is_active') | list %}
+    {% if active %}
+    <div class="card table-card">
+      <table class="table" data-sortable>
+        <thead>
+          <tr>
+            <th class="sortable">Contributor</th>
+            <th class="num sortable">Commits</th>
+            <th class="num sortable">+Lines</th>
+            <th class="num sortable">−Lines</th>
+            <th class="num sortable">Days</th>
+            <th class="num sortable">Issues</th>
+            <th class="num sortable">PRs Opened</th>
+            <th class="num sortable">PRs Merged</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in active %}
+          <tr>
+            <td><a href="https://github.com/{{ c.login }}" target="_blank" rel="noopener">{{ c.login }}</a></td>
+            <td class="num">{{ c.commits }}</td>
+            <td class="num">{{ c.additions }}</td>
+            <td class="num">{{ c.deletions }}</td>
+            <td class="num">{{ c.days_active }}</td>
+            <td class="num">{{ c.issues_opened }}</td>
+            <td class="num">{{ c.prs_opened }}</td>
+            <td class="num">{{ c.prs_merged }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No contributor activity in the last 7 days.</p>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro assigned_work(contributors, show_repo) %}
+    {% set people = contributors | selectattr('has_assigned') | list %}
+    {% if people %}
+    <div class="assigned-grid">
+      {% for c in people %}
+      <div class="card person-card">
+        <div class="card-head">
+          <a class="person" href="https://github.com/{{ c.login }}" target="_blank" rel="noopener">{{ c.login }}</a>
+        </div>
+        {% if c.assigned_issues %}
+        <h5 class="group-label">Assigned Issues</h5>
+        <ul class="mini-list">
+          {% for item in c.assigned_issues %}
+          <li>
+            <span class="item-num">#{{ item.number }}</span>
+            <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+            <span class="item-meta">
+              {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
+              {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% if c.assigned_prs %}
+        <h5 class="group-label">Assigned / Authored PRs</h5>
+        <ul class="mini-list">
+          {% for item in c.assigned_prs %}
+          <li>
+            <span class="item-num">#{{ item.number }}</span>
+            <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+            <span class="item-meta">
+              {% if item.relation == 'authored' %}<span class="badge badge-authored">authored</span>{% endif %}
+              {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
+              {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">No open assigned or authored work.</p>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro momentum_panel(key, lists, contributors, show_repo) %}
+  <section class="momentum-panel" data-repo="{{ key }}"{% if key != 'all' %} hidden{% endif %}>
+    <div class="list-grid">
+      {{ activity_card('New Issues', lists.new_issues, show_repo) }}
+      {{ activity_card('Opened PRs', lists.opened_prs, show_repo) }}
+      {{ activity_card('Merged PRs', lists.merged_prs, show_repo) }}
+      {{ activity_card('Closed Issues', lists.closed_issues, show_repo) }}
+      {{ activity_card('Releases', lists.releases, show_repo, true) }}
+    </div>
+    {% if not (lists.new_issues or lists.opened_prs or lists.merged_prs or lists.closed_issues or lists.releases) %}
+    <p class="empty">No notable activity in the last 7 days.</p>
+    {% endif %}
+
+    <h3 class="type-subhead">Contributors</h3>
+    {{ contributor_table(contributors) }}
+
+    <h3 class="type-subhead">Assigned Open Work</h3>
+    <p class="small-note">Open items currently assigned to each person. Unassigned PRs are listed under their author (badge “authored”); PRs assigned to someone else stay with the assignee.</p>
+    {{ assigned_work(contributors, show_repo) }}
+  </section>
+  {% endmacro %}
 
   <!-- Header / Summary -->
-  <section id="summary" class="section">
-    <h1>Cashu War Room</h1>
-    <p class="lead">
-      Snapshot — last 7 days: <strong>{{ start_date.strftime('%Y-%m-%d') }}</strong> →
-      <strong>{{ report_date.strftime('%Y-%m-%d') }}</strong>
-      &nbsp;|&nbsp; Repos:
-      {% for repo in repos %}<span class="badge bg-secondary me-1">{{ repo }}</span>{% endfor %}
+  <section id="summary" class="hero">
+    <p class="type-label">Ecosystem activity report</p>
+    <h1 class="hero-title">Cashu War Room</h1>
+    <p class="type-lead">
+      Snapshot of the last 7 days — <strong>{{ start_date.strftime('%Y-%m-%d') }}</strong> →
+      <strong>{{ report_date.strftime('%Y-%m-%d') }}</strong> — across
+      <strong>{{ repos|length }}</strong> Cashu repositories.
     </p>
 
-    <div class="row g-3">
-      <div class="col-md-2 col-sm-4 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">New Issues (7d)</div>
-            <div class="fs-3">{{ momentum.summary.new_issues }}</div>
-          </div>
-        </div>
+    <div class="metric-grid">
+      <div class="card metric">
+        <div class="label">New Issues</div>
+        <div class="value">{{ momentum.summary.new_issues }}</div>
       </div>
-      <div class="col-md-2 col-sm-4 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">PRs Opened (7d)</div>
-            <div class="fs-3">{{ momentum.summary.opened_prs }}</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">PRs Opened</div>
+        <div class="value">{{ momentum.summary.opened_prs }}</div>
       </div>
-      <div class="col-md-2 col-sm-4 col-6">
-        <div class="card metric-card success h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">PRs Merged (7d)</div>
-            <div class="fs-3">{{ momentum.summary.merged_prs }}</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">PRs Merged</div>
+        <div class="value">{{ momentum.summary.merged_prs }}</div>
       </div>
-      <div class="col-md-2 col-sm-4 col-6">
-        <div class="card metric-card warning h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">Closed Issues (7d)</div>
-            <div class="fs-3">{{ momentum.summary.closed_issues }}</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">Closed Issues</div>
+        <div class="value">{{ momentum.summary.closed_issues }}</div>
       </div>
-      <div class="col-md-2 col-sm-4 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">Active Contributors (7d)</div>
-            <div class="fs-3">{{ momentum.summary.active_contributors }}</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">Active Contributors</div>
+        <div class="value">{{ momentum.summary.active_contributors }}</div>
       </div>
-      <div class="col-md-2 col-sm-4 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">Releases (7d)</div>
-            <div class="fs-3">{{ momentum.summary.releases }}</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">Releases</div>
+        <div class="value">{{ momentum.summary.releases }}</div>
       </div>
     </div>
   </section>
 
   <!-- Cashu Momentum -->
   <section id="momentum" class="section">
-    <h2>Cashu Momentum (Last 7 Days)</h2>
+    <p class="type-label">Last 7 days</p>
+    <h2 class="section-title">Cashu Momentum</h2>
 
-    <h4>By Repo</h4>
-    {% for repo in repos %}
-      {% set data = momentum.by_repo[repo] %}
-      <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <strong>{{ repo }}</strong>
-          <span class="small-muted">
-            +{{ data.new_issues|length }} issues / +{{ data.opened_prs|length }} PRs /
-            ✓{{ data.merged_prs|length }} merged / +{{ data.releases|length }} releases
-          </span>
-        </div>
-        <div class="card-body">
-          {% if data.new_issues %}
-            <h6>New Issues</h6>
-            <ul>
-              {% for item in data.new_issues %}
-              <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}{% if item.author_login %}: {{ item.author_login | user_link }}{% endif %}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-          {% if data.opened_prs %}
-            <h6>Opened PRs</h6>
-            <ul>
-              {% for item in data.opened_prs %}
-              <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}{% if item.author_login %}: {{ item.author_login | user_link }}{% endif %}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-          {% if data.merged_prs %}
-            <h6>Merged PRs</h6>
-            <ul>
-              {% for item in data.merged_prs %}
-              <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}{% if item.author_login %}: {{ item.author_login | user_link }}{% endif %}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-          {% if data.releases %}
-            <h6>Releases</h6>
-            <ul>
-              {% for item in data.releases %}
-              <li>{{ item.tag_name|e|link(item.url) }} — {{ item.name|e }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-          {% if not data.new_issues and not data.opened_prs and not data.merged_prs and not data.releases %}
-            <p class="small-muted mb-0">No notable activity in the last 7 days.</p>
-          {% endif %}
-        </div>
-      </div>
-    {% endfor %}
-
-    <h4>By Contributor</h4>
-    <table id="momentum-contributors-table" class="table table-striped table-bordered">
-      <thead>
-        <tr>
-          <th>Contributor</th>
-          <th>Commits</th>
-          <th>+Lines</th>
-          <th>-Lines</th>
-          <th>Days Active</th>
-          <th>Issues Opened</th>
-          <th>PRs Opened</th>
-          <th>PRs Merged</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for c in momentum.by_contributor %}
-        <tr>
-          <td>{{ c.login }}</td>
-          <td>{{ c.commits }}</td>
-          <td>{{ c.additions }}</td>
-          <td>{{ c.deletions }}</td>
-          <td>{{ c.days_active }}</td>
-          <td>{{ c.issues_opened }}</td>
-          <td>{{ c.prs_opened }}</td>
-          <td>{{ c.prs_merged }}</td>
-        </tr>
+    <div class="ribbon-wrap">
+      <div class="ribbon" role="tablist" aria-label="Filter momentum by repository">
+        <button type="button" class="pill is-active" data-repo="all" role="tab" aria-selected="true">
+          All
+          <span class="pill-count">{{ momentum.summary.new_issues + momentum.summary.opened_prs + momentum.summary.merged_prs + momentum.summary.releases }}</span>
+        </button>
+        {% for repo in repos %}
+        {% set d = momentum.by_repo[repo.full_name] %}
+        <button type="button" class="pill" data-repo="{{ repo.full_name }}" role="tab" aria-selected="false">
+          {{ repo.display }}
+          <span class="pill-count">{{ (d.new_issues|length) + (d.opened_prs|length) + (d.merged_prs|length) + (d.releases|length) }}</span>
+        </button>
         {% endfor %}
-      </tbody>
-    </table>
-
-    <h5>Assigned Open Work</h5>
-    <div class="row">
-      {% for c in momentum.by_contributor if c.assigned_issues or c.assigned_prs %}
-      <div class="col-md-6 mb-3">
-        <div class="card">
-          <div class="card-header"><strong>{{ c.login }}</strong></div>
-          <div class="card-body">
-            {% if c.assigned_issues %}
-              <h6 class="small">Assigned Issues</h6>
-              <ul class="small">
-                {% for item in c.assigned_issues %}
-                <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-            {% if c.assigned_prs %}
-              <h6 class="small">Assigned PRs</h6>
-              <ul class="small">
-                {% for item in c.assigned_prs %}
-                <li>{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-          </div>
-        </div>
       </div>
-      {% endfor %}
     </div>
+
+    {{ momentum_panel('all', momentum.combined, momentum.by_contributor, true) }}
+    {% for repo in repos %}
+      {{ momentum_panel(repo.full_name, momentum.by_repo[repo.full_name], momentum.by_repo[repo.full_name].contributors, false) }}
+    {% endfor %}
   </section>
 
   <!-- Health -->
   <section id="health" class="section">
-    <h2>Issue / PR Health</h2>
-    <div class="row g-3 mb-4">
-      <div class="col-md-3 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">Open Issues</div>
-            <div class="fs-3">{{ aging.open_issues_count }}</div>
-          </div>
-        </div>
+    <p class="type-label">Backlog</p>
+    <h2 class="section-title">Issue / PR Health</h2>
+
+    <div class="metric-grid" style="margin-bottom: 1.5rem;">
+      <div class="card metric">
+        <div class="label">Open Issues</div>
+        <div class="value">{{ aging.open_issues_count }}</div>
       </div>
-      <div class="col-md-3 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">Avg Open Issue Age</div>
-            <div class="fs-3">{{ aging.open_issues_avg_age }}d</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">Avg Open Issue Age</div>
+        <div class="value">{{ aging.open_issues_avg_age }}<span class="suffix">d</span></div>
       </div>
-      <div class="col-md-3 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">Open PRs</div>
-            <div class="fs-3">{{ aging.open_prs_count }}</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">Open PRs</div>
+        <div class="value">{{ aging.open_prs_count }}</div>
       </div>
-      <div class="col-md-3 col-6">
-        <div class="card metric-card h-100">
-          <div class="card-body">
-            <div class="card-title small-muted">Avg Open PR Age</div>
-            <div class="fs-3">{{ aging.open_prs_avg_age }}d</div>
-          </div>
-        </div>
+      <div class="card metric">
+        <div class="label">Avg Open PR Age</div>
+        <div class="value">{{ aging.open_prs_avg_age }}<span class="suffix">d</span></div>
       </div>
     </div>
 
-    <div class="row g-4">
-      <div class="col-lg-6">
-        <h5>Oldest Open Issues</h5>
-        <ul class="list-group">
+    <div class="list-grid">
+      <div class="card list-card">
+        <div class="card-head"><h4>Oldest Open Issues</h4></div>
+        <ul class="item-list">
           {% for item in aging.oldest_open_issues %}
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</div>
-              <span class="small-muted">{{ item.repo }} &middot; opened {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else 'unknown' }}</span>
-            </div>
-            <span class="badge bg-warning text-dark rounded-pill">{{ item.age_days }}d</span>
+          <li class="item">
+            <span class="item-num">#{{ item.number }}</span>
+            <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+            <span class="item-meta">
+              <span class="badge">{{ item.repo_short }}</span>
+              <span>opened {{ item.date_str }}</span>
+              <span class="badge badge-age{% if item.age_days > 30 %} stale{% endif %}">{{ item.age_days }}d</span>
+            </span>
           </li>
           {% else %}
-          <li class="list-group-item text-muted">No open issues.</li>
+          <li class="item"><span class="empty">No open issues.</span></li>
           {% endfor %}
         </ul>
       </div>
-      <div class="col-lg-6">
-        <h5>Oldest Open PRs</h5>
-        <ul class="list-group">
+      <div class="card list-card">
+        <div class="card-head"><h4>Oldest Open PRs</h4></div>
+        <ul class="item-list">
           {% for item in aging.oldest_open_prs %}
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">{{ "#" ~ item.number|string ~ " " ~ item.title|e|link(item.url) }}</div>
-              <span class="small-muted">{{ item.repo }} &middot; opened {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else 'unknown' }}</span>
-            </div>
-            <span class="badge bg-warning text-dark rounded-pill">{{ item.age_days }}d</span>
+          <li class="item">
+            <span class="item-num">#{{ item.number }}</span>
+            <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+            <span class="item-meta">
+              <span class="badge">{{ item.repo_short }}</span>
+              <span>opened {{ item.date_str }}</span>
+              <span class="badge badge-age{% if item.age_days > 30 %} stale{% endif %}">{{ item.age_days }}d</span>
+            </span>
           </li>
           {% else %}
-          <li class="list-group-item text-muted">No open PRs.</li>
+          <li class="item"><span class="empty">No open PRs.</span></li>
           {% endfor %}
         </ul>
       </div>
     </div>
 
-    <div class="row mt-4">
-      <div class="col-md-6">
-        <p><strong>Average time to merge PRs:</strong> {{ aging.avg_time_to_merge_days if aging.avg_time_to_merge_days is not none else 'N/A' }} days</p>
+    <div class="list-grid" style="margin-top: 1rem;">
+      <div class="card metric">
+        <div class="label">Avg Time to Merge PRs</div>
+        <div class="value">{{ aging.avg_time_to_merge_days if aging.avg_time_to_merge_days is not none else 'N/A' }}<span class="suffix">d</span></div>
       </div>
-      <div class="col-md-6">
-        <p><strong>Average time to close issues:</strong> {{ aging.avg_time_to_close_issue_days if aging.avg_time_to_close_issue_days is not none else 'N/A' }} days</p>
+      <div class="card metric">
+        <div class="label">Avg Time to Close Issues</div>
+        <div class="value">{{ aging.avg_time_to_close_issue_days if aging.avg_time_to_close_issue_days is not none else 'N/A' }}<span class="suffix">d</span></div>
       </div>
     </div>
   </section>
 
   <!-- Growth -->
   <section id="growth" class="section">
-    <h2>Ecosystem Snapshot</h2>
+    <p class="type-label">Stars, forks &amp; open work</p>
+    <h2 class="section-title">Ecosystem Snapshot</h2>
 
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>Repo</th>
-          <th>Stars</th>
-          <th>Forks</th>
-          <th>Open Issues</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for repo, stats in growth.latest.items() %}
-        <tr>
-          <td>{{ repo }}</td>
-          <td>{{ stats.stars }}</td>
-          <td>{{ stats.forks }}</td>
-          <td>{{ stats.open_issues }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="card table-card">
+      <table class="table" data-sortable>
+        <thead>
+          <tr>
+            <th class="sortable">Repo</th>
+            <th class="num sortable">Stars</th>
+            <th class="num sortable">Forks</th>
+            <th class="num sortable">Open Issues</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for repo, stats in growth.latest.items() %}
+          <tr>
+            <td><a href="https://github.com/{{ repo }}" target="_blank" rel="noopener">{{ stats.short }}</a></td>
+            <td class="num">{{ stats.stars }}</td>
+            <td class="num">{{ stats.forks }}</td>
+            <td class="num">{{ stats.open_issues }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- Mint Updates -->
   <section id="mints" class="section">
-    <h2>Cashu Mint Updates</h2>
-    <p class="small-muted">Diff of <a href="https://ye0man.github.io/cashu-mint-directory/" target="_blank" rel="noopener">Cashu Mint Directory</a> vs the previous snapshot.</p>
-    {% if mint_changes %}
-    <ul>
-      {% for change in mint_changes %}
-      <li>{{ change }}</li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>No updates to any tracked mints.</p>
-    {% endif %}
+    <p class="type-label">Mint directory</p>
+    <h2 class="section-title">Cashu Mint Updates</h2>
+    <p class="small-note">Diff of the <a href="https://ye0man.github.io/cashu-mint-directory/" target="_blank" rel="noopener">Cashu Mint Directory</a> vs the previous snapshot.</p>
+    <div class="card">
+      {% if mint_changes %}
+      <ul class="mint-list">
+        {% for change in mint_changes %}
+        <li>{{ change }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <ul class="mint-list"><li>No updates to any tracked mints.</li></ul>
+      {% endif %}
+    </div>
   </section>
 
-  <footer class="text-center">
-    Generated {{ report_date.strftime('%Y-%m-%d %H:%M UTC') }} by Cashu War Room.
-  </footer>
-</div>
+</main>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<footer class="footer">
+  <div class="footer-inner">
+    <span>Generated {{ report_date.strftime('%Y-%m-%d %H:%M UTC') }} by Cashu War Room</span>
+    <span>{{ repos|length }} repos tracked</span>
+  </div>
+</footer>
+
 <script>
-  $(document).ready(function() {
-    $('#momentum-contributors-table').DataTable({
-      pageLength: 25,
-      order: [[1, 'desc']]
+  (function () {
+    var pills = Array.prototype.slice.call(document.querySelectorAll('.pill[data-repo]'));
+    var panels = Array.prototype.slice.call(document.querySelectorAll('.momentum-panel'));
+
+    pills.forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        var repo = pill.getAttribute('data-repo');
+        pills.forEach(function (p) {
+          var active = p === pill;
+          p.classList.toggle('is-active', active);
+          p.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        panels.forEach(function (panel) {
+          panel.hidden = panel.getAttribute('data-repo') !== repo;
+        });
+      });
     });
-  });
+
+    Array.prototype.slice.call(document.querySelectorAll('table[data-sortable]')).forEach(function (table) {
+      var headers = Array.prototype.slice.call(table.querySelectorAll('th'));
+      headers.forEach(function (th, idx) {
+        th.addEventListener('click', function () {
+          var tbody = table.tBodies[0];
+          if (!tbody) return;
+          var rows = Array.prototype.slice.call(tbody.rows);
+          var dir = th.getAttribute('data-dir') === 'asc' ? -1 : 1;
+          headers.forEach(function (h) { h.removeAttribute('data-dir'); });
+          th.setAttribute('data-dir', dir === 1 ? 'asc' : 'desc');
+          rows.sort(function (a, b) {
+            var av = (a.cells[idx].getAttribute('data-sort') || a.cells[idx].textContent).trim();
+            var bv = (b.cells[idx].getAttribute('data-sort') || b.cells[idx].textContent).trim();
+            var an = parseFloat(av.replace(/,/g, ''));
+            var bn = parseFloat(bv.replace(/,/g, ''));
+            if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
+            return av.localeCompare(bv) * dir;
+          });
+          rows.forEach(function (r) { tbody.appendChild(r); });
+        });
+      });
+    });
+  })();
 </script>
 </body>
 </html>

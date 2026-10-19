@@ -9,7 +9,6 @@ from typing import Any
 
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from markupsafe import Markup
 
 from config import (
     REPORT_DIR,
@@ -20,23 +19,6 @@ from config import (
 from data_store import DataStore
 
 logger = logging.getLogger(__name__)
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _link(text: str, url: str) -> str:
-    return Markup(f'<a href="{url}" target="_blank" rel="noopener">{text}</a>')
-
-
-def _user_link(login: str | None) -> str:
-    if not login:
-        return ""
-    return Markup(
-        f'<a href="https://github.com/{login}" target="_blank" rel="noopener">@{login}</a>'
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -92,78 +74,50 @@ def load_repo_snapshots(store: DataStore | None = None) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
-def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str, Any]:
-    end = pd.Timestamp(end).tz_convert("UTC")
-    start = end - timedelta(days=7)
+def _login_of(value: Any) -> str | None:
+    return value if isinstance(value, str) and value else None
 
-    issues = frames.get("issues", pd.DataFrame())
-    prs = frames.get("pull_requests", pd.DataFrame())
-    releases = frames.get("releases", pd.DataFrame())
 
-    new_issues = issues[(issues["created_at"] >= start) & (issues["created_at"] <= end)] if not issues.empty else issues
-    opened_prs = prs[(prs["created_at"] >= start) & (prs["created_at"] <= end)] if not prs.empty else prs
-    merged_prs = prs[(prs["merged_at"] >= start) & (prs["merged_at"] <= end)] if not prs.empty else prs
-    closed_issues = issues[(issues["closed_at"] >= start) & (issues["closed_at"] <= end)] if not issues.empty else issues
-    new_releases = releases[(releases["published_at"] >= start) & (releases["published_at"] <= end)] if not releases.empty else releases
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
 
-    # By repo
-    by_repo: dict[str, dict[str, Any]] = {}
-    for repo in [r.full_name for r in REPOS]:
-        by_repo[repo] = {
-            "new_issues": new_issues[new_issues["repo"] == repo].sort_values("created_at", ascending=False).to_dict("records") if not new_issues.empty else [],
-            "opened_prs": opened_prs[opened_prs["repo"] == repo].sort_values("created_at", ascending=False).to_dict("records") if not opened_prs.empty else [],
-            "merged_prs": merged_prs[merged_prs["repo"] == repo].sort_values("merged_at", ascending=False).to_dict("records") if not merged_prs.empty else [],
-            "closed_issues": closed_issues[closed_issues["repo"] == repo].sort_values("closed_at", ascending=False).to_dict("records") if not closed_issues.empty else [],
-            "releases": new_releases[new_releases["repo"] == repo].sort_values("published_at", ascending=False).to_dict("records") if not new_releases.empty else [],
-        }
 
-    # By contributor
-    contributor_rows: dict[str, dict[str, Any]] = defaultdict(lambda: {
+def _repo_short(repo: Any) -> str:
+    return repo.split("/", 1)[1] if isinstance(repo, str) and "/" in repo else (repo or "")
+
+
+def _window_records(df: pd.DataFrame, date_col: str) -> list[dict[str, Any]]:
+    """Records sorted newest-first, with display helpers attached."""
+    if df.empty:
+        return []
+    ordered = df.sort_values(date_col, ascending=False).copy()
+    dates = pd.to_datetime(ordered[date_col], utc=True, errors="coerce")
+    ordered["date_str"] = dates.dt.strftime("%Y-%m-%d")
+    ordered["repo_short"] = ordered["repo"].map(_repo_short) if "repo" in ordered.columns else ""
+    return ordered.to_dict("records")
+
+
+def _blank_contributor() -> dict[str, Any]:
+    return {
         "commits": 0, "additions": 0, "deletions": 0, "days_active": set(),
         "issues_opened": 0, "prs_opened": 0, "prs_merged": 0,
         "assigned_issues": [], "assigned_prs": [],
-    })
+    }
 
-    commits = frames.get("commits", pd.DataFrame())
-    if not commits.empty:
-        recent_commits = commits[(commits["committed_at"] >= start) & (commits["committed_at"] <= end)]
-        for _, row in recent_commits.iterrows():
-            login = row.get("author_login") or "unknown"
-            contributor_rows[login]["commits"] += 1
-            contributor_rows[login]["additions"] += int(row.get("additions", 0))
-            contributor_rows[login]["deletions"] += int(row.get("deletions", 0))
-            contributor_rows[login]["days_active"].add(row["committed_at"].strftime("%Y-%m-%d"))
 
-    for _, row in new_issues.iterrows():
-        login = row.get("author_login")
-        if login:
-            contributor_rows[login]["issues_opened"] += 1
-
-    for _, row in opened_prs.iterrows():
-        login = row.get("author_login")
-        if login:
-            contributor_rows[login]["prs_opened"] += 1
-
-    for _, row in merged_prs.iterrows():
-        login = row.get("author_login")
-        if login:
-            contributor_rows[login]["prs_merged"] += 1
-
-    # Assigned open items (current state)
-    open_issues = issues[issues["state"] == "OPEN"] if not issues.empty else issues
-    open_prs = prs[prs["state"] == "OPEN"] if not prs.empty else prs
-    for _, row in open_issues.iterrows():
-        for assignee in row.get("assignee_logins", []):
-            contributor_rows[assignee]["assigned_issues"].append(row.to_dict())
-    for _, row in open_prs.iterrows():
-        for assignee in row.get("assignee_logins", []):
-            contributor_rows[assignee]["assigned_prs"].append(row.to_dict())
-
-    by_contributor = []
-    for login, data in sorted(contributor_rows.items(), key=lambda x: x[1]["commits"], reverse=True):
-        if login == "unknown" and data["commits"] == 0 and data["issues_opened"] == 0 and data["prs_opened"] == 0:
+def _finish_contributors(rows: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for login, data in rows.items():
+        if (
+            login == "unknown"
+            and data["commits"] == 0
+            and data["issues_opened"] == 0
+            and data["prs_opened"] == 0
+            and not data["assigned_issues"]
+            and not data["assigned_prs"]
+        ):
             continue
-        by_contributor.append({
+        out.append({
             "login": login,
             "commits": data["commits"],
             "additions": data["additions"],
@@ -172,14 +126,135 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             "issues_opened": data["issues_opened"],
             "prs_opened": data["prs_opened"],
             "prs_merged": data["prs_merged"],
-            "assigned_issues": data["assigned_issues"],
-            "assigned_prs": data["assigned_prs"],
+            "assigned_issues": sorted(data["assigned_issues"], key=lambda r: str(r.get("created_at") or ""), reverse=True),
+            "assigned_prs": sorted(data["assigned_prs"], key=lambda r: str(r.get("created_at") or ""), reverse=True),
+            "has_assigned": bool(data["assigned_issues"] or data["assigned_prs"]),
+            "is_active": bool(data["commits"] or data["issues_opened"] or data["prs_opened"] or data["prs_merged"]),
         })
+    out.sort(key=lambda c: (-c["commits"], -c["prs_opened"], -c["issues_opened"], c["login"]))
+    return out
+
+
+def _assigned_item(row: Any, relation: str | None = None) -> dict[str, Any]:
+    created = row.get("created_at")
+    rec = row.to_dict()
+    rec["date_str"] = created.strftime("%Y-%m-%d") if hasattr(created, "strftime") else ""
+    rec["repo_short"] = _repo_short(rec.get("repo"))
+    if relation:
+        rec["relation"] = relation
+    return rec
+
+
+def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str, Any]:
+    end = pd.Timestamp(end).tz_convert("UTC")
+    start = end - timedelta(days=7)
+
+    issues = frames.get("issues", pd.DataFrame())
+    prs = frames.get("pull_requests", pd.DataFrame())
+    releases = frames.get("releases", pd.DataFrame())
+    commits = frames.get("commits", pd.DataFrame())
+
+    new_issues = issues[(issues["created_at"] >= start) & (issues["created_at"] <= end)] if not issues.empty else issues
+    opened_prs = prs[(prs["created_at"] >= start) & (prs["created_at"] <= end)] if not prs.empty else prs
+    merged_prs = prs[(prs["merged_at"] >= start) & (prs["merged_at"] <= end)] if not prs.empty else prs
+    closed_issues = issues[(issues["closed_at"] >= start) & (issues["closed_at"] <= end)] if not issues.empty else issues
+    new_releases = releases[(releases["published_at"] >= start) & (releases["published_at"] <= end)] if not releases.empty else releases
+
+    # Contributor rows scoped globally and per repo.
+    global_rows: dict[str, dict[str, Any]] = defaultdict(_blank_contributor)
+    repo_rows: dict[str, dict[str, dict[str, Any]]] = defaultdict(lambda: defaultdict(_blank_contributor))
+
+    def _bump(login: str | None, repo: str | None, field: str, amount: int = 1) -> None:
+        user = _login_of(login) or "unknown"
+        global_rows[user][field] += amount
+        if repo:
+            repo_rows[repo][user][field] += amount
+
+    if not commits.empty:
+        recent_commits = commits[(commits["committed_at"] >= start) & (commits["committed_at"] <= end)]
+        for _, row in recent_commits.iterrows():
+            user = _login_of(row.get("author_login")) or "unknown"
+            repo = row.get("repo")
+            day = row["committed_at"].strftime("%Y-%m-%d")
+            additions = int(row.get("additions", 0) or 0)
+            deletions = int(row.get("deletions", 0) or 0)
+            for table in (global_rows[user], repo_rows[repo][user] if repo else None):
+                if table is None:
+                    continue
+                table["commits"] += 1
+                table["additions"] += additions
+                table["deletions"] += deletions
+                table["days_active"].add(day)
+
+    for _, row in new_issues.iterrows():
+        _bump(row.get("author_login"), row.get("repo"), "issues_opened")
+
+    for _, row in opened_prs.iterrows():
+        _bump(row.get("author_login"), row.get("repo"), "prs_opened")
+
+    for _, row in merged_prs.iterrows():
+        _bump(row.get("author_login"), row.get("repo"), "prs_merged")
+
+    # Assigned open items (current state)
+    open_issues = issues[issues["state"] == "OPEN"] if not issues.empty else issues
+    open_prs = prs[prs["state"] == "OPEN"] if not prs.empty else prs
+
+    for _, row in open_issues.iterrows():
+        item = _assigned_item(row)
+        for assignee in _as_list(row.get("assignee_logins")):
+            user = _login_of(assignee)
+            if not user:
+                continue
+            global_rows[user]["assigned_issues"].append(item)
+            repo_rows[row.get("repo")][user]["assigned_issues"].append(item)
+
+    for _, row in open_prs.iterrows():
+        repo = row.get("repo")
+        assignees = [a for a in (_login_of(x) for x in _as_list(row.get("assignee_logins"))) if a]
+        author = _login_of(row.get("author_login"))
+        if assignees:
+            # Assignee takes priority: the PR is only listed under its assignees.
+            for assignee in assignees:
+                item = _assigned_item(row, "assigned")
+                global_rows[assignee]["assigned_prs"].append(item)
+                repo_rows[repo][assignee]["assigned_prs"].append(item)
+        elif author:
+            # Unassigned PR: fall back to the author ("authored").
+            item = _assigned_item(row, "authored")
+            global_rows[author]["assigned_prs"].append(item)
+            repo_rows[repo][author]["assigned_prs"].append(item)
+
+    # By repo
+    by_repo: dict[str, dict[str, Any]] = {}
+    for repo in [r.full_name for r in REPOS]:
+        scoped = {}
+        for col_frame, sort_col, name in (
+            (new_issues, "created_at", "new_issues"),
+            (opened_prs, "created_at", "opened_prs"),
+            (merged_prs, "merged_at", "merged_prs"),
+            (closed_issues, "closed_at", "closed_issues"),
+            (new_releases, "published_at", "releases"),
+        ):
+            subset = col_frame[col_frame["repo"] == repo] if not col_frame.empty else col_frame
+            scoped[name] = _window_records(subset, sort_col)
+        scoped["contributors"] = _finish_contributors(repo_rows.get(repo, {}))
+        by_repo[repo] = scoped
+
+    combined = {
+        "new_issues": _window_records(new_issues, "created_at"),
+        "opened_prs": _window_records(opened_prs, "created_at"),
+        "merged_prs": _window_records(merged_prs, "merged_at"),
+        "closed_issues": _window_records(closed_issues, "closed_at"),
+        "releases": _window_records(new_releases, "published_at"),
+    }
+
+    by_contributor = _finish_contributors(global_rows)
 
     return {
         "start": start,
         "end": end,
         "by_repo": by_repo,
+        "combined": combined,
         "by_contributor": by_contributor,
         "summary": {
             "new_issues": len(new_issues),
@@ -221,12 +296,16 @@ def compute_aging(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str, A
 
     if not open_issues.empty:
         open_issues["age_days"] = age_days(open_issues["created_at"])
-        oldest_issues = open_issues.sort_values("age_days", ascending=False).head(10)
+        oldest_issues = open_issues.sort_values("age_days", ascending=False).head(10).copy()
+        oldest_issues["date_str"] = pd.to_datetime(oldest_issues["created_at"], utc=True, errors="coerce").dt.strftime("%Y-%m-%d")
+        oldest_issues["repo_short"] = oldest_issues["repo"].map(_repo_short)
         result["oldest_open_issues"] = oldest_issues.to_dict("records")
 
     if not open_prs.empty:
         open_prs["age_days"] = age_days(open_prs["created_at"])
-        oldest_prs = open_prs.sort_values("age_days", ascending=False).head(10)
+        oldest_prs = open_prs.sort_values("age_days", ascending=False).head(10).copy()
+        oldest_prs["date_str"] = pd.to_datetime(oldest_prs["created_at"], utc=True, errors="coerce").dt.strftime("%Y-%m-%d")
+        oldest_prs["repo_short"] = oldest_prs["repo"].map(_repo_short)
         result["oldest_open_prs"] = oldest_prs.to_dict("records")
 
     merged = prs[prs["merged_at"].notna()].copy() if not prs.empty else prs
@@ -255,6 +334,7 @@ def compute_growth(snapshot_df: pd.DataFrame) -> dict[str, Any]:
     latest = snapshot_df.sort_values("snapshot_at").groupby("repo").last()
     for repo, row in latest.iterrows():
         result["latest"][repo] = {
+            "short": _repo_short(repo),
             "stars": int(row.get("stars", 0)),
             "forks": int(row.get("forks", 0)),
             "open_issues": int(row.get("open_issues", 0)),
@@ -282,14 +362,12 @@ def render_report(
         loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=select_autoescape(["html", "xml"]),
     )
-    env.filters["link"] = _link
-    env.filters["user_link"] = _user_link
     template = env.get_template("report.html")
 
     context = {
         "report_date": report_date,
         "start_date": start,
-        "repos": [r.full_name for r in REPOS],
+        "repos": [{"full_name": r.full_name, "display": r.display} for r in REPOS],
         "momentum": momentum,
         "aging": aging,
         "growth": growth,
