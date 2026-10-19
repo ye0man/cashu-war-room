@@ -170,6 +170,13 @@
     }
     .list-card { padding-bottom: .55rem; }
     .item-list { list-style: none; margin: 0; padding: .35rem .75rem .65rem; }
+    .momentum-panel .list-card {
+      height: 24rem; padding-bottom: 0; display: flex; flex-direction: column;
+    }
+    .momentum-panel .item-list {
+      flex: 1; min-height: 0; overflow-y: auto; padding-bottom: .85rem;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
     .item {
       display: flex; align-items: baseline; gap: .65rem; flex-wrap: wrap;
       padding: .55rem .5rem; border-top: 1px solid rgba(164, 187, 204, .35);
@@ -220,7 +227,13 @@
     .assigned-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem;
     }
-    .person-card { padding-bottom: .8rem; }
+    .person-card {
+      height: 24rem; padding-bottom: 0; display: flex; flex-direction: column;
+    }
+    .person-scroll {
+      flex: 1; min-height: 0; overflow-y: auto; padding-bottom: .85rem;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
     .person {
       font-family: var(--font-display); font-size: 1.05rem; font-weight: 600;
       letter-spacing: -.015em; color: var(--foreground);
@@ -231,6 +244,14 @@
       display: flex; align-items: baseline; gap: .55rem; flex-wrap: wrap;
       padding: .42rem 0; border-top: 1px solid rgba(164, 187, 204, .35); font-size: .875rem;
     }
+    .momentum-panel .item-list::-webkit-scrollbar,
+    .person-scroll::-webkit-scrollbar { width: 8px; }
+    .momentum-panel .item-list::-webkit-scrollbar-track,
+    .person-scroll::-webkit-scrollbar-track { background: transparent; }
+    .momentum-panel .item-list::-webkit-scrollbar-thumb,
+    .person-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    .momentum-panel .item-list::-webkit-scrollbar-thumb:hover,
+    .person-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
 
     /* Mint updates */
     .mint-list { list-style: none; margin: 0; padding: 0; }
@@ -2398,6 +2419,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/a1denvalu3" target="_blank" rel="noopener">a1denvalu3</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -2677,12 +2699,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/robwoodgate" target="_blank" rel="noopener">robwoodgate</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -3130,12 +3154,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/asmogo" target="_blank" rel="noopener">asmogo</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -3297,12 +3323,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Egge21M" target="_blank" rel="noopener">Egge21M</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -3562,12 +3590,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/swedishfrenchpress" target="_blank" rel="noopener">swedishfrenchpress</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -3649,12 +3679,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/KvngMikey" target="_blank" rel="noopener">KvngMikey</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -3753,12 +3785,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/orangeshyguy21" target="_blank" rel="noopener">orangeshyguy21</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -3776,12 +3810,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/thesimplekid" target="_blank" rel="noopener">thesimplekid</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -4036,12 +4072,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/ye0man" target="_blank" rel="noopener">ye0man</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -4123,12 +4161,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/dependabot" target="_blank" rel="noopener">dependabot</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4146,12 +4186,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mmalmi" target="_blank" rel="noopener">mmalmi</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4189,12 +4231,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/SatsAndSports" target="_blank" rel="noopener">SatsAndSports</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4232,12 +4276,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/github-actions" target="_blank" rel="noopener">github-actions</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4255,12 +4301,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/6D-pixel" target="_blank" rel="noopener">6D-pixel</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4278,12 +4326,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/MrishoLukamba" target="_blank" rel="noopener">MrishoLukamba</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -4325,12 +4375,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/agammann" target="_blank" rel="noopener">agammann</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4348,12 +4400,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/bitsjack" target="_blank" rel="noopener">bitsjack</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4371,12 +4425,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/callebtc" target="_blank" rel="noopener">callebtc</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -4853,12 +4909,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/cdk-bot" target="_blank" rel="noopener">cdk-bot</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4876,12 +4934,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/d4rp4t" target="_blank" rel="noopener">d4rp4t</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -4909,12 +4969,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/igbopharaoh" target="_blank" rel="noopener">igbopharaoh</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -5012,12 +5074,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/wavebyrd" target="_blank" rel="noopener">wavebyrd</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5035,12 +5099,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Forte11Cuba" target="_blank" rel="noopener">Forte11Cuba</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5068,12 +5134,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/18c83fd3-25ea-4ed9-8205-2abeff9b3883" target="_blank" rel="noopener">18c83fd3-25ea-4ed9-8205-2abeff9b3883</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5091,12 +5159,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Amperstrand" target="_blank" rel="noopener">Amperstrand</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5114,12 +5184,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Codepocketdev" target="_blank" rel="noopener">Codepocketdev</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5167,12 +5239,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/DSanich" target="_blank" rel="noopener">DSanich</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5190,12 +5264,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Datawav" target="_blank" rel="noopener">Datawav</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5213,12 +5289,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/DhananjayPurohit" target="_blank" rel="noopener">DhananjayPurohit</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5236,12 +5314,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Hardeezah" target="_blank" rel="noopener">Hardeezah</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5259,12 +5339,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Kelbie" target="_blank" rel="noopener">Kelbie</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -5326,12 +5408,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Slender2097" target="_blank" rel="noopener">Slender2097</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5349,12 +5433,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/TheMhv" target="_blank" rel="noopener">TheMhv</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -5434,12 +5520,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/YofiY" target="_blank" rel="noopener">YofiY</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5457,12 +5545,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/aaronmcdaid" target="_blank" rel="noopener">aaronmcdaid</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5490,12 +5580,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/aekasitt" target="_blank" rel="noopener">aekasitt</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5513,12 +5605,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/b-l-u-e" target="_blank" rel="noopener">b-l-u-e</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -5600,12 +5694,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/beambuilder" target="_blank" rel="noopener">beambuilder</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5623,12 +5719,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/btcjt" target="_blank" rel="noopener">btcjt</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5646,12 +5744,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/christoph865" target="_blank" rel="noopener">christoph865</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5669,12 +5769,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/cjbeery24" target="_blank" rel="noopener">cjbeery24</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5692,12 +5794,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/cjoshreid" target="_blank" rel="noopener">cjoshreid</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5715,12 +5819,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/comwanga" target="_blank" rel="noopener">comwanga</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -5738,12 +5844,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/crodas" target="_blank" rel="noopener">crodas</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -6124,12 +6232,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/edgarmuyomba" target="_blank" rel="noopener">edgarmuyomba</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6147,12 +6257,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/felixfelix-bot" target="_blank" rel="noopener">felixfelix-bot</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -6194,12 +6306,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/findingsov" target="_blank" rel="noopener">findingsov</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6217,12 +6331,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/gorrdy" target="_blank" rel="noopener">gorrdy</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6240,12 +6356,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/gudnuf" target="_blank" rel="noopener">gudnuf</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -6287,12 +6405,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/j-kon" target="_blank" rel="noopener">j-kon</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6340,12 +6460,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/joemphilips" target="_blank" rel="noopener">joemphilips</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6403,12 +6525,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/jooray" target="_blank" rel="noopener">jooray</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6426,12 +6550,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/jurraca" target="_blank" rel="noopener">jurraca</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6449,12 +6575,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/kaloudis" target="_blank" rel="noopener">kaloudis</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6472,12 +6600,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mariaa144" target="_blank" rel="noopener">mariaa144</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6495,12 +6625,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/minibits-cash" target="_blank" rel="noopener">minibits-cash</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6518,12 +6650,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mjkeaton" target="_blank" rel="noopener">mjkeaton</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6541,12 +6675,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mvuk" target="_blank" rel="noopener">mvuk</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6564,12 +6700,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/pruks-dev" target="_blank" rel="noopener">pruks-dev</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6587,12 +6725,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/prusnak" target="_blank" rel="noopener">prusnak</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6620,12 +6760,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/sj-fisher" target="_blank" rel="noopener">sj-fisher</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6643,12 +6785,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/slekrem" target="_blank" rel="noopener">slekrem</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6666,12 +6810,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/sotach1" target="_blank" rel="noopener">sotach1</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6699,12 +6845,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vincentpalma" target="_blank" rel="noopener">vincentpalma</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6722,12 +6870,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vincenzopalazzo" target="_blank" rel="noopener">vincenzopalazzo</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6765,12 +6915,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vnprc" target="_blank" rel="noopener">vnprc</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6798,12 +6950,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/zeugmaster" target="_blank" rel="noopener">zeugmaster</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -6851,6 +7005,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -7425,6 +7580,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/thesimplekid" target="_blank" rel="noopener">thesimplekid</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -7640,12 +7796,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/orangeshyguy21" target="_blank" rel="noopener">orangeshyguy21</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -7663,12 +7821,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/robwoodgate" target="_blank" rel="noopener">robwoodgate</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -7776,12 +7936,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mmalmi" target="_blank" rel="noopener">mmalmi</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -7819,12 +7981,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/asmogo" target="_blank" rel="noopener">asmogo</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -7916,12 +8080,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/github-actions" target="_blank" rel="noopener">github-actions</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -7939,12 +8105,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/6D-pixel" target="_blank" rel="noopener">6D-pixel</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -7962,12 +8130,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/MrishoLukamba" target="_blank" rel="noopener">MrishoLukamba</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -8009,12 +8179,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/cdk-bot" target="_blank" rel="noopener">cdk-bot</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8032,12 +8204,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/ye0man" target="_blank" rel="noopener">ye0man</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8055,12 +8229,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Amperstrand" target="_blank" rel="noopener">Amperstrand</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8078,12 +8254,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Egge21M" target="_blank" rel="noopener">Egge21M</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8101,12 +8279,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/TheMhv" target="_blank" rel="noopener">TheMhv</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -8176,12 +8356,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/a1denvalu3" target="_blank" rel="noopener">a1denvalu3</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8209,12 +8391,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/comwanga" target="_blank" rel="noopener">comwanga</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8232,12 +8416,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/crodas" target="_blank" rel="noopener">crodas</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -8578,12 +8764,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/d4rp4t" target="_blank" rel="noopener">d4rp4t</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8601,12 +8789,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/j-kon" target="_blank" rel="noopener">j-kon</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8654,12 +8844,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/kaloudis" target="_blank" rel="noopener">kaloudis</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8677,12 +8869,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vincenzopalazzo" target="_blank" rel="noopener">vincenzopalazzo</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8710,12 +8904,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vnprc" target="_blank" rel="noopener">vnprc</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -8733,6 +8929,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -9003,6 +9200,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/Egge21M" target="_blank" rel="noopener">Egge21M</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -9222,12 +9420,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/bitsjack" target="_blank" rel="noopener">bitsjack</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -9245,12 +9445,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/igbopharaoh" target="_blank" rel="noopener">igbopharaoh</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -9348,12 +9550,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Kelbie" target="_blank" rel="noopener">Kelbie</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -9395,12 +9599,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/KvngMikey" target="_blank" rel="noopener">KvngMikey</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -9417,12 +9623,14 @@
         </ul>
         
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/felixfelix-bot" target="_blank" rel="noopener">felixfelix-bot</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -9464,6 +9672,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -9938,6 +10147,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/robwoodgate" target="_blank" rel="noopener">robwoodgate</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10065,12 +10275,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/dependabot" target="_blank" rel="noopener">dependabot</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10088,12 +10300,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/crodas" target="_blank" rel="noopener">crodas</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10111,12 +10325,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/joemphilips" target="_blank" rel="noopener">joemphilips</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10134,6 +10350,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -10233,6 +10450,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/agammann" target="_blank" rel="noopener">agammann</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10250,12 +10468,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Codepocketdev" target="_blank" rel="noopener">Codepocketdev</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10303,12 +10523,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/DSanich" target="_blank" rel="noopener">DSanich</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10326,12 +10548,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Datawav" target="_blank" rel="noopener">Datawav</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10349,12 +10573,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Slender2097" target="_blank" rel="noopener">Slender2097</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10372,12 +10598,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/YofiY" target="_blank" rel="noopener">YofiY</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10395,12 +10623,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/a1denvalu3" target="_blank" rel="noopener">a1denvalu3</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10438,12 +10668,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/asmogo" target="_blank" rel="noopener">asmogo</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10461,12 +10693,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/beambuilder" target="_blank" rel="noopener">beambuilder</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10484,12 +10718,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/btcjt" target="_blank" rel="noopener">btcjt</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10507,12 +10743,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/callebtc" target="_blank" rel="noopener">callebtc</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10710,12 +10948,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/cjbeery24" target="_blank" rel="noopener">cjbeery24</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10733,12 +10973,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/crodas" target="_blank" rel="noopener">crodas</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10756,12 +10998,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/findingsov" target="_blank" rel="noopener">findingsov</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10779,12 +11023,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mariaa144" target="_blank" rel="noopener">mariaa144</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10802,12 +11048,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mjkeaton" target="_blank" rel="noopener">mjkeaton</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10825,12 +11073,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/mvuk" target="_blank" rel="noopener">mvuk</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10848,12 +11098,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/prusnak" target="_blank" rel="noopener">prusnak</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10871,12 +11123,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/robwoodgate" target="_blank" rel="noopener">robwoodgate</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10894,12 +11148,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/swedishfrenchpress" target="_blank" rel="noopener">swedishfrenchpress</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10917,12 +11173,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/ye0man" target="_blank" rel="noopener">ye0man</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10940,12 +11198,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/zeugmaster" target="_blank" rel="noopener">zeugmaster</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -10963,6 +11223,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -11097,6 +11358,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/SatsAndSports" target="_blank" rel="noopener">SatsAndSports</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11124,12 +11386,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/d4rp4t" target="_blank" rel="noopener">d4rp4t</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11147,12 +11411,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Egge21M" target="_blank" rel="noopener">Egge21M</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11180,12 +11446,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Forte11Cuba" target="_blank" rel="noopener">Forte11Cuba</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11203,12 +11471,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Hardeezah" target="_blank" rel="noopener">Hardeezah</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11226,12 +11496,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Kelbie" target="_blank" rel="noopener">Kelbie</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11249,12 +11521,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/KvngMikey" target="_blank" rel="noopener">KvngMikey</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11282,12 +11556,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/TheMhv" target="_blank" rel="noopener">TheMhv</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11305,12 +11581,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/a1denvalu3" target="_blank" rel="noopener">a1denvalu3</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11348,12 +11626,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/callebtc" target="_blank" rel="noopener">callebtc</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11371,12 +11651,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/crodas" target="_blank" rel="noopener">crodas</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11404,12 +11686,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/gudnuf" target="_blank" rel="noopener">gudnuf</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -11441,12 +11725,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/joemphilips" target="_blank" rel="noopener">joemphilips</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11494,12 +11780,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/minibits-cash" target="_blank" rel="noopener">minibits-cash</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11517,12 +11805,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/prusnak" target="_blank" rel="noopener">prusnak</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11540,12 +11830,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/robwoodgate" target="_blank" rel="noopener">robwoodgate</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11673,12 +11965,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/sotach1" target="_blank" rel="noopener">sotach1</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11696,12 +11990,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/thesimplekid" target="_blank" rel="noopener">thesimplekid</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -11753,12 +12049,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vincentpalma" target="_blank" rel="noopener">vincentpalma</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11776,12 +12074,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vnprc" target="_blank" rel="noopener">vnprc</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11799,12 +12099,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/ye0man" target="_blank" rel="noopener">ye0man</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11832,12 +12134,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/zeugmaster" target="_blank" rel="noopener">zeugmaster</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -11855,6 +12159,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -12242,6 +12547,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/a1denvalu3" target="_blank" rel="noopener">a1denvalu3</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -12423,12 +12729,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/KvngMikey" target="_blank" rel="noopener">KvngMikey</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -12489,12 +12797,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/ye0man" target="_blank" rel="noopener">ye0man</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -12526,12 +12836,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/callebtc" target="_blank" rel="noopener">callebtc</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -12808,12 +13120,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/robwoodgate" target="_blank" rel="noopener">robwoodgate</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -12911,12 +13225,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/wavebyrd" target="_blank" rel="noopener">wavebyrd</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -12934,12 +13250,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/SatsAndSports" target="_blank" rel="noopener">SatsAndSports</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -12957,12 +13275,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/18c83fd3-25ea-4ed9-8205-2abeff9b3883" target="_blank" rel="noopener">18c83fd3-25ea-4ed9-8205-2abeff9b3883</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -12980,12 +13300,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/DhananjayPurohit" target="_blank" rel="noopener">DhananjayPurohit</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13003,12 +13325,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Egge21M" target="_blank" rel="noopener">Egge21M</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13026,12 +13350,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Forte11Cuba" target="_blank" rel="noopener">Forte11Cuba</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13049,12 +13375,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/aaronmcdaid" target="_blank" rel="noopener">aaronmcdaid</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13082,12 +13410,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/aekasitt" target="_blank" rel="noopener">aekasitt</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13105,12 +13435,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/asmogo" target="_blank" rel="noopener">asmogo</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13128,12 +13460,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/b-l-u-e" target="_blank" rel="noopener">b-l-u-e</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -13215,12 +13549,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/christoph865" target="_blank" rel="noopener">christoph865</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13238,12 +13574,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/cjoshreid" target="_blank" rel="noopener">cjoshreid</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13261,12 +13599,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/edgarmuyomba" target="_blank" rel="noopener">edgarmuyomba</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13284,12 +13624,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/gorrdy" target="_blank" rel="noopener">gorrdy</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13307,12 +13649,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/gudnuf" target="_blank" rel="noopener">gudnuf</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13330,12 +13674,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/jooray" target="_blank" rel="noopener">jooray</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13353,12 +13699,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/jurraca" target="_blank" rel="noopener">jurraca</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13376,12 +13724,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/pruks-dev" target="_blank" rel="noopener">pruks-dev</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13399,12 +13749,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/sj-fisher" target="_blank" rel="noopener">sj-fisher</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13422,12 +13774,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/slekrem" target="_blank" rel="noopener">slekrem</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13445,12 +13799,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/sotach1" target="_blank" rel="noopener">sotach1</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13468,6 +13824,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -13821,6 +14178,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/a1denvalu3" target="_blank" rel="noopener">a1denvalu3</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -13846,12 +14204,14 @@
         </ul>
         
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/swedishfrenchpress" target="_blank" rel="noopener">swedishfrenchpress</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -13893,12 +14253,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/zeugmaster" target="_blank" rel="noopener">zeugmaster</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -13916,6 +14278,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -14439,6 +14802,7 @@
         <div class="card-head">
           <a class="person" href="https://github.com/asmogo" target="_blank" rel="noopener">asmogo</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -14496,12 +14860,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/swedishfrenchpress" target="_blank" rel="noopener">swedishfrenchpress</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -14539,12 +14905,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/Kelbie" target="_blank" rel="noopener">Kelbie</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -14562,12 +14930,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/KvngMikey" target="_blank" rel="noopener">KvngMikey</a>
         </div>
+        <div class="person-scroll">
         
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
@@ -14584,12 +14954,14 @@
         </ul>
         
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/vincenzopalazzo" target="_blank" rel="noopener">vincenzopalazzo</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -14607,12 +14979,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/ye0man" target="_blank" rel="noopener">ye0man</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -14630,12 +15004,14 @@
           
         </ul>
         
+        </div>
       </div>
       
       <div class="card person-card">
         <div class="card-head">
           <a class="person" href="https://github.com/zeugmaster" target="_blank" rel="noopener">zeugmaster</a>
         </div>
+        <div class="person-scroll">
         
         
         <h5 class="group-label">Assigned / Authored PRs</h5>
@@ -14653,6 +15029,7 @@
           
         </ul>
         
+        </div>
       </div>
       
     </div>
@@ -15000,12 +15377,6 @@
     <div class="card">
       
       <ul class="mint-list">
-        
-        <li>Mint fredix: status: offline → online; version: 0.17.5 → 0.18.2</li>
-        
-        <li>Mountainlake M7: version: 0.18.1 → 0.18.2</li>
-        
-        <li>Nuts: status: offline → online</li>
         
         <li>Agorist Cashu Mint: status: online → offline</li>
         
