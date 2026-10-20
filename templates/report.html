@@ -22,6 +22,8 @@
       --secondary: #c0d8e9;
       --success: #16a34a;
       --destructive: #b71b10;
+      --info: #2f6f9f;
+      --new: #8f6400;
       --glass-border: #ffffff80;
       --glass-border-strong: #ffffffb3;
       --glass-shadow: inset 0 1px 0 0 #ffffff8c, 0 8px 24px -12px #1e407847;
@@ -33,6 +35,7 @@
       --font-mono: "Azeret Mono", ui-monospace, "SF Mono", Menlo, monospace;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -163,6 +166,50 @@
     }
     .pill-count { font-size: .66rem; opacity: .75; }
 
+    /* Contributor ribbon */
+    .ribbon + .ribbon { margin-top: .5rem; }
+    .ribbon-scroll { position: relative; margin-top: .5rem; }
+    .ribbon-scroll::after {
+      content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 2.75rem;
+      background: linear-gradient(90deg, rgba(224, 237, 248, 0), rgba(224, 237, 248, .92));
+      pointer-events: none; border-radius: 999px;
+    }
+    .ribbon-contributors {
+      margin-top: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent; padding: .55rem .7rem;
+    }
+    .ribbon-contributors::-webkit-scrollbar { height: 6px; }
+    .ribbon-contributors::-webkit-scrollbar-track { background: transparent; }
+    .ribbon-contributors::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    .ribbon-contributors::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+    .ribbon-contributors .pill { flex: 0 0 auto; text-transform: none; }
+    .ribbon-label {
+      flex: 0 0 auto; align-self: center; padding: 0 .55rem 0 .35rem;
+      font-family: var(--font-mono); font-size: .64rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted-foreground); white-space: nowrap;
+    }
+
+    /* Daily activity chart */
+    .chart-card { margin-bottom: 1rem; }
+    .chart-body { padding: .35rem 1rem .85rem; }
+    .chart-body svg { display: block; width: 100%; height: auto; }
+    .chart-legend {
+      display: flex; flex-wrap: wrap; gap: .9rem;
+      font-family: var(--font-mono); font-size: .66rem; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted-foreground);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: .4rem; }
+    .legend-swatch { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; }
+    .chart-axis { font-family: var(--font-mono); font-size: 10px; fill: var(--muted-foreground); }
+    .chart-total { font-family: var(--font-mono); font-size: 10px; fill: var(--foreground); }
+    .chart-total.is-zero { fill: var(--muted-foreground); }
+    .chart-grid { stroke: rgba(164, 187, 204, .45); stroke-width: 1; }
+    .series-issues { fill: var(--primary); background: var(--primary); }
+    .series-opened { fill: var(--info); background: var(--info); }
+    .series-merged { fill: var(--success); background: var(--success); }
+    .chart-zero { stroke-width: 2; stroke-linecap: round; }
+    .chart-hit { fill: transparent; }
+
     /* Activity lists */
     .list-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
@@ -188,6 +235,14 @@
     }
     .item-link { font-weight: 500; color: var(--foreground); }
     .item-link:hover { color: var(--primary); text-decoration: underline; }
+    .item-link.is-new { color: var(--new); }
+    .item-link.is-new:hover { color: var(--new); text-decoration: underline; }
+    .freshness-note {
+      font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted-foreground);
+      margin: -1.6rem 0 2.5rem;
+    }
+    .freshness-key { color: var(--new); font-weight: 500; }
     .item-meta {
       margin-left: auto; display: flex; align-items: center; gap: .55rem; flex-wrap: wrap;
       font-family: var(--font-mono); font-size: .72rem; color: var(--muted-foreground); white-space: nowrap;
@@ -296,12 +351,12 @@
 <main class="container">
 
   {% macro item_row(item, show_repo, is_release=false) %}
-  <li class="item">
+  <li class="item" data-author="{{ item.author_login or '' }}">
     {% if is_release %}
-    <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.tag_name }}{% if item.name %} — {{ item.name }}{% endif %}</a>
+    <a class="item-link{% if item.is_new %} is-new{% endif %}" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.tag_name }}{% if item.name %} — {{ item.name }}{% endif %}</a>
     {% else %}
     <span class="item-num">#{{ item.number }}</span>
-    <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+    <a class="item-link{% if item.is_new %} is-new{% endif %}" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
     {% endif %}
     <span class="item-meta">
       {% if not is_release and item.author_login %}<a href="https://github.com/{{ item.author_login }}" target="_blank" rel="noopener">@{{ item.author_login }}</a>{% endif %}
@@ -313,10 +368,10 @@
 
   {% macro activity_card(title, items, show_repo, is_release=false) %}
     {% if items %}
-    <div class="card list-card">
+    <div class="card list-card" data-series="{{ title|lower|replace(' ', '-') }}">
       <div class="card-head">
         <h4>{{ title }}</h4>
-        <span class="badge">{{ items|length }}</span>
+        <span class="badge" data-count>{{ items|length }}</span>
       </div>
       <ul class="item-list">
         {% for item in items %}{{ item_row(item, show_repo, is_release) }}{% endfor %}
@@ -344,7 +399,7 @@
         </thead>
         <tbody>
           {% for c in active %}
-          <tr>
+          <tr data-contributor="{{ c.login }}">
             <td><a href="https://github.com/{{ c.login }}" target="_blank" rel="noopener">{{ c.login }}</a></td>
             <td class="num">{{ c.commits }}</td>
             <td class="num">{{ c.additions }}</td>
@@ -368,7 +423,7 @@
     {% if people %}
     <div class="assigned-grid">
       {% for c in people %}
-      <div class="card person-card">
+      <div class="card person-card" data-contributor="{{ c.login }}">
         <div class="card-head">
           <a class="person" href="https://github.com/{{ c.login }}" target="_blank" rel="noopener">{{ c.login }}</a>
         </div>
@@ -377,7 +432,7 @@
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
           {% for item in c.assigned_issues %}
-          <li>
+          <li data-author="{{ item.author_login or '' }}">
             <span class="item-num">#{{ item.number }}</span>
             <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
             <span class="item-meta">
@@ -392,7 +447,7 @@
         <h5 class="group-label">Assigned / Authored PRs</h5>
         <ul class="mini-list">
           {% for item in c.assigned_prs %}
-          <li>
+          <li data-author="{{ item.author_login or '' }}">
             <span class="item-num">#{{ item.number }}</span>
             <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
             <span class="item-meta">
@@ -423,8 +478,9 @@
       {{ activity_card('Releases', lists.releases, show_repo, true) }}
     </div>
     {% if not (lists.new_issues or lists.opened_prs or lists.merged_prs or lists.closed_issues or lists.releases) %}
-    <p class="empty">No notable activity in the last 7 days.</p>
+    <p class="empty" data-static-empty>No notable activity in the last 7 days.</p>
     {% endif %}
+    <p class="empty" data-filter-empty hidden>No activity for the selected contributor in the last 7 days.</p>
 
     <h3 class="type-subhead">Contributors</h3>
     {{ contributor_table(contributors) }}
@@ -444,6 +500,9 @@
       <strong>{{ report_date.strftime('%Y-%m-%d') }}</strong> — across
       <strong>{{ repos|length }}</strong> Cashu repositories.
     </p>
+    {% if momentum.summary.new_items %}
+    <p class="freshness-note">Titles in <span class="freshness-key">gold</span> are new since yesterday's report.</p>
+    {% endif %}
 
     <div class="metric-grid">
       <div class="card metric">
@@ -492,7 +551,37 @@
         </button>
         {% endfor %}
       </div>
+      <div class="ribbon-scroll">
+      <div class="ribbon ribbon-contributors" role="tablist" aria-label="Filter momentum by contributor">
+        <span class="ribbon-label">Contributor</span>
+        <button type="button" class="pill is-active" data-contributor="all" role="tab" aria-selected="true">
+          All
+          <span class="pill-count">{{ momentum.by_contributor|length }}</span>
+        </button>
+        {% for c in momentum.by_contributor %}
+        <button type="button" class="pill" data-contributor="{{ c.login }}" role="tab" aria-selected="false">
+          {{ c.login }}
+          <span class="pill-count">{{ c.commits + c.issues_opened + c.prs_opened + c.prs_merged }}</span>
+        </button>
+        {% endfor %}
+      </div>
+      </div>
     </div>
+
+    <div class="card chart-card">
+      <div class="card-head">
+        <h4>Daily Activity</h4>
+        <div class="chart-legend">
+          <span class="legend-item"><i class="legend-swatch series-issues"></i>Issues</span>
+          <span class="legend-item"><i class="legend-swatch series-opened"></i>PRs opened</span>
+          <span class="legend-item"><i class="legend-swatch series-merged"></i>PRs merged</span>
+        </div>
+      </div>
+      <div class="chart-body" data-chart role="img"
+           aria-label="Daily count of new issues, opened pull requests and merged pull requests over the last seven days">
+      </div>
+    </div>
+    <p class="small-note" data-chart-empty hidden>No activity for this filter.</p>
 
     {{ momentum_panel('all', momentum.combined, momentum.by_contributor, true) }}
     {% for repo in repos %}
@@ -632,23 +721,170 @@
 </footer>
 
 <script>
+  window.WAR_ROOM_CHART = {{ momentum.chart | tojson }};
+</script>
+<script>
   (function () {
-    var pills = Array.prototype.slice.call(document.querySelectorAll('.pill[data-repo]'));
-    var panels = Array.prototype.slice.call(document.querySelectorAll('.momentum-panel'));
+    var state = { repo: 'all', login: 'all' };
+    var weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var seriesClass = ['series-issues', 'series-opened', 'series-merged'];
+    var seriesName = ['new issues', 'PRs opened', 'PRs merged'];
 
-    pills.forEach(function (pill) {
-      pill.addEventListener('click', function () {
-        var repo = pill.getAttribute('data-repo');
-        pills.forEach(function (p) {
-          var active = p === pill;
-          p.classList.toggle('is-active', active);
-          p.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
-        panels.forEach(function (panel) {
-          panel.hidden = panel.getAttribute('data-repo') !== repo;
+    function bindPills(selector, attr, key) {
+      var pills = Array.prototype.slice.call(document.querySelectorAll(selector));
+      pills.forEach(function (pill) {
+        pill.addEventListener('click', function () {
+          var value = pill.getAttribute(attr) || 'all';
+          pills.forEach(function (p) {
+            var active = p === pill;
+            p.classList.toggle('is-active', active);
+            p.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+          state[key] = value;
+          applyFilters();
         });
       });
-    });
+    }
+
+    function applyFilters() {
+      var panel = null;
+      Array.prototype.slice.call(document.querySelectorAll('.momentum-panel')).forEach(function (p) {
+        var match = p.getAttribute('data-repo') === state.repo;
+        p.hidden = !match;
+        if (match) panel = p;
+      });
+      if (!panel) return;
+
+      Array.prototype.slice.call(panel.querySelectorAll('li[data-author]')).forEach(function (li) {
+        var author = li.getAttribute('data-author') || '';
+        li.hidden = state.login !== 'all' && author !== state.login;
+      });
+
+      Array.prototype.slice.call(panel.querySelectorAll('.list-card')).forEach(function (card) {
+        var visible = card.querySelectorAll('li.item:not([hidden])').length;
+        var badge = card.querySelector('[data-count]');
+        if (badge) badge.textContent = visible;
+        card.hidden = visible === 0;
+      });
+
+      Array.prototype.slice.call(panel.querySelectorAll('tr[data-contributor]')).forEach(function (tr) {
+        tr.hidden = state.login !== 'all' && tr.getAttribute('data-contributor') !== state.login;
+      });
+
+      Array.prototype.slice.call(panel.querySelectorAll('.table-card')).forEach(function (card) {
+        card.hidden = card.querySelectorAll('tbody tr:not([hidden])').length === 0;
+      });
+
+      Array.prototype.slice.call(panel.querySelectorAll('.person-card')).forEach(function (card) {
+        card.hidden = state.login !== 'all' && card.getAttribute('data-contributor') !== state.login;
+      });
+
+      Array.prototype.slice.call(panel.querySelectorAll('.assigned-grid')).forEach(function (grid) {
+        grid.hidden = grid.querySelectorAll('.person-card:not([hidden])').length === 0;
+      });
+
+      var visibleCards = panel.querySelectorAll('.list-card:not([hidden])').length
+        + panel.querySelectorAll('.table-card:not([hidden])').length
+        + panel.querySelectorAll('.person-card:not([hidden])').length;
+      var staticEmpty = panel.querySelector('[data-static-empty]');
+      var filterEmpty = panel.querySelector('[data-filter-empty]');
+      if (filterEmpty) {
+        filterEmpty.hidden = !(state.login !== 'all' && visibleCards === 0 && !(staticEmpty && !staticEmpty.hidden));
+      }
+
+      renderChart();
+    }
+
+    function renderChart() {
+      var host = document.querySelector('[data-chart]');
+      var emptyNote = document.querySelector('[data-chart-empty]');
+      if (!host) return;
+
+      var data = window.WAR_ROOM_CHART || { days: [], rows: [] };
+      var days = data.days || [];
+      var totals = days.map(function () { return [0, 0, 0]; });
+
+      (data.rows || []).forEach(function (row) {
+        if (state.repo !== 'all' && row[0] !== state.repo) return;
+        if (state.login !== 'all' && row[1] !== state.login) return;
+        for (var s = 0; s < 3; s++) {
+          var slot = row[2 + s] || [];
+          for (var d = 0; d < days.length; d++) totals[d][s] += slot[d] || 0;
+        }
+      });
+
+      var sums = totals.map(function (t) { return t[0] + t[1] + t[2]; });
+      var peak = Math.max.apply(null, sums.concat([1]));
+      var step = Math.max(1, Math.ceil(peak / 4));
+      var yMax = step * Math.ceil(peak / step);
+
+      var W = 760, H = 220;
+      var padL = 34, padR = 10, padT = 24, padB = 30;
+      var plotW = W - padL - padR;
+      var plotH = H - padT - padB;
+      var baseY = padT + plotH;
+      var groupW = plotW / Math.max(days.length, 1);
+      var barW = Math.min(14, groupW * 0.16);
+      var gap = 4;
+
+      var parts = [];
+      parts.push('<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">');
+
+      for (var t = 0; t <= yMax; t += step) {
+        var gy = baseY - (t / yMax) * plotH;
+        parts.push('<line class="chart-grid" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + gy.toFixed(1) + '" y2="' + gy.toFixed(1) + '"/>');
+        parts.push('<text class="chart-axis" x="' + (padL - 8) + '" y="' + (gy + 3.5).toFixed(1) + '" text-anchor="end">' + t + '</text>');
+      }
+
+      days.forEach(function (day, d) {
+        var center = padL + groupW * (d + 0.5);
+        var groupW3 = barW * 3 + gap * 2;
+        var startX = center - groupW3 / 2;
+        var dayTotal = sums[d];
+        var topY = baseY;
+
+        for (var s = 0; s < 3; s++) {
+          var value = totals[d][s];
+          var x = startX + s * (barW + gap);
+          if (value > 0) {
+            var h = (value / yMax) * plotH;
+            var y = baseY - h;
+            if (y < topY) topY = y;
+            parts.push('<rect class="' + seriesClass[s] + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) +
+              '" width="' + barW.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2"><title>' + day + ' · ' +
+              seriesName[s] + ': ' + value + '</title></rect>');
+          } else {
+            parts.push('<line class="' + seriesClass[s] + ' chart-zero" x1="' + x.toFixed(1) + '" x2="' + (x + barW).toFixed(1) +
+              '" y1="' + (baseY - 1).toFixed(1) + '" y2="' + (baseY - 1).toFixed(1) + '"><title>' + day + ' · ' +
+              seriesName[s] + ': 0</title></line>');
+          }
+        }
+
+        var labelY = dayTotal > 0 ? Math.max(padT + 9, topY - 7) : baseY - 9;
+        parts.push('<text class="chart-total' + (dayTotal === 0 ? ' is-zero' : '') + '" x="' + center.toFixed(1) + '" y="' +
+          labelY.toFixed(1) + '" text-anchor="middle">' + dayTotal + '</text>');
+
+        var dt = new Date(day + 'T00:00:00Z');
+        var dayLabel = weekday[dt.getUTCDay()] + ' ' + dt.getUTCDate();
+        parts.push('<text class="chart-axis" x="' + center.toFixed(1) + '" y="' + (H - 10) + '" text-anchor="middle">' + dayLabel + '</text>');
+        parts.push('<rect class="chart-hit" x="' + (padL + groupW * d).toFixed(1) + '" y="' + padT + '" width="' +
+          groupW.toFixed(1) + '" height="' + plotH + '"><title>' + day + ' · ' + dayTotal + ' events</title></rect>');
+      });
+
+      parts.push('</svg>');
+      host.innerHTML = parts.join('');
+
+      var grand = sums.reduce(function (a, b) { return a + b; }, 0);
+      if (emptyNote) emptyNote.hidden = grand !== 0;
+      host.setAttribute('aria-label', 'Daily activity: ' + totals.reduce(function (a, t) { return a + t[0]; }, 0) +
+        ' new issues, ' + totals.reduce(function (a, t) { return a + t[1]; }, 0) +
+        ' pull requests opened, ' + totals.reduce(function (a, t) { return a + t[2]; }, 0) +
+        ' pull requests merged.');
+    }
+
+    bindPills('.pill[data-repo]', 'data-repo', 'repo');
+    bindPills('.pill[data-contributor]', 'data-contributor', 'login');
+    applyFilters();
 
     Array.prototype.slice.call(document.querySelectorAll('table[data-sortable]')).forEach(function (table) {
       var headers = Array.prototype.slice.call(table.querySelectorAll('th'));

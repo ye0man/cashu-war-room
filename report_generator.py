@@ -82,19 +82,64 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+REPO_DISPLAY = {r.full_name: r.display for r in REPOS}
+
+
 def _repo_short(repo: Any) -> str:
+    if isinstance(repo, str) and repo in REPO_DISPLAY:
+        return REPO_DISPLAY[repo]
     return repo.split("/", 1)[1] if isinstance(repo, str) and "/" in repo else (repo or "")
 
 
-def _window_records(df: pd.DataFrame, date_col: str) -> list[dict[str, Any]]:
+def _window_records(
+    df: pd.DataFrame, date_col: str, new_cutoff: pd.Timestamp | None = None
+) -> list[dict[str, Any]]:
     """Records sorted newest-first, with display helpers attached."""
     if df.empty:
         return []
     ordered = df.sort_values(date_col, ascending=False).copy()
     dates = pd.to_datetime(ordered[date_col], utc=True, errors="coerce")
     ordered["date_str"] = dates.dt.strftime("%Y-%m-%d")
+    ordered["is_new"] = dates.ge(new_cutoff).fillna(False) if new_cutoff is not None else False
     ordered["repo_short"] = ordered["repo"].map(_repo_short) if "repo" in ordered.columns else ""
     return ordered.to_dict("records")
+
+
+def _daily_chart(
+    days: list[str],
+    new_issues: pd.DataFrame,
+    opened_prs: pd.DataFrame,
+    merged_prs: pd.DataFrame,
+) -> dict[str, Any]:
+    """Dense per-repo/per-contributor daily counts for the three chart series.
+
+    Every row carries one 7-slot array per series, so days with no activity are
+    explicit zeros rather than missing data.
+    """
+    day_index = {day: i for i, day in enumerate(days)}
+    series: dict[tuple[str, str], list[list[int]]] = defaultdict(lambda: [[0] * len(days) for _ in range(3)])
+
+    def _add(frame: pd.DataFrame, date_col: str, slot: int) -> None:
+        if frame.empty:
+            return
+        dates = pd.to_datetime(frame[date_col], utc=True, errors="coerce")
+        for repo, login, day in zip(frame["repo"], frame["author_login"], dates.dt.strftime("%Y-%m-%d")):
+            idx = day_index.get(day)
+            if idx is None:
+                continue
+            key = (repo, _login_of(login) or "unknown")
+            series[key][slot][idx] += 1
+
+    _add(new_issues, "created_at", 0)
+    _add(opened_prs, "created_at", 1)
+    _add(merged_prs, "merged_at", 2)
+
+    rows = [
+        [repo, login, *counts]
+        for (repo, login), counts in sorted(series.items(), key=lambda kv: (kv[0][0], kv[0][1]))
+        if any(any(slot) for slot in counts)
+    ]
+    return {"days": days, "rows": rows}
 
 
 def _blank_contributor() -> dict[str, Any]:
@@ -148,17 +193,19 @@ def _assigned_item(row: Any, relation: str | None = None) -> dict[str, Any]:
 def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str, Any]:
     end = pd.Timestamp(end).tz_convert("UTC")
     start = end - timedelta(days=7)
+    new_cutoff = end - timedelta(days=1)
+    chart_days = [(end - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7, 0, -1)]
 
     issues = frames.get("issues", pd.DataFrame())
     prs = frames.get("pull_requests", pd.DataFrame())
     releases = frames.get("releases", pd.DataFrame())
     commits = frames.get("commits", pd.DataFrame())
 
-    new_issues = issues[(issues["created_at"] >= start) & (issues["created_at"] <= end)] if not issues.empty else issues
-    opened_prs = prs[(prs["created_at"] >= start) & (prs["created_at"] <= end)] if not prs.empty else prs
-    merged_prs = prs[(prs["merged_at"] >= start) & (prs["merged_at"] <= end)] if not prs.empty else prs
-    closed_issues = issues[(issues["closed_at"] >= start) & (issues["closed_at"] <= end)] if not issues.empty else issues
-    new_releases = releases[(releases["published_at"] >= start) & (releases["published_at"] <= end)] if not releases.empty else releases
+    new_issues = issues[(issues["created_at"] >= start) & (issues["created_at"] < end)] if not issues.empty else issues
+    opened_prs = prs[(prs["created_at"] >= start) & (prs["created_at"] < end)] if not prs.empty else prs
+    merged_prs = prs[(prs["merged_at"] >= start) & (prs["merged_at"] < end)] if not prs.empty else prs
+    closed_issues = issues[(issues["closed_at"] >= start) & (issues["closed_at"] < end)] if not issues.empty else issues
+    new_releases = releases[(releases["published_at"] >= start) & (releases["published_at"] < end)] if not releases.empty else releases
 
     # Contributor rows scoped globally and per repo.
     global_rows: dict[str, dict[str, Any]] = defaultdict(_blank_contributor)
@@ -171,7 +218,7 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             repo_rows[repo][user][field] += amount
 
     if not commits.empty:
-        recent_commits = commits[(commits["committed_at"] >= start) & (commits["committed_at"] <= end)]
+        recent_commits = commits[(commits["committed_at"] >= start) & (commits["committed_at"] < end)]
         for _, row in recent_commits.iterrows():
             user = _login_of(row.get("author_login")) or "unknown"
             repo = row.get("repo")
@@ -236,16 +283,23 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             (new_releases, "published_at", "releases"),
         ):
             subset = col_frame[col_frame["repo"] == repo] if not col_frame.empty else col_frame
-            scoped[name] = _window_records(subset, sort_col)
+            scoped[name] = _window_records(subset, sort_col, new_cutoff)
         scoped["contributors"] = _finish_contributors(repo_rows.get(repo, {}))
         by_repo[repo] = scoped
 
     combined = {
-        "new_issues": _window_records(new_issues, "created_at"),
-        "opened_prs": _window_records(opened_prs, "created_at"),
-        "merged_prs": _window_records(merged_prs, "merged_at"),
-        "closed_issues": _window_records(closed_issues, "closed_at"),
-        "releases": _window_records(new_releases, "published_at"),
+        "new_issues": _window_records(new_issues, "created_at", new_cutoff),
+        "opened_prs": _window_records(opened_prs, "created_at", new_cutoff),
+        "merged_prs": _window_records(merged_prs, "merged_at", new_cutoff),
+        "closed_issues": _window_records(closed_issues, "closed_at", new_cutoff),
+        "releases": _window_records(new_releases, "published_at", new_cutoff),
+    }
+
+    new_item_urls = {
+        item.get("url")
+        for items in combined.values()
+        for item in items
+        if item.get("is_new")
     }
 
     by_contributor = _finish_contributors(global_rows)
@@ -256,6 +310,7 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
         "by_repo": by_repo,
         "combined": combined,
         "by_contributor": by_contributor,
+        "chart": _daily_chart(chart_days, new_issues, opened_prs, merged_prs),
         "summary": {
             "new_issues": len(new_issues),
             "opened_prs": len(opened_prs),
@@ -263,6 +318,7 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             "closed_issues": len(closed_issues),
             "releases": len(new_releases),
             "active_contributors": len([c for c in by_contributor if c["commits"] or c["issues_opened"] or c["prs_opened"]]),
+            "new_items": len(new_item_urls),
         },
     }
 

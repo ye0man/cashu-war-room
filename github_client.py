@@ -35,6 +35,13 @@ class GitHubClient:
         if variables:
             payload["variables"] = variables
         resp = self.session.post(GITHUB_GRAPHQL_URL, json=payload)
+        for attempt in range(3):
+            if resp.status_code not in {502, 503, 504}:
+                break
+            wait = 2 ** attempt
+            logger.warning("GitHub GraphQL returned %d; retrying in %ds", resp.status_code, wait)
+            time.sleep(wait)
+            resp = self.session.post(GITHUB_GRAPHQL_URL, json=payload)
         if resp.status_code == 401:
             raise PermissionError("GitHub GraphQL request unauthorized. Check GH_TOKEN.")
         if resp.status_code == 403:

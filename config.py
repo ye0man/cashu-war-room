@@ -27,6 +27,14 @@ REPOS = [
     Repo("cashubtc", "nutshell", "nutshell"),
     Repo("cashubtc", "Numo", "numo"),
     Repo("cashubtc", "wallet", "wallet"),
+    Repo("SovranBitcoin", "Sovran", "sovran"),
+    Repo("zeugmaster", "CashuSwift", "cashu-swift"),
+    Repo("zeugmaster", "macadamia", "macadamia"),
+    Repo("zeugmaster", "pecan", "pecan"),
+    Repo("cashubtc", "orchard", "orchard"),
+    Repo("cashubtc", "cdk-payment-processors", "cdk-payment-processors"),
+    Repo("cashubtc", "docs.cashu.space", "docs"),
+    Repo("cashubtc", "cashu-skill", "cashu-skill"),
 ]
 
 REPO_NAMES = [r.full_name for r in REPOS]
