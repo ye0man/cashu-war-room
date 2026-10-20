@@ -42,6 +42,7 @@ REPO_NAMES = [r.full_name for r in REPOS]
 MINT_DIRECTORY_URL = "https://ye0man.github.io/cashu-mint-directory/mints.json"
 
 LOOKBACK_DAYS = 7
+REPORT_RETENTION_DAYS = 30
 
 ROOT_DIR = Path(__file__).resolve().parent
 DATA_DIR = ROOT_DIR / "data"

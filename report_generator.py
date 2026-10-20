@@ -12,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from config import (
     REPORT_DIR,
+    REPORT_RETENTION_DAYS,
     REPOS,
     TEMPLATE_DIR,
     today,
@@ -490,6 +491,21 @@ def save_report(html: str, date: datetime | None = None) -> Path:
     dated.write_text(html, encoding="utf-8")
     latest.write_text(html, encoding="utf-8")
     return dated
+
+
+def prune_reports(report_date: datetime, retention_days: int = REPORT_RETENTION_DAYS) -> list[Path]:
+    """Delete dated reports older than `retention_days`; index.html is kept."""
+    cutoff = (report_date - timedelta(days=retention_days)).date()
+    removed: list[Path] = []
+    for path in REPORT_DIR.glob("cashu-war-room-*.html"):
+        try:
+            file_date = datetime.strptime(path.stem.removeprefix("cashu-war-room-"), "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if file_date < cutoff:
+            path.unlink()
+            removed.append(path)
+    return removed
 
 
 def default_start_date(end: datetime) -> datetime:

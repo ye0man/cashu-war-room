@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 from config import (
     MINT_SNAPSHOT_DIR,
+    REPORT_RETENTION_DAYS,
     REPOS,
     default_start_date,
     github_token,
@@ -22,7 +23,13 @@ from mint_tracker import (
     save_snapshot,
     summarize_changes,
 )
-from report_generator import load_dataframes, load_repo_snapshots, render_report, save_report
+from report_generator import (
+    load_dataframes,
+    load_repo_snapshots,
+    prune_reports,
+    render_report,
+    save_report,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -290,6 +297,10 @@ def main() -> int:
     html = render_report(report_date, frames, snapshot_df, mint_changes)
     report_path = save_report(html, report_date)
     logger.info("Report saved to %s", report_path)
+
+    removed = prune_reports(report_date)
+    if removed:
+        logger.info("Pruned %d report(s) older than %d days", len(removed), REPORT_RETENTION_DAYS)
     return 0
 
 
