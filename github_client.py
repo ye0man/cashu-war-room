@@ -394,10 +394,11 @@ class GitHubClient:
     def fetch_repo_snapshot(self, owner: str, name: str) -> dict[str, Any]:
         path = f"/repos/{owner}/{name}"
         data = self._rest_get(path)
+        snapshot_at = datetime.now(timezone.utc)
         return {
-            "id": f"{owner}/{name}",
+            "id": f"{owner}/{name}@{snapshot_at.strftime('%Y-%m-%d')}",
             "repo": f"{owner}/{name}",
-            "snapshot_at": datetime.now(timezone.utc).isoformat(),
+            "snapshot_at": snapshot_at.isoformat(),
             "stars": data.get("stargazers_count", 0),
             "forks": data.get("forks_count", 0),
             "open_issues": data.get("open_issues_count", 0),

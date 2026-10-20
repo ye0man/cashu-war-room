@@ -304,6 +304,27 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
 
     by_contributor = _finish_contributors(global_rows)
 
+    def _in_last_day(frame: pd.DataFrame, date_col: str) -> pd.DataFrame:
+        if frame.empty or date_col not in frame.columns:
+            return frame.iloc[0:0]
+        return frame[(frame[date_col] >= new_cutoff) & (frame[date_col] < end)]
+
+    last_commits = _in_last_day(commits, "committed_at")
+    last_issues = _in_last_day(issues, "created_at")
+    last_opened = _in_last_day(prs, "created_at")
+    last_merged = _in_last_day(prs, "merged_at")
+    last_closed = _in_last_day(issues, "closed_at")
+    last_releases = _in_last_day(releases, "published_at")
+
+    last_logins: set[str] = set()
+    for frame in (last_commits, last_issues, last_opened):
+        if frame.empty or "author_login" not in frame.columns:
+            continue
+        last_logins |= {
+            login if isinstance(login, str) and login else "unknown"
+            for login in frame["author_login"].tolist()
+        }
+
     return {
         "start": start,
         "end": end,
@@ -319,6 +340,14 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             "releases": len(new_releases),
             "active_contributors": len([c for c in by_contributor if c["commits"] or c["issues_opened"] or c["prs_opened"]]),
             "new_items": len(new_item_urls),
+            "last_day": {
+                "new_issues": len(last_issues),
+                "opened_prs": len(last_opened),
+                "merged_prs": len(last_merged),
+                "closed_issues": len(last_closed),
+                "releases": len(last_releases),
+                "active_contributors": len(last_logins),
+            },
         },
     }
 
@@ -387,14 +416,35 @@ def compute_growth(snapshot_df: pd.DataFrame) -> dict[str, Any]:
     if snapshot_df.empty:
         return result
 
-    latest = snapshot_df.sort_values("snapshot_at").groupby("repo").last()
-    for repo, row in latest.iterrows():
-        result["latest"][repo] = {
+    snap = snapshot_df.copy()
+    snap["day"] = snap["snapshot_at"].dt.strftime("%Y-%m-%d")
+    daily = snap.sort_values("snapshot_at").groupby(["repo", "day"]).last()
+
+    rows: list[dict[str, Any]] = []
+    for repo, group in daily.groupby(level=0):
+        history = group.droplevel(0).sort_index()
+        latest_row = history.iloc[-1]
+        previous_row = history.iloc[-2] if len(history) > 1 else None
+
+        def _delta(field: str) -> int | None:
+            if previous_row is None:
+                return None
+            return int(latest_row.get(field, 0)) - int(previous_row.get(field, 0))
+
+        rows.append({
+            "repo": repo,
             "short": _repo_short(repo),
-            "stars": int(row.get("stars", 0)),
-            "forks": int(row.get("forks", 0)),
-            "open_issues": int(row.get("open_issues", 0)),
-        }
+            "stars": int(latest_row.get("stars", 0)),
+            "forks": int(latest_row.get("forks", 0)),
+            "open_issues": int(latest_row.get("open_issues", 0)),
+            "stars_delta": _delta("stars"),
+            "forks_delta": _delta("forks"),
+            "open_issues_delta": _delta("open_issues"),
+        })
+
+    rows.sort(key=lambda row: (-row["stars"], row["repo"]))
+    for row in rows:
+        result["latest"][row["repo"]] = row
     return result
 
 

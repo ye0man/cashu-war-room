@@ -130,7 +130,7 @@
       display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
       gap: 1rem;
     }
-    .metric { padding: 1.2rem 1.3rem 1.35rem; }
+    .metric { padding: 1.2rem 1.3rem 1.15rem; }
     .metric .label {
       font-family: var(--font-mono); font-size: .68rem; letter-spacing: .1em;
       text-transform: uppercase; color: var(--muted-foreground); margin-bottom: .65rem;
@@ -140,6 +140,16 @@
       letter-spacing: -.025em; line-height: 1;
     }
     .metric .value .suffix { font-size: 1.15rem; color: var(--muted-foreground); }
+    .metric-day {
+      display: flex; align-items: baseline; justify-content: space-between; gap: .75rem;
+      margin-top: 1rem; padding-top: .6rem; border-top: 1px solid rgba(164, 187, 204, .45);
+      font-family: var(--font-mono); font-size: .64rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted-foreground);
+    }
+    .metric-day-value {
+      font-family: var(--font-display); font-size: 1.1rem; font-weight: 500;
+      letter-spacing: -.015em; color: var(--new);
+    }
 
     /* Repo ribbon */
     .ribbon-wrap { position: sticky; top: 3.55rem; z-index: 40; margin: 0 0 1.75rem; }
@@ -201,14 +211,12 @@
     .legend-item { display: inline-flex; align-items: center; gap: .4rem; }
     .legend-swatch { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; }
     .chart-axis { font-family: var(--font-mono); font-size: 10px; fill: var(--muted-foreground); }
-    .chart-total { font-family: var(--font-mono); font-size: 10px; fill: var(--foreground); }
-    .chart-total.is-zero { fill: var(--muted-foreground); }
     .chart-grid { stroke: rgba(164, 187, 204, .45); stroke-width: 1; }
     .series-issues { fill: var(--primary); background: var(--primary); }
     .series-opened { fill: var(--info); background: var(--info); }
     .series-merged { fill: var(--success); background: var(--success); }
-    .chart-zero { stroke-width: 2; stroke-linecap: round; }
-    .chart-hit { fill: transparent; }
+    .chart-zero { stroke-width: 3; stroke-linecap: round; }
+    .chart-hit { fill: transparent; pointer-events: all; }
 
     /* Activity lists */
     .list-grid {
@@ -257,10 +265,26 @@
       text-transform: uppercase; padding: .16rem .6rem; border-radius: 999px;
       background: var(--secondary); color: var(--foreground);
     }
-    .badge-authored { background: rgba(91, 70, 212, .16); color: var(--primary); }
     .badge-merged { background: rgba(22, 163, 74, .18); color: #14713a; }
     .badge-age { background: var(--secondary); color: var(--foreground); }
     .badge-age.stale { background: rgba(183, 27, 16, .15); color: var(--destructive); }
+
+    /* Copy-as-Markdown */
+    .card-tools { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+    .copy-btn {
+      font-family: var(--font-mono); font-size: .62rem; letter-spacing: .08em;
+      text-transform: uppercase; line-height: 1; padding: .24rem .55rem;
+      border-radius: 999px; border: 1px solid var(--glass-border-strong);
+      background: rgba(255, 255, 255, .28); color: var(--muted-foreground); cursor: pointer;
+    }
+    .copy-btn:hover { color: var(--primary); border-color: var(--primary); }
+    .copy-btn.is-copied { color: var(--new); border-color: var(--new); }
+    .table-tools { display: flex; justify-content: flex-end; padding-top: .55rem; }
+
+    /* Growth deltas */
+    .delta { margin-left: .4rem; font-family: var(--font-mono); font-size: .72rem; letter-spacing: 0; }
+    .delta.up { color: var(--new); }
+    .delta.down { color: var(--destructive); }
 
     /* Tables */
     .table-card { padding: .45rem 1.25rem 1.15rem; overflow-x: auto; }
@@ -351,7 +375,12 @@
 <main class="container">
 
   {% macro item_row(item, show_repo, is_release=false) %}
-  <li class="item" data-author="{{ item.author_login or '' }}">
+  <li class="item" data-author="{{ item.author_login or '' }}"
+      data-number="{{ '' if is_release else item.number }}"
+      data-title="{% if is_release %}{{ item.tag_name }}{% if item.name %} — {{ item.name }}{% endif %}{% else %}{{ item.title }}{% endif %}"
+      data-url="{{ item.url }}"
+      data-repo="{{ item.repo_short }}"
+      data-date="{{ item.date_str }}">
     {% if is_release %}
     <a class="item-link{% if item.is_new %} is-new{% endif %}" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.tag_name }}{% if item.name %} — {{ item.name }}{% endif %}</a>
     {% else %}
@@ -371,7 +400,10 @@
     <div class="card list-card" data-series="{{ title|lower|replace(' ', '-') }}">
       <div class="card-head">
         <h4>{{ title }}</h4>
-        <span class="badge" data-count>{{ items|length }}</span>
+        <div class="card-tools">
+          <span class="badge" data-count>{{ items|length }}</span>
+          <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy {{ title }} as Markdown">copy</button>
+        </div>
       </div>
       <ul class="item-list">
         {% for item in items %}{{ item_row(item, show_repo, is_release) }}{% endfor %}
@@ -380,10 +412,13 @@
     {% endif %}
   {% endmacro %}
 
-  {% macro contributor_table(contributors) %}
+  {% macro contributor_table(contributors, key='all') %}
     {% set active = contributors | selectattr('is_active') | list %}
     {% if active %}
-    <div class="card table-card">
+    <div class="card table-card" data-copy-title="Contributors{% if key != 'all' %} — {{ key.split('/')[-1] }}{% endif %}">
+      <div class="table-tools">
+        <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy contributor table as Markdown">copy</button>
+      </div>
       <table class="table" data-sortable>
         <thead>
           <tr>
@@ -426,13 +461,18 @@
       <div class="card person-card" data-contributor="{{ c.login }}">
         <div class="card-head">
           <a class="person" href="https://github.com/{{ c.login }}" target="_blank" rel="noopener">{{ c.login }}</a>
+          <div class="card-tools">
+            <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy {{ c.login }}'s assigned work as Markdown">copy</button>
+          </div>
         </div>
         <div class="person-scroll">
         {% if c.assigned_issues %}
         <h5 class="group-label">Assigned Issues</h5>
         <ul class="mini-list">
           {% for item in c.assigned_issues %}
-          <li data-author="{{ item.author_login or '' }}">
+          <li data-author="{{ item.author_login or '' }}"
+              data-number="{{ item.number }}" data-title="{{ item.title }}" data-url="{{ item.url }}"
+              data-repo="{{ item.repo_short }}" data-date="{{ item.date_str }}">
             <span class="item-num">#{{ item.number }}</span>
             <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
             <span class="item-meta">
@@ -447,11 +487,12 @@
         <h5 class="group-label">Assigned / Authored PRs</h5>
         <ul class="mini-list">
           {% for item in c.assigned_prs %}
-          <li data-author="{{ item.author_login or '' }}">
+          <li data-author="{{ item.author_login or '' }}"
+              data-number="{{ item.number }}" data-title="{{ item.title }}" data-url="{{ item.url }}"
+              data-repo="{{ item.repo_short }}" data-date="{{ item.date_str }}">
             <span class="item-num">#{{ item.number }}</span>
             <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
             <span class="item-meta">
-              {% if item.relation == 'authored' %}<span class="badge badge-authored">authored</span>{% endif %}
               {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
               {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
             </span>
@@ -483,10 +524,10 @@
     <p class="empty" data-filter-empty hidden>No activity for the selected contributor in the last 7 days.</p>
 
     <h3 class="type-subhead">Contributors</h3>
-    {{ contributor_table(contributors) }}
+    {{ contributor_table(contributors, key) }}
 
     <h3 class="type-subhead">Assigned Open Work</h3>
-    <p class="small-note">Open items currently assigned to each person. Unassigned PRs are listed under their author (badge “authored”); PRs assigned to someone else stay with the assignee.</p>
+    <p class="small-note">Open items currently assigned to each person. Unassigned PRs are listed under their author; PRs assigned to someone else stay with the assignee.</p>
     {{ assigned_work(contributors, show_repo) }}
   </section>
   {% endmacro %}
@@ -508,26 +549,32 @@
       <div class="card metric">
         <div class="label">New Issues</div>
         <div class="value">{{ momentum.summary.new_issues }}</div>
+        <div class="metric-day"><span>Last day</span><span class="metric-day-value">{{ momentum.summary.last_day.new_issues }}</span></div>
       </div>
       <div class="card metric">
         <div class="label">PRs Opened</div>
         <div class="value">{{ momentum.summary.opened_prs }}</div>
+        <div class="metric-day"><span>Last day</span><span class="metric-day-value">{{ momentum.summary.last_day.opened_prs }}</span></div>
       </div>
       <div class="card metric">
         <div class="label">PRs Merged</div>
         <div class="value">{{ momentum.summary.merged_prs }}</div>
+        <div class="metric-day"><span>Last day</span><span class="metric-day-value">{{ momentum.summary.last_day.merged_prs }}</span></div>
       </div>
       <div class="card metric">
         <div class="label">Closed Issues</div>
         <div class="value">{{ momentum.summary.closed_issues }}</div>
+        <div class="metric-day"><span>Last day</span><span class="metric-day-value">{{ momentum.summary.last_day.closed_issues }}</span></div>
       </div>
       <div class="card metric">
         <div class="label">Active Contributors</div>
         <div class="value">{{ momentum.summary.active_contributors }}</div>
+        <div class="metric-day"><span>Last day</span><span class="metric-day-value">{{ momentum.summary.last_day.active_contributors }}</span></div>
       </div>
       <div class="card metric">
         <div class="label">Releases</div>
         <div class="value">{{ momentum.summary.releases }}</div>
+        <div class="metric-day"><span>Last day</span><span class="metric-day-value">{{ momentum.summary.last_day.releases }}</span></div>
       </div>
     </div>
   </section>
@@ -615,10 +662,16 @@
 
     <div class="list-grid">
       <div class="card list-card">
-        <div class="card-head"><h4>Oldest Open Issues</h4></div>
+        <div class="card-head">
+          <h4>Oldest Open Issues</h4>
+          <div class="card-tools">
+            <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy oldest open issues as Markdown">copy</button>
+          </div>
+        </div>
         <ul class="item-list">
           {% for item in aging.oldest_open_issues %}
-          <li class="item">
+          <li class="item" data-number="{{ item.number }}" data-title="{{ item.title }}" data-url="{{ item.url }}"
+              data-repo="{{ item.repo_short }}" data-date="{{ item.date_str }}" data-age="{{ item.age_days }}">
             <span class="item-num">#{{ item.number }}</span>
             <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
             <span class="item-meta">
@@ -633,10 +686,16 @@
         </ul>
       </div>
       <div class="card list-card">
-        <div class="card-head"><h4>Oldest Open PRs</h4></div>
+        <div class="card-head">
+          <h4>Oldest Open PRs</h4>
+          <div class="card-tools">
+            <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy oldest open PRs as Markdown">copy</button>
+          </div>
+        </div>
         <ul class="item-list">
           {% for item in aging.oldest_open_prs %}
-          <li class="item">
+          <li class="item" data-number="{{ item.number }}" data-title="{{ item.title }}" data-url="{{ item.url }}"
+              data-repo="{{ item.repo_short }}" data-date="{{ item.date_str }}" data-age="{{ item.age_days }}">
             <span class="item-num">#{{ item.number }}</span>
             <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
             <span class="item-meta">
@@ -676,16 +735,16 @@
             <th class="sortable">Repo</th>
             <th class="num sortable">Stars</th>
             <th class="num sortable">Forks</th>
-            <th class="num sortable">Open Issues</th>
+            <th class="num sortable">Open Issues + PRs</th>
           </tr>
         </thead>
         <tbody>
           {% for repo, stats in growth.latest.items() %}
           <tr>
             <td><a href="https://github.com/{{ repo }}" target="_blank" rel="noopener">{{ stats.short }}</a></td>
-            <td class="num">{{ stats.stars }}</td>
-            <td class="num">{{ stats.forks }}</td>
-            <td class="num">{{ stats.open_issues }}</td>
+            <td class="num">{{ stats.stars }}{% if stats.stars_delta %}<span class="delta {{ 'up' if stats.stars_delta > 0 else 'down' }}">{{ '+' if stats.stars_delta > 0 else '' }}{{ stats.stars_delta }}</span>{% endif %}</td>
+            <td class="num">{{ stats.forks }}{% if stats.forks_delta %}<span class="delta {{ 'up' if stats.forks_delta > 0 else 'down' }}">{{ '+' if stats.forks_delta > 0 else '' }}{{ stats.forks_delta }}</span>{% endif %}</td>
+            <td class="num">{{ stats.open_issues }}{% if stats.open_issues_delta %}<span class="delta {{ 'up' if stats.open_issues_delta > 0 else 'down' }}">{{ '+' if stats.open_issues_delta > 0 else '' }}{{ stats.open_issues_delta }}</span>{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -699,6 +758,12 @@
     <h2 class="section-title">Cashu Mint Updates</h2>
     <p class="small-note">Diff of the <a href="https://ye0man.github.io/cashu-mint-directory/" target="_blank" rel="noopener">Cashu Mint Directory</a> vs the previous snapshot.</p>
     <div class="card">
+      <div class="card-head">
+        <h4>Changes</h4>
+        <div class="card-tools">
+          <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy mint updates as Markdown">copy</button>
+        </div>
+      </div>
       {% if mint_changes %}
       <ul class="mint-list">
         {% for change in mint_changes %}
@@ -819,7 +884,7 @@
       var yMax = step * Math.ceil(peak / step);
 
       var W = 760, H = 220;
-      var padL = 34, padR = 10, padT = 24, padB = 30;
+      var padL = 34, padR = 10, padT = 16, padB = 30;
       var plotW = W - padL - padR;
       var plotH = H - padT - padB;
       var baseY = padT + plotH;
@@ -840,8 +905,6 @@
         var center = padL + groupW * (d + 0.5);
         var groupW3 = barW * 3 + gap * 2;
         var startX = center - groupW3 / 2;
-        var dayTotal = sums[d];
-        var topY = baseY;
 
         for (var s = 0; s < 3; s++) {
           var value = totals[d][s];
@@ -849,26 +912,19 @@
           if (value > 0) {
             var h = (value / yMax) * plotH;
             var y = baseY - h;
-            if (y < topY) topY = y;
             parts.push('<rect class="' + seriesClass[s] + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) +
-              '" width="' + barW.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2"><title>' + day + ' · ' +
-              seriesName[s] + ': ' + value + '</title></rect>');
+              '" width="' + barW.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2"></rect>');
           } else {
             parts.push('<line class="' + seriesClass[s] + ' chart-zero" x1="' + x.toFixed(1) + '" x2="' + (x + barW).toFixed(1) +
-              '" y1="' + (baseY - 1).toFixed(1) + '" y2="' + (baseY - 1).toFixed(1) + '"><title>' + day + ' · ' +
-              seriesName[s] + ': 0</title></line>');
+              '" y1="' + (baseY - 1).toFixed(1) + '" y2="' + (baseY - 1).toFixed(1) + '"></line>');
           }
+          parts.push('<rect class="chart-hit" x="' + x.toFixed(1) + '" y="' + padT + '" width="' + barW.toFixed(1) +
+            '" height="' + plotH + '"><title>' + day + ' · ' + seriesName[s] + ': ' + value + '</title></rect>');
         }
-
-        var labelY = dayTotal > 0 ? Math.max(padT + 9, topY - 7) : baseY - 9;
-        parts.push('<text class="chart-total' + (dayTotal === 0 ? ' is-zero' : '') + '" x="' + center.toFixed(1) + '" y="' +
-          labelY.toFixed(1) + '" text-anchor="middle">' + dayTotal + '</text>');
 
         var dt = new Date(day + 'T00:00:00Z');
         var dayLabel = weekday[dt.getUTCDay()] + ' ' + dt.getUTCDate();
         parts.push('<text class="chart-axis" x="' + center.toFixed(1) + '" y="' + (H - 10) + '" text-anchor="middle">' + dayLabel + '</text>');
-        parts.push('<rect class="chart-hit" x="' + (padL + groupW * d).toFixed(1) + '" y="' + padT + '" width="' +
-          groupW.toFixed(1) + '" height="' + plotH + '"><title>' + day + ' · ' + dayTotal + ' events</title></rect>');
       });
 
       parts.push('</svg>');
@@ -881,6 +937,118 @@
         ' pull requests opened, ' + totals.reduce(function (a, t) { return a + t[2]; }, 0) +
         ' pull requests merged.');
     }
+
+    function mdEscape(text) {
+      return String(text || '').replace(/([\[\]])/g, '\\$1');
+    }
+
+    function itemMarkdown(li) {
+      var number = li.getAttribute('data-number');
+      var title = mdEscape(li.getAttribute('data-title'));
+      var url = li.getAttribute('data-url');
+      var author = li.getAttribute('data-author');
+      var repo = li.getAttribute('data-repo');
+      var date = li.getAttribute('data-date');
+      var age = li.getAttribute('data-age');
+
+      var line = '- [' + (number ? '#' + number + ' — ' : '') + title + '](' + url + ')';
+      if (author) line += ' — @' + author;
+      if (repo) line += ' · ' + repo;
+      if (date) line += ' · ' + date;
+      if (age) line += ' · ' + age + 'd';
+      return line;
+    }
+
+    function listCardMarkdown(card) {
+      var heading = card.querySelector('h4');
+      var out = ['### ' + (heading ? heading.textContent.trim() : 'Items'), ''];
+      var items = card.querySelectorAll('li.item[data-url]:not([hidden])');
+      if (!items.length) out.push('_No items._');
+      Array.prototype.forEach.call(items, function (li) { out.push(itemMarkdown(li)); });
+      return out.join('\n') + '\n';
+    }
+
+    function personMarkdown(card) {
+      var person = card.querySelector('.person');
+      var out = ['### ' + (person ? person.textContent.trim() : 'Contributor') + ' — Assigned Open Work', ''];
+      Array.prototype.forEach.call(card.querySelectorAll('.mini-list'), function (list) {
+        var visible = list.querySelectorAll('li:not([hidden])');
+        if (!visible.length) return;
+        var label = list.previousElementSibling;
+        out.push('**' + (label ? label.textContent.trim() : 'Items') + '**');
+        Array.prototype.forEach.call(visible, function (li) { out.push(itemMarkdown(li)); });
+        out.push('');
+      });
+      return out.join('\n').trim() + '\n';
+    }
+
+    function tableMarkdown(card) {
+      var headers = Array.prototype.map.call(card.querySelectorAll('thead th'), function (th) {
+        return th.textContent.trim();
+      });
+      var rows = Array.prototype.map.call(card.querySelectorAll('tbody tr:not([hidden])'), function (tr) {
+        return Array.prototype.map.call(tr.cells, function (cell) {
+          return cell.textContent.trim().replace(/\|/g, '\\|');
+        });
+      });
+      var out = [
+        '### ' + (card.getAttribute('data-copy-title') || 'Contributors'),
+        '',
+        '| ' + headers.join(' | ') + ' |',
+        '| ' + headers.map(function () { return '---'; }).join(' | ') + ' |',
+      ];
+      rows.forEach(function (row) { out.push('| ' + row.join(' | ') + ' |'); });
+      return out.join('\n') + '\n';
+    }
+
+    function mintMarkdown(card) {
+      var out = ['### Cashu Mint Updates', ''];
+      var items = card.querySelectorAll('.mint-list li:not([hidden])');
+      if (!items.length) out.push('_No items._');
+      Array.prototype.forEach.call(items, function (li) { out.push('- ' + li.textContent.trim()); });
+      return out.join('\n') + '\n';
+    }
+
+    function copyMarkdown(text, button) {
+      var finish = function () {
+        var original = button.textContent;
+        button.textContent = 'copied';
+        button.classList.add('is-copied');
+        window.setTimeout(function () {
+          button.textContent = original;
+          button.classList.remove('is-copied');
+        }, 1400);
+      };
+      var fallback = function () {
+        var area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.left = '-9999px';
+        document.body.appendChild(area);
+        area.select();
+        try { document.execCommand('copy'); } finally { document.body.removeChild(area); }
+        finish();
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(finish).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+
+    document.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-copy]');
+      if (!button) return;
+      var card = button.closest('.card');
+      if (!card) return;
+      var text = '';
+      if (card.classList.contains('person-card')) text = personMarkdown(card);
+      else if (card.classList.contains('table-card')) text = tableMarkdown(card);
+      else if (card.querySelector('.mint-list')) text = mintMarkdown(card);
+      else if (card.classList.contains('list-card')) text = listCardMarkdown(card);
+      if (text) copyMarkdown(text, button);
+    });
 
     bindPills('.pill[data-repo]', 'data-repo', 'repo');
     bindPills('.pill[data-contributor]', 'data-contributor', 'login');
