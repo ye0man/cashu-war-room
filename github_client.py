@@ -125,6 +125,9 @@ class GitHubClient:
                       additions
                       deletions
                       changedFiles
+                      associatedPullRequests(first: 10) {
+                        nodes { number state }
+                      }
                     }
                   }
                 }
@@ -139,6 +142,7 @@ class GitHubClient:
             data = self._graphql(query, {"owner": owner, "name": name, "since": self._iso(since), "after": after})
             history = data.get("repository", {}).get("defaultBranchRef", {}).get("target", {}).get("history", {})
             for node in history.get("nodes", []):
+                associated = (node.get("associatedPullRequests") or {}).get("nodes") or []
                 records.append({
                     "id": node["oid"],
                     "repo": f"{owner}/{name}",
@@ -151,6 +155,9 @@ class GitHubClient:
                     "additions": node.get("additions", 0),
                     "deletions": node.get("deletions", 0),
                     "changed_files": node.get("changedFiles", 0),
+                    "associated_merged_pr_numbers": [
+                        p["number"] for p in associated if p.get("state") == "MERGED"
+                    ],
                     "url": f"https://github.com/{owner}/{name}/commit/{node['oid']}",
                 })
             page_info = history.get("pageInfo", {})

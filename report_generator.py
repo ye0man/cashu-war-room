@@ -79,6 +79,30 @@ def _login_of(value: Any) -> str | None:
     return value if isinstance(value, str) and value else None
 
 
+KNOWN_BOT_LOGINS = {
+    "dependabot",
+    "renovate",
+    "github-actions",
+    "codecov",
+    "mergify",
+    "pre-commit-ci",
+}
+
+
+def _is_bot(login: str | None) -> bool:
+    if not login:
+        return False
+    lowered = login.lower()
+    return lowered.endswith("[bot]") or lowered in KNOWN_BOT_LOGINS
+
+
+def _int_or_none(value: Any) -> int | None:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
@@ -147,6 +171,7 @@ def _blank_contributor() -> dict[str, Any]:
     return {
         "commits": 0, "additions": 0, "deletions": 0, "days_active": set(),
         "issues_opened": 0, "prs_opened": 0, "prs_merged": 0,
+        "reviews_submitted": 0, "review_comments": 0, "prs_reviewed": set(),
         "assigned_issues": [], "assigned_prs": [],
     }
 
@@ -154,11 +179,15 @@ def _blank_contributor() -> dict[str, Any]:
 def _finish_contributors(rows: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for login, data in rows.items():
+        if _is_bot(login):
+            continue
         if (
             login == "unknown"
             and data["commits"] == 0
             and data["issues_opened"] == 0
             and data["prs_opened"] == 0
+            and data["reviews_submitted"] == 0
+            and data["review_comments"] == 0
             and not data["assigned_issues"]
             and not data["assigned_prs"]
         ):
@@ -172,12 +201,21 @@ def _finish_contributors(rows: dict[str, dict[str, Any]]) -> list[dict[str, Any]
             "issues_opened": data["issues_opened"],
             "prs_opened": data["prs_opened"],
             "prs_merged": data["prs_merged"],
+            "reviews_submitted": data["reviews_submitted"],
+            "review_comments": data["review_comments"],
+            "prs_reviewed": len(data["prs_reviewed"]),
             "assigned_issues": sorted(data["assigned_issues"], key=lambda r: str(r.get("created_at") or ""), reverse=True),
             "assigned_prs": sorted(data["assigned_prs"], key=lambda r: str(r.get("created_at") or ""), reverse=True),
             "has_assigned": bool(data["assigned_issues"] or data["assigned_prs"]),
-            "is_active": bool(data["commits"] or data["issues_opened"] or data["prs_opened"] or data["prs_merged"]),
+            "is_active": bool(
+                data["commits"] or data["issues_opened"] or data["prs_opened"]
+                or data["prs_merged"] or data["reviews_submitted"] or data["review_comments"]
+            ),
         })
-    out.sort(key=lambda c: (-c["commits"], -c["prs_opened"], -c["issues_opened"], c["login"]))
+    out.sort(key=lambda c: (
+        -c["commits"], -c["prs_opened"], -c["issues_opened"],
+        -c["prs_reviewed"], -c["review_comments"], c["login"],
+    ))
     return out
 
 
@@ -201,6 +239,8 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
     prs = frames.get("pull_requests", pd.DataFrame())
     releases = frames.get("releases", pd.DataFrame())
     commits = frames.get("commits", pd.DataFrame())
+    reviews = frames.get("pr_reviews", pd.DataFrame())
+    review_comments = frames.get("pr_review_comments", pd.DataFrame())
 
     new_issues = issues[(issues["created_at"] >= start) & (issues["created_at"] < end)] if not issues.empty else issues
     opened_prs = prs[(prs["created_at"] >= start) & (prs["created_at"] < end)] if not prs.empty else prs
@@ -208,30 +248,72 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
     closed_issues = issues[(issues["closed_at"] >= start) & (issues["closed_at"] < end)] if not issues.empty else issues
     new_releases = releases[(releases["published_at"] >= start) & (releases["published_at"] < end)] if not releases.empty else releases
 
+    merged_pr_keys = {
+        (row.get("repo"), number)
+        for _, row in merged_prs.iterrows()
+        if (number := _int_or_none(row.get("number"))) is not None
+    } if not merged_prs.empty else set()
+
+    pr_author_by_key: dict[tuple[str, int], str | None] = {}
+    if not prs.empty:
+        for _, row in prs.iterrows():
+            number = _int_or_none(row.get("number"))
+            if number is None:
+                continue
+            pr_author_by_key[(row.get("repo"), number)] = _login_of(row.get("author_login"))
+
+    def _is_self_review(login: str, repo: Any, pr_number: Any) -> bool:
+        number = _int_or_none(pr_number)
+        if number is None:
+            return False
+        author = pr_author_by_key.get((repo, number))
+        return bool(author) and author == login
+
     # Contributor rows scoped globally and per repo.
     global_rows: dict[str, dict[str, Any]] = defaultdict(_blank_contributor)
     repo_rows: dict[str, dict[str, dict[str, Any]]] = defaultdict(lambda: defaultdict(_blank_contributor))
 
     def _bump(login: str | None, repo: str | None, field: str, amount: int = 1) -> None:
         user = _login_of(login) or "unknown"
+        if _is_bot(user):
+            return
         global_rows[user][field] += amount
         if repo:
             repo_rows[repo][user][field] += amount
+
+    def _add_review(login: str, repo: str | None, field: str, key: tuple[Any, int] | None) -> None:
+        for table in (global_rows[login], repo_rows[repo][login] if repo else None):
+            if table is None:
+                continue
+            table[field] += 1
+            if key is not None:
+                table["prs_reviewed"].add(key)
 
     if not commits.empty:
         recent_commits = commits[(commits["committed_at"] >= start) & (commits["committed_at"] < end)]
         for _, row in recent_commits.iterrows():
             user = _login_of(row.get("author_login")) or "unknown"
+            if _is_bot(user):
+                continue
             repo = row.get("repo")
             day = row["committed_at"].strftime("%Y-%m-%d")
             additions = int(row.get("additions", 0) or 0)
             deletions = int(row.get("deletions", 0) or 0)
+            associated = set()
+            raw_associated = row.get("associated_merged_pr_numbers")
+            if isinstance(raw_associated, (list, tuple)):
+                for number in raw_associated:
+                    parsed = _int_or_none(number)
+                    if parsed is not None:
+                        associated.add((repo, parsed))
+            lines_count_via_pr = bool(associated & merged_pr_keys)
             for table in (global_rows[user], repo_rows[repo][user] if repo else None):
                 if table is None:
                     continue
                 table["commits"] += 1
-                table["additions"] += additions
-                table["deletions"] += deletions
+                if not lines_count_via_pr:
+                    table["additions"] += additions
+                    table["deletions"] += deletions
                 table["days_active"].add(day)
 
     for _, row in new_issues.iterrows():
@@ -241,7 +323,44 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
         _bump(row.get("author_login"), row.get("repo"), "prs_opened")
 
     for _, row in merged_prs.iterrows():
-        _bump(row.get("author_login"), row.get("repo"), "prs_merged")
+        user = _login_of(row.get("author_login")) or "unknown"
+        if _is_bot(user):
+            continue
+        repo = row.get("repo")
+        additions = int(row.get("additions", 0) or 0)
+        deletions = int(row.get("deletions", 0) or 0)
+        for table in (global_rows[user], repo_rows[repo][user] if repo else None):
+            if table is None:
+                continue
+            table["prs_merged"] += 1
+            table["additions"] += additions
+            table["deletions"] += deletions
+
+    if not reviews.empty:
+        recent_reviews = reviews[(reviews["submitted_at"] >= start) & (reviews["submitted_at"] < end)]
+        for _, row in recent_reviews.iterrows():
+            user = _login_of(row.get("author_login")) or "unknown"
+            if _is_bot(user):
+                continue
+            repo = row.get("repo")
+            pr_number = _int_or_none(row.get("pr_number"))
+            if _is_self_review(user, repo, pr_number):
+                continue
+            key = (repo, pr_number) if pr_number is not None else None
+            _add_review(user, repo, "reviews_submitted", key)
+
+    if not review_comments.empty:
+        recent_comments = review_comments[(review_comments["created_at"] >= start) & (review_comments["created_at"] < end)]
+        for _, row in recent_comments.iterrows():
+            user = _login_of(row.get("author_login")) or "unknown"
+            if _is_bot(user):
+                continue
+            repo = row.get("repo")
+            pr_number = _int_or_none(row.get("pr_number"))
+            if _is_self_review(user, repo, pr_number):
+                continue
+            key = (repo, pr_number) if pr_number is not None else None
+            _add_review(user, repo, "review_comments", key)
 
     # Assigned open items (current state)
     open_issues = issues[issues["state"] == "OPEN"] if not issues.empty else issues
@@ -251,15 +370,17 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
         item = _assigned_item(row)
         for assignee in _as_list(row.get("assignee_logins")):
             user = _login_of(assignee)
-            if not user:
+            if not user or _is_bot(user):
                 continue
             global_rows[user]["assigned_issues"].append(item)
             repo_rows[row.get("repo")][user]["assigned_issues"].append(item)
 
     for _, row in open_prs.iterrows():
         repo = row.get("repo")
-        assignees = [a for a in (_login_of(x) for x in _as_list(row.get("assignee_logins"))) if a]
+        assignees = [a for a in (_login_of(x) for x in _as_list(row.get("assignee_logins"))) if a and not _is_bot(a)]
         author = _login_of(row.get("author_login"))
+        if author and _is_bot(author):
+            author = None
         if assignees:
             # Assignee takes priority: the PR is only listed under its assignees.
             for assignee in assignees:
@@ -316,6 +437,8 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
     last_merged = _in_last_day(prs, "merged_at")
     last_closed = _in_last_day(issues, "closed_at")
     last_releases = _in_last_day(releases, "published_at")
+    last_reviews = _in_last_day(reviews, "submitted_at")
+    last_review_comments = _in_last_day(review_comments, "created_at")
 
     last_logins: set[str] = set()
     for frame in (last_commits, last_issues, last_opened):
@@ -324,7 +447,19 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
         last_logins |= {
             login if isinstance(login, str) and login else "unknown"
             for login in frame["author_login"].tolist()
+            if not _is_bot(login if isinstance(login, str) else None)
         }
+
+    for frame, date_col in ((last_reviews, "submitted_at"), (last_review_comments, "created_at")):
+        if frame.empty or "author_login" not in frame.columns:
+            continue
+        for _, row in frame.iterrows():
+            user = _login_of(row.get("author_login")) or "unknown"
+            if _is_bot(user):
+                continue
+            if _is_self_review(user, row.get("repo"), row.get("pr_number")):
+                continue
+            last_logins.add(user)
 
     return {
         "start": start,
@@ -339,7 +474,7 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             "merged_prs": len(merged_prs),
             "closed_issues": len(closed_issues),
             "releases": len(new_releases),
-            "active_contributors": len([c for c in by_contributor if c["commits"] or c["issues_opened"] or c["prs_opened"]]),
+            "active_contributors": len([c for c in by_contributor if c["is_active"]]),
             "new_items": len(new_item_urls),
             "last_day": {
                 "new_issues": len(last_issues),

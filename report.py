@@ -53,11 +53,21 @@ def _parse_date(date_str: str | None) -> datetime:
     return today()
 
 
+def _parse_iso(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
 def _generate_sample_data(store: DataStore, end: datetime) -> None:
     """Create plausible sample data so the report can be tested without a token."""
     random.seed(42)
     start = default_start_date(end)
-    contributors = ["alice", "bob", "carol", "dave", "eve", "frank"]
+    contributors = ["alice", "bob", "carol", "dave", "eve", "frank", "dependabot[bot]"]
     for repo in REPOS:
         commits = []
         for _ in range(random.randint(50, 200)):
@@ -75,6 +85,7 @@ def _generate_sample_data(store: DataStore, end: datetime) -> None:
                 "additions": random.randint(1, 500),
                 "deletions": random.randint(0, 200),
                 "changed_files": random.randint(1, 10),
+                "associated_merged_pr_numbers": [],
                 "url": f"https://github.com/{repo.full_name}/commit/sample",
             })
         store.append_records(repo.full_name, "commits", commits, id_field="id")
@@ -130,19 +141,48 @@ def _generate_sample_data(store: DataStore, end: datetime) -> None:
             })
         store.append_records(repo.full_name, "pull_requests", prs, id_field="id")
 
+        merged_pr_numbers = [
+            p["number"] for p in prs
+            if p["merged_at"] and start <= datetime.fromisoformat(p["merged_at"]) < end
+        ]
+        if merged_pr_numbers:
+            for commit in commits:
+                if random.random() < 0.5:
+                    commit["associated_merged_pr_numbers"] = [random.choice(merged_pr_numbers)]
+            store.append_records(repo.full_name, "commits", commits, id_field="id")
+
         reviews = []
         for i in range(random.randint(5, 20)):
             ts = start + timedelta(seconds=random.randint(0, int((end - start).total_seconds())))
+            pr = random.choice(prs)
+            author = pr["author_login"] if i % 5 == 0 else random.choice(contributors)
             reviews.append({
                 "id": f"review-{repo.full_name}-{i}",
                 "repo": repo.full_name,
-                "pr_number": random.randint(1, len(prs)),
-                "author_login": random.choice(contributors),
+                "pr_number": pr["number"],
+                "author_login": author,
                 "state": random.choice(["APPROVED", "COMMENTED", "CHANGES_REQUESTED"]),
                 "submitted_at": ts.isoformat(),
-                "url": f"https://github.com/{repo.full_name}/pull/{i}#review",
+                "url": f"https://github.com/{repo.full_name}/pull/{pr['number']}#review",
             })
         store.append_records(repo.full_name, "pr_reviews", reviews, id_field="id")
+
+        review_comments = []
+        for i in range(random.randint(5, 25)):
+            ts = start + timedelta(seconds=random.randint(0, int((end - start).total_seconds())))
+            pr = random.choice(prs)
+            author = pr["author_login"] if i % 6 == 0 else random.choice(contributors)
+            review_comments.append({
+                "id": f"rc-{repo.full_name}-{i}",
+                "repo": repo.full_name,
+                "pr_number": pr["number"],
+                "review_id": None,
+                "author_login": author,
+                "created_at": ts.isoformat(),
+                "updated_at": ts.isoformat(),
+                "url": f"https://github.com/{repo.full_name}/pull/{pr['number']}#discussion_r{i}",
+            })
+        store.append_records(repo.full_name, "pr_review_comments", review_comments, id_field="id")
 
         issue_comments = []
         for i in range(random.randint(5, 30)):
@@ -197,6 +237,17 @@ def _fetch_github_data(client: GitHubClient, store: DataStore, end: datetime, fo
         try:
             # Commits touched in the window
             since_commits = start if force else (store.get_max_datetime(repo.full_name, "commits", "committed_at") or start)
+            if not force:
+                stored_commits = store.load_records(repo.full_name, "commits")
+                needs_backfill = any(
+                    "associated_merged_pr_numbers" not in commit
+                    and (ts := _parse_iso(commit.get("committed_at"))) is not None
+                    and ts >= start
+                    for commit in stored_commits
+                )
+                if needs_backfill:
+                    logger.info("  backfilling commit/PR associations for the lookback window")
+                    since_commits = start
             commits = client.fetch_commits(repo.owner, repo.name, since=since_commits)
             store.append_records(repo.full_name, "commits", commits, id_field="id")
             logger.info("  commits: %d", len(commits))

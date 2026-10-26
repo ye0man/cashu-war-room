@@ -426,10 +426,13 @@
             <th class="num sortable">Commits</th>
             <th class="num sortable">+Lines</th>
             <th class="num sortable">−Lines</th>
-            <th class="num sortable">Days</th>
+            <th class="num sortable">Commit Days</th>
             <th class="num sortable">Issues</th>
             <th class="num sortable">PRs Opened</th>
             <th class="num sortable">PRs Merged</th>
+            <th class="num sortable">Reviews</th>
+            <th class="num sortable">Review Comments</th>
+            <th class="num sortable">PRs Reviewed</th>
           </tr>
         </thead>
         <tbody>
@@ -443,6 +446,9 @@
             <td class="num">{{ c.issues_opened }}</td>
             <td class="num">{{ c.prs_opened }}</td>
             <td class="num">{{ c.prs_merged }}</td>
+            <td class="num">{{ c.reviews_submitted }}</td>
+            <td class="num">{{ c.review_comments }}</td>
+            <td class="num">{{ c.prs_reviewed }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -524,6 +530,7 @@
     <p class="empty" data-filter-empty hidden>No activity for the selected contributor in the last 7 days.</p>
 
     <h3 class="type-subhead">Contributors</h3>
+    <p class="small-note">Lines are the diff of merged PRs attributed to their authors plus commits pushed directly to the default branch. Review counts exclude items on PRs the contributor authored. Bots are excluded from all contributor metrics.</p>
     {{ contributor_table(contributors, key) }}
 
     <h3 class="type-subhead">Assigned Open Work</h3>
@@ -608,7 +615,7 @@
         {% for c in momentum.by_contributor %}
         <button type="button" class="pill" data-contributor="{{ c.login }}" role="tab" aria-selected="false">
           {{ c.login }}
-          <span class="pill-count">{{ c.commits + c.issues_opened + c.prs_opened + c.prs_merged }}</span>
+          <span class="pill-count">{{ c.commits + c.issues_opened + c.prs_opened + c.prs_merged + c.prs_reviewed }}</span>
         </button>
         {% endfor %}
       </div>
