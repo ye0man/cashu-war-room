@@ -827,7 +827,7 @@
       });
       if (!panel) return;
 
-      Array.prototype.slice.call(panel.querySelectorAll('li[data-author]')).forEach(function (li) {
+      Array.prototype.slice.call(panel.querySelectorAll('li.item[data-author]')).forEach(function (li) {
         var author = li.getAttribute('data-author') || '';
         li.hidden = state.login !== 'all' && author !== state.login;
       });
