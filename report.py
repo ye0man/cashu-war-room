@@ -130,6 +130,10 @@ def _generate_sample_data(store: DataStore, end: datetime) -> None:
                 "author_login": author,
                 "merged_by_login": random.choice(contributors) if merged else None,
                 "assignee_logins": random.sample(contributors, k=random.randint(0, 2)),
+                "review_request_logins": random.sample(
+                    [c for c in contributors if c != author and not c.endswith("[bot]")],
+                    k=random.randint(0, 2),
+                ),
                 "labels": random.sample(["bug", "enhancement", "NUT"], k=random.randint(0, 2)),
                 "additions": random.randint(1, 300),
                 "deletions": random.randint(0, 100),
@@ -214,6 +218,7 @@ def _generate_sample_data(store: DataStore, end: datetime) -> None:
             })
         store.append_records(repo.full_name, "releases", releases, id_field="id")
 
+        latest_release = max(releases, key=lambda release: release["published_at"]) if releases else None
         snapshot = {
             "id": repo.full_name,
             "repo": repo.full_name,
@@ -224,6 +229,10 @@ def _generate_sample_data(store: DataStore, end: datetime) -> None:
             "watchers": random.randint(10, 300),
             "pushed_at": end.isoformat(),
             "default_branch": "main",
+            "latest_release_tag": latest_release["tag_name"] if latest_release else None,
+            "latest_release_name": latest_release["name"] if latest_release else None,
+            "latest_release_published_at": latest_release["published_at"] if latest_release else None,
+            "latest_release_url": latest_release["url"] if latest_release else None,
         }
         store.append_records(repo.full_name, "repo_snapshots", [snapshot], id_field="id")
 

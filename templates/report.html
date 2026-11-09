@@ -151,53 +151,33 @@
       letter-spacing: -.015em; color: var(--new);
     }
 
-    /* Repo ribbon */
-    .ribbon-wrap { position: sticky; top: 3.55rem; z-index: 40; margin: 0 0 1.75rem; }
-    .ribbon {
-      display: flex; flex-wrap: wrap; gap: .55rem;
-      padding: .7rem; border-radius: var(--radius-3xl);
-      background: rgba(224, 237, 248, .72);
+    /* Filter bar */
+    .filter-wrap { position: sticky; top: 3.55rem; z-index: 45; padding: .85rem 0 .55rem; margin-bottom: .25rem; }
+    .filter-bar {
+      display: flex; flex-wrap: wrap; gap: .75rem 1rem;
+      padding: .7rem .85rem; border-radius: var(--radius-3xl);
+      background: rgba(224, 237, 248, .82);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
     }
-    .pill {
-      font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em;
-      text-transform: uppercase; font-weight: 500;
-      display: inline-flex; align-items: center; gap: .45rem;
-      padding: .48rem 1rem; border-radius: 999px; cursor: pointer;
+    .filter-field { display: flex; flex: 1 1 15rem; flex-direction: column; gap: .32rem; }
+    .filter-label {
+      font-family: var(--font-mono); font-size: .62rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted-foreground);
+    }
+    .filter-field select {
+      width: 100%; appearance: none; cursor: pointer;
+      font-family: var(--font-mono); font-size: .74rem; letter-spacing: .02em;
+      padding: .55rem 2.1rem .55rem .85rem; border-radius: 999px;
       border: 1px solid var(--glass-border-strong);
-      background: rgba(255, 255, 255, .32);
-      color: var(--foreground);
+      background-color: rgba(255, 255, 255, .4); color: var(--foreground);
+      background-image: linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+                        linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+      background-position: calc(100% - 1.05rem) 52%, calc(100% - .7rem) 52%;
+      background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
     }
-    .pill:hover { border-color: var(--primary); color: var(--primary); }
-    .pill.is-active {
-      background: var(--primary); border-color: var(--primary); color: var(--primary-foreground);
-    }
-    .pill-count { font-size: .66rem; opacity: .75; }
-
-    /* Contributor ribbon */
-    .ribbon + .ribbon { margin-top: .5rem; }
-    .ribbon-scroll { position: relative; margin-top: .5rem; }
-    .ribbon-scroll::after {
-      content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 2.75rem;
-      background: linear-gradient(90deg, rgba(224, 237, 248, 0), rgba(224, 237, 248, .92));
-      pointer-events: none; border-radius: 999px;
-    }
-    .ribbon-contributors {
-      margin-top: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin;
-      scrollbar-color: var(--border) transparent; padding: .55rem .7rem;
-    }
-    .ribbon-contributors::-webkit-scrollbar { height: 6px; }
-    .ribbon-contributors::-webkit-scrollbar-track { background: transparent; }
-    .ribbon-contributors::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
-    .ribbon-contributors::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
-    .ribbon-contributors .pill { flex: 0 0 auto; text-transform: none; }
-    .ribbon-label {
-      flex: 0 0 auto; align-self: center; padding: 0 .55rem 0 .35rem;
-      font-family: var(--font-mono); font-size: .64rem; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--muted-foreground); white-space: nowrap;
-    }
+    .filter-field select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
 
     /* Daily activity chart */
     .chart-card { margin-bottom: 1rem; }
@@ -266,8 +246,13 @@
       background: var(--secondary); color: var(--foreground);
     }
     .badge-merged { background: rgba(22, 163, 74, .18); color: #14713a; }
+    .badge-review { background: rgba(91, 70, 212, .16); color: var(--primary); }
     .badge-age { background: var(--secondary); color: var(--foreground); }
     .badge-age.stale { background: rgba(183, 27, 16, .15); color: var(--destructive); }
+    .assignee { color: var(--muted-foreground); }
+    .reviewers { color: var(--foreground); white-space: normal; }
+    .reviewers a { color: var(--foreground); }
+    .reviewers a:hover { color: var(--primary); }
 
     /* Copy-as-Markdown */
     .card-tools { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
@@ -301,6 +286,14 @@
     }
     .table tbody tr:last-child td { border-bottom: 0; }
     .table td.num, .table th.num { font-family: var(--font-mono); font-size: .82rem; }
+    .table-scroll {
+      max-height: 60vh; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .table-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .table-scroll::-webkit-scrollbar-track { background: transparent; }
+    .table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    .table-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+    .table-scroll thead th { position: sticky; top: 0; z-index: 2; background: var(--card); }
 
     /* Assigned open work */
     .assigned-grid {
@@ -352,7 +345,7 @@
 
     @media (max-width: 640px) {
       .item-meta { margin-left: 0; width: 100%; }
-      .ribbon-wrap { top: 5.25rem; }
+      .filter-wrap { top: 5.25rem; }
     }
   </style>
 </head>
@@ -364,6 +357,8 @@
     <nav class="nav">
       <a href="#summary">Summary</a>
       <a href="#momentum">Momentum</a>
+      <a href="#contributors">Contributors</a>
+      <a href="#assigned">Assigned Work</a>
       <a href="#health">Health</a>
       <a href="#growth">Growth</a>
       <a href="#mints">Mints</a>
@@ -373,6 +368,29 @@
 </header>
 
 <main class="container">
+
+  <div class="filter-wrap">
+    <div class="filter-bar">
+      <label class="filter-field">
+        <span class="filter-label">Repository</span>
+        <select data-filter-repo aria-label="Filter report by repository">
+          <option value="all">All repositories ({{ all_event_total }})</option>
+          {% for option in repo_options %}
+          <option value="{{ option.full_name }}">{{ option.display }} ({{ option.event_total }})</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-field">
+        <span class="filter-label">Contributor</span>
+        <select data-filter-contributor aria-label="Filter report by contributor">
+          <option value="all">All contributors ({{ momentum.by_contributor|length }})</option>
+          {% for contributor in momentum.by_contributor|sort(attribute='event_total', reverse=true) %}
+          <option value="{{ contributor.login }}" data-repos="{{ contributor.repos|join(' ') }}">{{ contributor.login }} ({{ contributor.event_total }})</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+  </div>
 
   {% macro item_row(item, show_repo, is_release=false) %}
   <li class="item" data-author="{{ item.author_login or '' }}"
@@ -412,6 +430,41 @@
     {% endif %}
   {% endmacro %}
 
+  {% macro reviewed_card(title, items, show_repo) %}
+    {% if items %}
+    <div class="card list-card" data-series="prs-reviewed">
+      <div class="card-head">
+        <h4>{{ title }}</h4>
+        <div class="card-tools">
+          <span class="badge" data-count>{{ items|length }}</span>
+          <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy {{ title }} as Markdown">copy</button>
+        </div>
+      </div>
+      <ul class="item-list">
+        {% for item in items %}
+        <li class="item" data-author="{{ item.author_login or '' }}"
+            data-number="{{ item.number }}"
+            data-title="{{ item.title }}"
+            data-url="{{ item.url }}"
+            data-repo="{{ item.repo_short }}"
+            data-date="{{ item.date_str }}"
+            data-reviewers="{{ item.reviewers|join(', ') }}">
+          <span class="item-num">#{{ item.number }}</span>
+          <a class="item-link{% if item.is_new %} is-new{% endif %}" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+          <span class="item-meta">
+            {% if item.author_login %}<a href="https://github.com/{{ item.author_login }}" target="_blank" rel="noopener">@{{ item.author_login }}</a>{% endif %}
+            {% for assignee in item.assignee_logins[:2] %}<span class="assignee">@{{ assignee }}</span>{% endfor %}
+            {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
+            {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
+            <span class="reviewers">Reviewed by {% for reviewer in item.reviewers %}<strong><a href="https://github.com/{{ reviewer }}" target="_blank" rel="noopener">@{{ reviewer }}</a></strong>{% if not loop.last %}, {% endif %}{% endfor %}</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  {% endmacro %}
+
   {% macro contributor_table(contributors, key='all') %}
     {% set active = contributors | selectattr('is_active') | list %}
     {% if active %}
@@ -419,6 +472,7 @@
       <div class="table-tools">
         <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy contributor table as Markdown">copy</button>
       </div>
+      <div class="table-scroll">
       <table class="table" data-sortable>
         <thead>
           <tr>
@@ -453,9 +507,10 @@
           {% endfor %}
         </tbody>
       </table>
+      </div>
     </div>
     {% else %}
-    <p class="empty">No contributor activity in the last 7 days.</p>
+    <p class="empty" data-static-empty>No contributor activity in the last 7 days.</p>
     {% endif %}
   {% endmacro %}
 
@@ -506,16 +561,35 @@
           {% endfor %}
         </ul>
         {% endif %}
+        {% if c.requested_reviews %}
+        <h5 class="group-label">Requested Reviews</h5>
+        <ul class="mini-list">
+          {% for item in c.requested_reviews %}
+          <li data-author="{{ item.author_login or '' }}"
+              data-number="{{ item.number }}" data-title="{{ item.title }}" data-url="{{ item.url }}"
+              data-repo="{{ item.repo_short }}" data-date="{{ item.date_str }}">
+            <span class="item-num">#{{ item.number }}</span>
+            <a class="item-link" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+            <span class="item-meta">
+              {% if item.author_login %}<span class="assignee">@{{ item.author_login }}</span>{% endif %}
+              {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
+              {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
+              <span class="badge badge-review">review requested</span>
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
         </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="empty">No open assigned or authored work.</p>
+    <p class="empty" data-static-empty>No open assigned or requested work.</p>
     {% endif %}
   {% endmacro %}
 
-  {% macro momentum_panel(key, lists, contributors, show_repo) %}
+  {% macro momentum_panel(key, lists, show_repo) %}
   <section class="momentum-panel" data-repo="{{ key }}"{% if key != 'all' %} hidden{% endif %}>
     <div class="list-grid">
       {{ activity_card('New Issues', lists.new_issues, show_repo) }}
@@ -523,19 +597,26 @@
       {{ activity_card('Merged PRs', lists.merged_prs, show_repo) }}
       {{ activity_card('Closed Issues', lists.closed_issues, show_repo) }}
       {{ activity_card('Releases', lists.releases, show_repo, true) }}
+      {{ reviewed_card('PRs Reviewed', lists.prs_reviewed, show_repo) }}
     </div>
-    {% if not (lists.new_issues or lists.opened_prs or lists.merged_prs or lists.closed_issues or lists.releases) %}
+    {% if not (lists.new_issues or lists.opened_prs or lists.merged_prs or lists.closed_issues or lists.releases or lists.prs_reviewed) %}
     <p class="empty" data-static-empty>No notable activity in the last 7 days.</p>
     {% endif %}
     <p class="empty" data-filter-empty hidden>No activity for the selected contributor in the last 7 days.</p>
+  </section>
+  {% endmacro %}
 
-    <h3 class="type-subhead">Contributors</h3>
-    <p class="small-note">Lines are the diff of merged PRs attributed to their authors plus commits pushed directly to the default branch. Review counts exclude items on PRs the contributor authored. Bots are excluded from all contributor metrics.</p>
+  {% macro contributors_panel(key, contributors) %}
+  <section class="contributors-panel" data-repo="{{ key }}"{% if key != 'all' %} hidden{% endif %}>
     {{ contributor_table(contributors, key) }}
+    <p class="empty" data-filter-empty hidden>No contributor activity for this filter in the last 7 days.</p>
+  </section>
+  {% endmacro %}
 
-    <h3 class="type-subhead">Assigned Open Work</h3>
-    <p class="small-note">Open items currently assigned to each person. Unassigned PRs are listed under their author; PRs assigned to someone else stay with the assignee.</p>
+  {% macro assigned_panel(key, contributors, show_repo) %}
+  <section class="assigned-panel" data-repo="{{ key }}"{% if key != 'all' %} hidden{% endif %}>
     {{ assigned_work(contributors, show_repo) }}
+    <p class="empty" data-filter-empty hidden>No open assigned or requested work for this filter.</p>
   </section>
   {% endmacro %}
 
@@ -591,37 +672,6 @@
     <p class="type-label">Last 7 days</p>
     <h2 class="section-title">Cashu Momentum</h2>
 
-    <div class="ribbon-wrap">
-      <div class="ribbon" role="tablist" aria-label="Filter momentum by repository">
-        <button type="button" class="pill is-active" data-repo="all" role="tab" aria-selected="true">
-          All
-          <span class="pill-count">{{ momentum.summary.new_issues + momentum.summary.opened_prs + momentum.summary.merged_prs + momentum.summary.releases }}</span>
-        </button>
-        {% for repo in repos %}
-        {% set d = momentum.by_repo[repo.full_name] %}
-        <button type="button" class="pill" data-repo="{{ repo.full_name }}" role="tab" aria-selected="false">
-          {{ repo.display }}
-          <span class="pill-count">{{ (d.new_issues|length) + (d.opened_prs|length) + (d.merged_prs|length) + (d.releases|length) }}</span>
-        </button>
-        {% endfor %}
-      </div>
-      <div class="ribbon-scroll">
-      <div class="ribbon ribbon-contributors" role="tablist" aria-label="Filter momentum by contributor">
-        <span class="ribbon-label">Contributor</span>
-        <button type="button" class="pill is-active" data-contributor="all" role="tab" aria-selected="true">
-          All
-          <span class="pill-count">{{ momentum.by_contributor|length }}</span>
-        </button>
-        {% for c in momentum.by_contributor %}
-        <button type="button" class="pill" data-contributor="{{ c.login }}" role="tab" aria-selected="false">
-          {{ c.login }}
-          <span class="pill-count">{{ c.commits + c.issues_opened + c.prs_opened + c.prs_merged + c.prs_reviewed }}</span>
-        </button>
-        {% endfor %}
-      </div>
-      </div>
-    </div>
-
     <div class="card chart-card">
       <div class="card-head">
         <h4>Daily Activity</h4>
@@ -637,9 +687,65 @@
     </div>
     <p class="small-note" data-chart-empty hidden>No activity for this filter.</p>
 
-    {{ momentum_panel('all', momentum.combined, momentum.by_contributor, true) }}
+    <div class="card table-card" data-copy-title="Current Releases">
+      <div class="card-head">
+        <h4>Current Releases</h4>
+        <div class="card-tools">
+          <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy current releases as Markdown">copy</button>
+        </div>
+      </div>
+      <table class="table" data-sortable>
+        <thead>
+          <tr>
+            <th class="sortable">Repo</th>
+            <th class="sortable">Current Release</th>
+            <th class="sortable">Published</th>
+            <th class="num sortable">Days Since</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in release_status %}
+          <tr>
+            <td><a href="https://github.com/{{ row.repo }}" target="_blank" rel="noopener">{{ row.short }}</a></td>
+            <td>
+              {% if row.tag %}
+                {% if row.url %}<a href="{{ row.url }}" target="_blank" rel="noopener">{{ row.tag }}</a>{% else %}{{ row.tag }}{% endif %}
+                {% if row.name and row.name != row.tag %} — {{ row.name }}{% endif %}
+              {% else %}—{% endif %}
+            </td>
+            <td>{{ row.published if row.published else '—' }}</td>
+            <td class="num">{{ row.days_since if row.days_since is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {{ momentum_panel('all', momentum.combined, true) }}
     {% for repo in repos %}
-      {{ momentum_panel(repo.full_name, momentum.by_repo[repo.full_name], momentum.by_repo[repo.full_name].contributors, false) }}
+      {{ momentum_panel(repo.full_name, momentum.by_repo[repo.full_name], false) }}
+    {% endfor %}
+  </section>
+
+  <!-- Contributors -->
+  <section id="contributors" class="section">
+    <p class="type-label">Last 7 days</p>
+    <h2 class="section-title">Contributors</h2>
+    <p class="small-note">Lines are the diff of merged PRs attributed to their authors plus commits pushed directly to the default branch. Review counts exclude items on PRs the contributor authored. Bots are excluded from all contributor metrics.</p>
+    {{ contributors_panel('all', momentum.by_contributor) }}
+    {% for repo in repos %}
+      {{ contributors_panel(repo.full_name, momentum.by_repo[repo.full_name].contributors) }}
+    {% endfor %}
+  </section>
+
+  <!-- Assigned Open Work -->
+  <section id="assigned" class="section">
+    <p class="type-label">Current state</p>
+    <h2 class="section-title">Assigned Open Work</h2>
+    <p class="small-note">Open items currently assigned to each person, plus review requests awaiting their response. Unassigned PRs are listed under their author; PRs assigned to someone else stay with the assignee.</p>
+    {{ assigned_panel('all', momentum.by_contributor, true) }}
+    {% for repo in repos %}
+      {{ assigned_panel(repo.full_name, momentum.by_repo[repo.full_name].contributors, false) }}
     {% endfor %}
   </section>
 
@@ -802,34 +908,32 @@
     var seriesClass = ['series-issues', 'series-opened', 'series-merged'];
     var seriesName = ['new issues', 'PRs opened', 'PRs merged'];
 
-    function bindPills(selector, attr, key) {
-      var pills = Array.prototype.slice.call(document.querySelectorAll(selector));
-      pills.forEach(function (pill) {
-        pill.addEventListener('click', function () {
-          var value = pill.getAttribute(attr) || 'all';
-          pills.forEach(function (p) {
-            var active = p === pill;
-            p.classList.toggle('is-active', active);
-            p.setAttribute('aria-selected', active ? 'true' : 'false');
-          });
-          state[key] = value;
-          applyFilters();
-        });
+    function populateContributorOptions() {
+      var select = document.querySelector('[data-filter-contributor]');
+      if (!select) return;
+      var current = state.login;
+      var stillValid = current === 'all';
+      Array.prototype.slice.call(select.options).forEach(function (option) {
+        var repos = (option.getAttribute('data-repos') || '').split(/\s+/);
+        var available = option.value === 'all' || state.repo === 'all' || repos.indexOf(state.repo) !== -1;
+        option.hidden = !available;
+        option.disabled = !available;
+        if (option.value === current && available) stillValid = true;
       });
+      if (!stillValid) {
+        state.login = 'all';
+        select.value = 'all';
+      }
     }
 
-    function applyFilters() {
-      var panel = null;
-      Array.prototype.slice.call(document.querySelectorAll('.momentum-panel')).forEach(function (p) {
-        var match = p.getAttribute('data-repo') === state.repo;
-        p.hidden = !match;
-        if (match) panel = p;
-      });
-      if (!panel) return;
-
+    function applyPanel(panel) {
       Array.prototype.slice.call(panel.querySelectorAll('li.item[data-author]')).forEach(function (li) {
         var author = li.getAttribute('data-author') || '';
-        li.hidden = state.login !== 'all' && author !== state.login;
+        var reviewers = (li.getAttribute('data-reviewers') || '').split(',').map(function (name) {
+          return name.trim();
+        }).filter(Boolean);
+        var matches = author === state.login || reviewers.indexOf(state.login) !== -1;
+        li.hidden = state.login !== 'all' && !matches;
       });
 
       Array.prototype.slice.call(panel.querySelectorAll('.list-card')).forEach(function (card) {
@@ -863,7 +967,15 @@
       if (filterEmpty) {
         filterEmpty.hidden = !(state.login !== 'all' && visibleCards === 0 && !(staticEmpty && !staticEmpty.hidden));
       }
+    }
 
+    function applyFilters() {
+      populateContributorOptions();
+      Array.prototype.slice.call(document.querySelectorAll('.momentum-panel, .contributors-panel, .assigned-panel')).forEach(function (panel) {
+        var match = panel.getAttribute('data-repo') === state.repo;
+        panel.hidden = !match;
+        if (match) applyPanel(panel);
+      });
       renderChart();
     }
 
@@ -957,12 +1069,14 @@
       var repo = li.getAttribute('data-repo');
       var date = li.getAttribute('data-date');
       var age = li.getAttribute('data-age');
+      var reviewers = li.getAttribute('data-reviewers');
 
       var line = '- [' + (number ? '#' + number + ' — ' : '') + title + '](' + url + ')';
       if (author) line += ' — @' + author;
       if (repo) line += ' · ' + repo;
       if (date) line += ' · ' + date;
       if (age) line += ' · ' + age + 'd';
+      if (reviewers) line += ' · reviewed by ' + reviewers;
       return line;
     }
 
@@ -1057,8 +1171,18 @@
       if (text) copyMarkdown(text, button);
     });
 
-    bindPills('.pill[data-repo]', 'data-repo', 'repo');
-    bindPills('.pill[data-contributor]', 'data-contributor', 'login');
+    Array.prototype.slice.call(document.querySelectorAll('[data-filter-repo]')).forEach(function (select) {
+      select.addEventListener('change', function () {
+        state.repo = select.value || 'all';
+        applyFilters();
+      });
+    });
+    Array.prototype.slice.call(document.querySelectorAll('[data-filter-contributor]')).forEach(function (select) {
+      select.addEventListener('change', function () {
+        state.login = select.value || 'all';
+        applyFilters();
+      });
+    });
     applyFilters();
 
     Array.prototype.slice.call(document.querySelectorAll('table[data-sortable]')).forEach(function (table) {

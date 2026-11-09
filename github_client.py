@@ -263,6 +263,16 @@ class GitHubClient:
                 author {{ login }}
                 mergedBy {{ login }}
                 assignees(first: 10) {{ nodes {{ login }} }}
+                reviewRequests(first: 20) {{
+                  nodes {{
+                    requestedReviewer {{
+                      __typename
+                      ... on User {{ login }}
+                      ... on Mannequin {{ login }}
+                      ... on Team {{ name }}
+                    }}
+                  }}
+                }}
                 labels(first: 20) {{ nodes {{ name }} }}
                 additions
                 deletions
@@ -287,6 +297,16 @@ class GitHubClient:
                     updated = datetime.fromisoformat(node["updatedAt"].replace("Z", "+00:00"))
                     if updated < cutoff:
                         return records
+                requested_reviewers = (node.get("reviewRequests") or {}).get("nodes") or []
+                review_request_logins = []
+                review_request_teams = []
+                for requested in requested_reviewers:
+                    reviewer = requested.get("requestedReviewer") or {}
+                    if reviewer.get("__typename") == "Team":
+                        if reviewer.get("name"):
+                            review_request_teams.append(reviewer["name"])
+                    elif reviewer.get("login"):
+                        review_request_logins.append(reviewer["login"])
                 records.append({
                     "id": node["id"],
                     "repo": f"{owner}/{name}",
@@ -300,6 +320,8 @@ class GitHubClient:
                     "author_login": self._login(node.get("author"), "login"),
                     "merged_by_login": self._login(node.get("mergedBy"), "login"),
                     "assignee_logins": [a["login"] for a in node.get("assignees", {}).get("nodes", [])],
+                    "review_request_logins": review_request_logins,
+                    "review_request_teams": review_request_teams,
                     "labels": [l["name"] for l in node.get("labels", {}).get("nodes", [])],
                     "additions": node.get("additions", 0),
                     "deletions": node.get("deletions", 0),
@@ -398,9 +420,29 @@ class GitHubClient:
             })
         return records
 
+    def fetch_latest_release(self, owner: str, name: str) -> dict[str, Any] | None:
+        """Return the latest stable release, or None when the repo has none."""
+        path = f"/repos/{owner}/{name}/releases/latest"
+        try:
+            data = self._rest_get(path)
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                return None
+            raise
+        if not isinstance(data, dict):
+            return None
+        return {
+            "tag_name": data.get("tag_name"),
+            "name": data.get("name"),
+            "published_at": data.get("published_at"),
+            "url": data.get("html_url"),
+            "prerelease": data.get("prerelease", False),
+        }
+
     def fetch_repo_snapshot(self, owner: str, name: str) -> dict[str, Any]:
         path = f"/repos/{owner}/{name}"
         data = self._rest_get(path)
+        latest_release = self.fetch_latest_release(owner, name)
         snapshot_at = datetime.now(timezone.utc)
         return {
             "id": f"{owner}/{name}@{snapshot_at.strftime('%Y-%m-%d')}",
@@ -412,4 +454,8 @@ class GitHubClient:
             "watchers": data.get("watchers_count", 0),
             "pushed_at": data.get("pushed_at"),
             "default_branch": data.get("default_branch"),
+            "latest_release_tag": (latest_release or {}).get("tag_name"),
+            "latest_release_name": (latest_release or {}).get("name"),
+            "latest_release_published_at": (latest_release or {}).get("published_at"),
+            "latest_release_url": (latest_release or {}).get("url"),
         }

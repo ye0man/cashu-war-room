@@ -172,7 +172,8 @@ def _blank_contributor() -> dict[str, Any]:
         "commits": 0, "additions": 0, "deletions": 0, "days_active": set(),
         "issues_opened": 0, "prs_opened": 0, "prs_merged": 0,
         "reviews_submitted": 0, "review_comments": 0, "prs_reviewed": set(),
-        "assigned_issues": [], "assigned_prs": [],
+        "assigned_issues": [], "assigned_prs": [], "requested_reviews": [],
+        "repos": set(),
     }
 
 
@@ -190,6 +191,7 @@ def _finish_contributors(rows: dict[str, dict[str, Any]]) -> list[dict[str, Any]
             and data["review_comments"] == 0
             and not data["assigned_issues"]
             and not data["assigned_prs"]
+            and not data["requested_reviews"]
         ):
             continue
         out.append({
@@ -206,7 +208,14 @@ def _finish_contributors(rows: dict[str, dict[str, Any]]) -> list[dict[str, Any]
             "prs_reviewed": len(data["prs_reviewed"]),
             "assigned_issues": sorted(data["assigned_issues"], key=lambda r: str(r.get("created_at") or ""), reverse=True),
             "assigned_prs": sorted(data["assigned_prs"], key=lambda r: str(r.get("created_at") or ""), reverse=True),
-            "has_assigned": bool(data["assigned_issues"] or data["assigned_prs"]),
+            "requested_reviews": sorted(data["requested_reviews"], key=lambda r: str(r.get("created_at") or ""), reverse=True),
+            "pending_reviews": len(data["requested_reviews"]),
+            "event_total": (
+                data["issues_opened"] + data["prs_opened"] + data["prs_merged"]
+                + len(data["prs_reviewed"]) + len(data["requested_reviews"])
+            ),
+            "repos": sorted(data["repos"]),
+            "has_assigned": bool(data["assigned_issues"] or data["assigned_prs"] or data["requested_reviews"]),
             "is_active": bool(
                 data["commits"] or data["issues_opened"] or data["prs_opened"]
                 or data["prs_merged"] or data["reviews_submitted"] or data["review_comments"]
@@ -255,12 +264,15 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
     } if not merged_prs.empty else set()
 
     pr_author_by_key: dict[tuple[str, int], str | None] = {}
+    pr_by_key: dict[tuple[str, int], dict[str, Any]] = {}
     if not prs.empty:
         for _, row in prs.iterrows():
             number = _int_or_none(row.get("number"))
-            if number is None:
+            repo = row.get("repo")
+            if number is None or not isinstance(repo, str):
                 continue
-            pr_author_by_key[(row.get("repo"), number)] = _login_of(row.get("author_login"))
+            pr_author_by_key[(repo, number)] = _login_of(row.get("author_login"))
+            pr_by_key[(repo, number)] = row.to_dict()
 
     def _is_self_review(login: str, repo: Any, pr_number: Any) -> bool:
         number = _int_or_none(pr_number)
@@ -279,13 +291,17 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             return
         global_rows[user][field] += amount
         if repo:
+            global_rows[user]["repos"].add(repo)
             repo_rows[repo][user][field] += amount
+            repo_rows[repo][user]["repos"].add(repo)
 
     def _add_review(login: str, repo: str | None, field: str, key: tuple[Any, int] | None) -> None:
         for table in (global_rows[login], repo_rows[repo][login] if repo else None):
             if table is None:
                 continue
             table[field] += 1
+            if repo:
+                table["repos"].add(repo)
             if key is not None:
                 table["prs_reviewed"].add(key)
 
@@ -311,6 +327,8 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
                 if table is None:
                     continue
                 table["commits"] += 1
+                if repo:
+                    table["repos"].add(repo)
                 if not lines_count_via_pr:
                     table["additions"] += additions
                     table["deletions"] += deletions
@@ -333,6 +351,8 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             if table is None:
                 continue
             table["prs_merged"] += 1
+            if repo:
+                table["repos"].add(repo)
             table["additions"] += additions
             table["deletions"] += deletions
 
@@ -362,18 +382,76 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             key = (repo, pr_number) if pr_number is not None else None
             _add_review(user, repo, "review_comments", key)
 
+    # Distinct PRs reviewed in the window, with every reviewer attached.
+    review_events: list[tuple[str, int, str, Any]] = []
+    for frame, date_col in ((reviews, "submitted_at"), (review_comments, "created_at")):
+        if frame.empty or date_col not in frame.columns:
+            continue
+        recent = frame[(frame[date_col] >= start) & (frame[date_col] < end)]
+        for _, row in recent.iterrows():
+            user = _login_of(row.get("author_login")) or "unknown"
+            if _is_bot(user):
+                continue
+            repo = row.get("repo")
+            pr_number = _int_or_none(row.get("pr_number"))
+            if not isinstance(repo, str) or pr_number is None:
+                continue
+            if _is_self_review(user, repo, pr_number):
+                continue
+            review_events.append((repo, pr_number, user, row.get(date_col)))
+
+    reviewed_map: dict[tuple[str, int], dict[str, Any]] = {}
+    for repo, pr_number, user, reviewed_at in review_events:
+        key = (repo, pr_number)
+        item = reviewed_map.get(key)
+        if item is None:
+            pr = pr_by_key.get(key, {})
+            item = {
+                "repo": repo,
+                "repo_short": _repo_short(repo),
+                "number": pr_number,
+                "title": pr.get("title") or f"PR #{pr_number}",
+                "url": pr.get("url") or f"https://github.com/{repo}/pull/{pr_number}",
+                "author_login": _login_of(pr.get("author_login")),
+                "assignee_logins": [
+                    a for a in (_login_of(x) for x in _as_list(pr.get("assignee_logins")))
+                    if a and not _is_bot(a)
+                ],
+                "reviewers": set(),
+                "last_reviewed_at": reviewed_at,
+            }
+            reviewed_map[key] = item
+        item["reviewers"].add(user)
+        if isinstance(reviewed_at, pd.Timestamp) and (
+            item["last_reviewed_at"] is None or reviewed_at > item["last_reviewed_at"]
+        ):
+            item["last_reviewed_at"] = reviewed_at
+
+    reviewed_items: list[dict[str, Any]] = []
+    for item in reviewed_map.values():
+        last_reviewed = item.pop("last_reviewed_at", None)
+        item["reviewers"] = sorted(item["reviewers"], key=lambda value: value.lower())
+        item["date_str"] = last_reviewed.strftime("%Y-%m-%d") if hasattr(last_reviewed, "strftime") else ""
+        item["is_new"] = bool(last_reviewed is not None and last_reviewed >= new_cutoff)
+        reviewed_items.append(item)
+    reviewed_items.sort(key=lambda item: str(item.get("date_str") or ""), reverse=True)
+
     # Assigned open items (current state)
     open_issues = issues[issues["state"] == "OPEN"] if not issues.empty else issues
     open_prs = prs[prs["state"] == "OPEN"] if not prs.empty else prs
 
     for _, row in open_issues.iterrows():
         item = _assigned_item(row)
+        repo = row.get("repo")
         for assignee in _as_list(row.get("assignee_logins")):
             user = _login_of(assignee)
             if not user or _is_bot(user):
                 continue
             global_rows[user]["assigned_issues"].append(item)
-            repo_rows[row.get("repo")][user]["assigned_issues"].append(item)
+            repo_rows[repo][user]["assigned_issues"].append(item)
+            if isinstance(repo, str):
+                global_rows[user]["repos"].add(repo)
+                repo_rows[repo][user]["repos"].add(repo)
 
     for _, row in open_prs.iterrows():
         repo = row.get("repo")
@@ -387,11 +465,33 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
                 item = _assigned_item(row, "assigned")
                 global_rows[assignee]["assigned_prs"].append(item)
                 repo_rows[repo][assignee]["assigned_prs"].append(item)
+                if isinstance(repo, str):
+                    global_rows[assignee]["repos"].add(repo)
+                    repo_rows[repo][assignee]["repos"].add(repo)
         elif author:
             # Unassigned PR: fall back to the author ("authored").
             item = _assigned_item(row, "authored")
             global_rows[author]["assigned_prs"].append(item)
             repo_rows[repo][author]["assigned_prs"].append(item)
+            if isinstance(repo, str):
+                global_rows[author]["repos"].add(repo)
+                repo_rows[repo][author]["repos"].add(repo)
+
+    # Pending review requests on open PRs.
+    for _, row in open_prs.iterrows():
+        repo = row.get("repo")
+        author = _login_of(row.get("author_login"))
+        requested = {
+            user for user in (_login_of(x) for x in _as_list(row.get("review_request_logins")))
+            if user and not _is_bot(user) and user != author
+        }
+        for reviewer in sorted(requested):
+            item = _assigned_item(row, "review_requested")
+            global_rows[reviewer]["requested_reviews"].append(item)
+            repo_rows[repo][reviewer]["requested_reviews"].append(item)
+            if isinstance(repo, str):
+                global_rows[reviewer]["repos"].add(repo)
+                repo_rows[repo][reviewer]["repos"].add(repo)
 
     # By repo
     by_repo: dict[str, dict[str, Any]] = {}
@@ -406,6 +506,12 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
         ):
             subset = col_frame[col_frame["repo"] == repo] if not col_frame.empty else col_frame
             scoped[name] = _window_records(subset, sort_col, new_cutoff)
+        scoped["prs_reviewed"] = [item for item in reviewed_items if item.get("repo") == repo]
+        scoped["event_total"] = sum(
+            len(scoped[name]) for name in (
+                "new_issues", "opened_prs", "merged_prs", "closed_issues", "releases", "prs_reviewed",
+            )
+        )
         scoped["contributors"] = _finish_contributors(repo_rows.get(repo, {}))
         by_repo[repo] = scoped
 
@@ -415,6 +521,7 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
         "merged_prs": _window_records(merged_prs, "merged_at", new_cutoff),
         "closed_issues": _window_records(closed_issues, "closed_at", new_cutoff),
         "releases": _window_records(new_releases, "published_at", new_cutoff),
+        "prs_reviewed": reviewed_items,
     }
 
     new_item_urls = {
@@ -474,6 +581,7 @@ def compute_momentum(frames: dict[str, pd.DataFrame], end: datetime) -> dict[str
             "merged_prs": len(merged_prs),
             "closed_issues": len(closed_issues),
             "releases": len(new_releases),
+            "prs_reviewed": len(reviewed_items),
             "active_contributors": len([c for c in by_contributor if c["is_active"]]),
             "new_items": len(new_item_urls),
             "last_day": {
@@ -585,6 +693,67 @@ def compute_growth(snapshot_df: pd.DataFrame) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Releases
+# ---------------------------------------------------------------------------
+
+
+def compute_release_status(
+    snapshot_df: pd.DataFrame, releases_df: pd.DataFrame, end: datetime
+) -> list[dict[str, Any]]:
+    """Latest stable release per tracked repo and days since publication."""
+    end = pd.Timestamp(end).tz_convert("UTC")
+
+    latest_snapshots: dict[str, Any] = {}
+    if not snapshot_df.empty:
+        for repo, group in snapshot_df.sort_values("snapshot_at").groupby("repo"):
+            latest_snapshots[repo] = group.iloc[-1]
+
+    latest_releases: dict[str, Any] = {}
+    if not releases_df.empty and "published_at" in releases_df.columns:
+        published = releases_df.dropna(subset=["published_at"]).sort_values("published_at")
+        for repo, group in published.groupby("repo"):
+            latest_releases[repo] = group.iloc[-1]
+
+    def _text(value: Any) -> str | None:
+        return value if isinstance(value, str) and value else None
+
+    rows: list[dict[str, Any]] = []
+    for repo_cfg in REPOS:
+        repo = repo_cfg.full_name
+        snap = latest_snapshots.get(repo)
+        tag = _text(snap.get("latest_release_tag")) if snap is not None else None
+        name = _text(snap.get("latest_release_name")) if snap is not None else None
+        url = _text(snap.get("latest_release_url")) if snap is not None else None
+        published_raw = snap.get("latest_release_published_at") if snap is not None else None
+
+        if not tag:
+            release = latest_releases.get(repo)
+            if release is not None:
+                tag = _text(release.get("tag_name"))
+                name = _text(release.get("name"))
+                url = _text(release.get("url"))
+                published_raw = release.get("published_at")
+
+        published_ts = pd.to_datetime(published_raw, utc=True, errors="coerce") if published_raw else None
+        days_since = None
+        published_str = ""
+        if published_ts is not None and not pd.isna(published_ts):
+            days_since = max(0, (end - published_ts).days)
+            published_str = published_ts.strftime("%Y-%m-%d")
+
+        rows.append({
+            "repo": repo,
+            "short": repo_cfg.display,
+            "tag": tag or "",
+            "name": name or "",
+            "url": url or "",
+            "published": published_str,
+            "days_since": days_since,
+        })
+    return rows
+
+
+# ---------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------
 
@@ -599,6 +768,23 @@ def render_report(
     momentum = compute_momentum(frames, report_date)
     aging = compute_aging(frames, report_date)
     growth = compute_growth(snapshot_df)
+    release_status = compute_release_status(
+        snapshot_df, frames.get("releases", pd.DataFrame()), report_date
+    )
+
+    repo_options = [
+        {
+            "full_name": r.full_name,
+            "display": r.display,
+            "event_total": momentum["by_repo"].get(r.full_name, {}).get("event_total", 0),
+        }
+        for r in REPOS
+    ]
+    repo_options.sort(key=lambda option: (-option["event_total"], option["display"].lower()))
+    all_event_total = sum(
+        len(momentum["combined"].get(name, []))
+        for name in ("new_issues", "opened_prs", "merged_prs", "closed_issues", "releases", "prs_reviewed")
+    )
 
     env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
@@ -610,9 +796,12 @@ def render_report(
         "report_date": report_date,
         "start_date": start,
         "repos": [{"full_name": r.full_name, "display": r.display} for r in REPOS],
+        "repo_options": repo_options,
+        "all_event_total": all_event_total,
         "momentum": momentum,
         "aging": aging,
         "growth": growth,
+        "release_status": release_status,
         "mint_changes": mint_changes,
     }
     return template.render(context)

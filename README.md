@@ -21,8 +21,14 @@ Each run:
 
 ## What's in the report
 
-- **Momentum** - new issues, opened/merged PRs, closed issues, and releases over
-  the last 7 days, with daily activity and per-repo/per-contributor breakdowns.
+- **Momentum** - new issues, opened/merged PRs, closed issues, releases, and
+  PRs reviewed over the last 7 days, with daily activity and
+  per-repo/per-contributor breakdowns. A release table shows each repo's current
+  stable release and days since it was published.
+- **Contributors** - per-repo and ecosystem-wide leaderboard with commits, lines,
+  issues, PRs, and review activity.
+- **Assigned open work** - open issues and PRs assigned to each person, plus
+  pending review requests awaiting their response.
 - **Issue / PR health** - open item counts, average age, oldest open items, and
   average time to merge or close.
 - **Ecosystem snapshot** - stars, forks, and open issues per repository, with
