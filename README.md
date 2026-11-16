@@ -19,6 +19,12 @@ Each run:
 3. Writes `reports/cashu-war-room-YYYY-MM-DD.html` plus `reports/index.html`.
 4. Commits the updated `data/` and `reports/` directories back to `main`.
 
+`.github/workflows/pages.yml` publishes `reports/` to GitHub Pages. It triggers on
+`workflow_run` completion of the daily report rather than only on push, because
+commits pushed with the repository's built-in `GITHUB_TOKEN` do not start new
+workflow runs (GitHub suppresses them to prevent recursion). A push-only trigger
+therefore leaves the published site frozen at the last manual deploy.
+
 ## What's in the report
 
 - **Momentum** - new issues, opened/merged PRs, closed issues, releases, and
