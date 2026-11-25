@@ -406,7 +406,7 @@
     <a class="item-link{% if item.is_new %} is-new{% endif %}" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
     {% endif %}
     <span class="item-meta">
-      {% if not is_release and item.author_login %}<a href="https://github.com/{{ item.author_login }}" target="_blank" rel="noopener">@{{ item.author_login }}</a>{% endif %}
+      {% if not is_release and item.author_login %}<a href="{{ person_url(item.author_login, item.repo) }}" target="_blank" rel="noopener">@{{ item.author_login }}</a>{% endif %}
       {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
       {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
     </span>
@@ -452,11 +452,11 @@
           <span class="item-num">#{{ item.number }}</span>
           <a class="item-link{% if item.is_new %} is-new{% endif %}" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
           <span class="item-meta">
-            {% if item.author_login %}<a href="https://github.com/{{ item.author_login }}" target="_blank" rel="noopener">@{{ item.author_login }}</a>{% endif %}
+            {% if item.author_login %}<a href="{{ person_url(item.author_login, item.repo) }}" target="_blank" rel="noopener">@{{ item.author_login }}</a>{% endif %}
             {% for assignee in item.assignee_logins[:2] %}<span class="assignee">@{{ assignee }}</span>{% endfor %}
             {% if show_repo and item.repo_short %}<span class="badge">{{ item.repo_short }}</span>{% endif %}
             {% if item.date_str %}<span>{{ item.date_str }}</span>{% endif %}
-            <span class="reviewers">Reviewed by {% for reviewer in item.reviewers %}<strong><a href="https://github.com/{{ reviewer }}" target="_blank" rel="noopener">@{{ reviewer }}</a></strong>{% if not loop.last %}, {% endif %}{% endfor %}</span>
+            <span class="reviewers">Reviewed by {% for reviewer in item.reviewers %}<strong><a href="{{ person_url(reviewer, item.repo) }}" target="_blank" rel="noopener">@{{ reviewer }}</a></strong>{% if not loop.last %}, {% endif %}{% endfor %}</span>
           </span>
         </li>
         {% endfor %}
@@ -492,7 +492,7 @@
         <tbody>
           {% for c in active %}
           <tr data-contributor="{{ c.login }}">
-            <td><a href="https://github.com/{{ c.login }}" target="_blank" rel="noopener">{{ c.login }}</a></td>
+            <td><a href="{{ person_url(c.login, key) }}" target="_blank" rel="noopener">{{ c.login }}</a></td>
             <td class="num">{{ c.commits }}</td>
             <td class="num">{{ c.additions }}</td>
             <td class="num">{{ c.deletions }}</td>
@@ -514,14 +514,14 @@
     {% endif %}
   {% endmacro %}
 
-  {% macro assigned_work(contributors, show_repo) %}
+  {% macro assigned_work(contributors, show_repo, key='all') %}
     {% set people = contributors | selectattr('has_assigned') | list %}
     {% if people %}
     <div class="assigned-grid">
       {% for c in people %}
       <div class="card person-card" data-contributor="{{ c.login }}">
         <div class="card-head">
-          <a class="person" href="https://github.com/{{ c.login }}" target="_blank" rel="noopener">{{ c.login }}</a>
+          <a class="person" href="{{ person_url(c.login, key) }}" target="_blank" rel="noopener">{{ c.login }}</a>
           <div class="card-tools">
             <button type="button" class="copy-btn" data-copy title="Copy as Markdown" aria-label="Copy {{ c.login }}'s assigned work as Markdown">copy</button>
           </div>
@@ -615,7 +615,7 @@
 
   {% macro assigned_panel(key, contributors, show_repo) %}
   <section class="assigned-panel" data-repo="{{ key }}"{% if key != 'all' %} hidden{% endif %}>
-    {{ assigned_work(contributors, show_repo) }}
+    {{ assigned_work(contributors, show_repo, key) }}
     <p class="empty" data-filter-empty hidden>No open assigned or requested work for this filter.</p>
   </section>
   {% endmacro %}
@@ -706,7 +706,7 @@
         <tbody>
           {% for row in release_status %}
           <tr>
-            <td><a href="https://github.com/{{ row.repo }}" target="_blank" rel="noopener">{{ row.short }}</a></td>
+            <td><a href="{{ repo_url(row.repo) }}" target="_blank" rel="noopener">{{ row.short }}</a></td>
             <td>
               {% if row.tag %}
                 {% if row.url %}<a href="{{ row.url }}" target="_blank" rel="noopener">{{ row.tag }}</a>{% else %}{{ row.tag }}{% endif %}
@@ -854,7 +854,7 @@
         <tbody>
           {% for repo, stats in growth.latest.items() %}
           <tr>
-            <td><a href="https://github.com/{{ repo }}" target="_blank" rel="noopener">{{ stats.short }}</a></td>
+            <td><a href="{{ repo_url(repo) }}" target="_blank" rel="noopener">{{ stats.short }}</a></td>
             <td class="num">{{ stats.stars }}{% if stats.stars_delta %}<span class="delta {{ 'up' if stats.stars_delta > 0 else 'down' }}">{{ '+' if stats.stars_delta > 0 else '' }}{{ stats.stars_delta }}</span>{% endif %}</td>
             <td class="num">{{ stats.forks }}{% if stats.forks_delta %}<span class="delta {{ 'up' if stats.forks_delta > 0 else 'down' }}">{{ '+' if stats.forks_delta > 0 else '' }}{{ stats.forks_delta }}</span>{% endif %}</td>
             <td class="num">{{ stats.open_issues }}{% if stats.open_issues_delta %}<span class="delta {{ 'up' if stats.open_issues_delta > 0 else 'down' }}">{{ '+' if stats.open_issues_delta > 0 else '' }}{{ stats.open_issues_delta }}</span>{% endif %}</td>

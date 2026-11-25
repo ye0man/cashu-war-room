@@ -1,8 +1,8 @@
 # Cashu War Room
 
-A daily activity report for the Cashu ecosystem. It pulls GitHub data for a curated
-set of Cashu repositories, diffs the Cashu Mint Directory against its previous
-snapshot, and renders a static HTML dashboard.
+A daily activity report for the Cashu ecosystem. It pulls GitHub and Forgejo data
+for a curated set of Cashu repositories, diffs the Cashu Mint Directory against its
+previous snapshot, and renders a static HTML dashboard.
 
 ## Daily schedule
 
@@ -48,7 +48,12 @@ Reports older than 30 days are pruned automatically.
 
 Defined in `config.py`: `cdk`, `coco`, `cashu-ts`, `cashu.me`, `nuts`, `nutshell`,
 `Numo`, `wallet`, `orchard`, `cdk-payment-processors`, `docs.cashu.space`,
-`cashu-skill`, `Sovran`, `CashuSwift`, `macadamia`, and `pecan`.
+`cashu-skill`, `Sovran`, `CashuSwift`, `macadamia`, `pecan`, and
+`internet-mint-finder`.
+
+Most repos are on GitHub. Repositories hosted elsewhere are declared with a
+`forge` and `host` in `config.py` (currently Forgejo at `git.cashu.dev`), and are
+read through the same-shaped client in `forgejo_client.py`.
 
 ## Running locally
 
@@ -66,6 +71,9 @@ python report.py
 The token needs read access to the tracked repositories. For the scheduled
 workflow, configure it as a repository secret or variable named `GH_TOKEN`.
 
+Forgejo-hosted repositories are read anonymously unless `FORGEJO_TOKEN` (or
+`GITEA_TOKEN`) is set; set it if the instance requires auth or rate limits bite.
+
 Useful flags:
 
 ```bash
@@ -80,6 +88,7 @@ python report.py --date 2026-10-01 # generate a report for a specific date
 ```
 config.py              tracked repos, paths, lookback and retention settings
 github_client.py       GitHub GraphQL/REST client
+forgejo_client.py      Forgejo/Gitea REST client (same record shapes)
 data_store.py          incremental JSONL storage
 mint_tracker.py        mint directory snapshots and diffs
 report_generator.py    metrics computation and HTML rendering

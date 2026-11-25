@@ -15,6 +15,8 @@ from config import (
     REPORT_RETENTION_DAYS,
     REPOS,
     TEMPLATE_DIR,
+    person_web_url,
+    repo_web_url,
     today,
 )
 from data_store import DataStore
@@ -790,6 +792,8 @@ def render_report(
         loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=select_autoescape(["html", "xml"]),
     )
+    env.globals["repo_url"] = repo_web_url
+    env.globals["person_url"] = person_web_url
     template = env.get_template("report.html")
 
     context = {

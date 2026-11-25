@@ -12,10 +12,24 @@ class Repo:
     owner: str
     name: str
     display: str
+    forge: str = "github"
+    host: str = "github.com"
 
     @property
     def full_name(self) -> str:
         return f"{self.owner}/{self.name}"
+
+    @property
+    def web_url(self) -> str:
+        return f"https://{self.host}/{self.full_name}"
+
+    @property
+    def is_github(self) -> bool:
+        return self.forge == "github"
+
+    @property
+    def is_forgejo(self) -> bool:
+        return self.forge == "forgejo"
 
 
 REPOS = [
@@ -35,9 +49,25 @@ REPOS = [
     Repo("cashubtc", "cdk-payment-processors", "cdk-payment-processors"),
     Repo("cashubtc", "docs.cashu.space", "docs"),
     Repo("cashubtc", "cashu-skill", "cashu-skill"),
+    # Forgejo-hosted repositories.
+    Repo("cashubtc", "internet-mint-finder", "internet-mint-finder", forge="forgejo", host="git.cashu.dev"),
 ]
 
 REPO_NAMES = [r.full_name for r in REPOS]
+
+# Web base per tracked repo, so links point at the right forge.
+REPO_WEB_BASE = {r.full_name: f"https://{r.host}" for r in REPOS}
+
+
+def repo_web_url(full_name: str) -> str:
+    base = REPO_WEB_BASE.get(full_name, "https://github.com")
+    return f"{base}/{full_name}"
+
+
+def person_web_url(login: str, repo: str | None = None) -> str:
+    base = REPO_WEB_BASE.get(repo, "https://github.com") if repo else "https://github.com"
+    return f"{base}/{login}"
+
 
 MINT_DIRECTORY_URL = "https://ye0man.github.io/cashu-mint-directory/mints.json"
 
@@ -63,3 +93,7 @@ def default_start_date(end: datetime | None = None) -> datetime:
 
 def github_token() -> str | None:
     return os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+
+
+def forgejo_token() -> str | None:
+    return os.environ.get("FORGEJO_TOKEN") or os.environ.get("GITEA_TOKEN")

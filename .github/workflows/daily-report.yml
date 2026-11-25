@@ -35,6 +35,7 @@ jobs:
       - name: Generate report
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN || vars.GH_TOKEN }}
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN || vars.FORGEJO_TOKEN }}
         run: python report.py
 
       - name: Commit and push updates

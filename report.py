@@ -16,6 +16,7 @@ from config import (
     today,
 )
 from data_store import DataStore
+from forgejo_client import ForgejoClient
 from github_client import GitHubClient
 from mint_tracker import (
     fetch_mint_directory,
@@ -239,10 +240,29 @@ def _generate_sample_data(store: DataStore, end: datetime) -> None:
     logger.info("Generated sample data for %d repos", len(REPOS))
 
 
-def _fetch_github_data(client: GitHubClient, store: DataStore, end: datetime, force: bool) -> None:
+def _client_for(
+    repo, github_client: GitHubClient, forgejo_clients: dict[str, ForgejoClient]
+) -> GitHubClient | ForgejoClient:
+    if repo.is_forgejo:
+        client = forgejo_clients.get(repo.host)
+        if client is None:
+            client = ForgejoClient(repo.host)
+            forgejo_clients[repo.host] = client
+        return client
+    return github_client
+
+
+def _fetch_data(
+    github_client: GitHubClient,
+    forgejo_clients: dict[str, ForgejoClient],
+    store: DataStore,
+    end: datetime,
+    force: bool,
+) -> None:
     start = default_start_date(end)
     for repo in REPOS:
-        logger.info("Fetching %s", repo.full_name)
+        logger.info("Fetching %s (%s)", repo.full_name, repo.host)
+        client = _client_for(repo, github_client, forgejo_clients)
         try:
             # Commits touched in the window
             since_commits = start if force else (store.get_max_datetime(repo.full_name, "commits", "committed_at") or start)
@@ -311,7 +331,7 @@ def _fetch_github_data(client: GitHubClient, store: DataStore, end: datetime, fo
             store.append_records(repo.full_name, "repo_snapshots", [snapshot], id_field="id")
         except Exception as exc:
             logger.error("Failed to fetch %s: %s", repo.full_name, exc, exc_info=True)
-            logger.error("If this is a permission error, make sure GH_TOKEN can read %s.", repo.full_name)
+            logger.error("If this is a permission error, check the token used for %s.", repo.host)
 
 
 def _fetch_mint_updates() -> list[str]:
@@ -345,8 +365,9 @@ def main() -> int:
             return 1
 
         client = GitHubClient(token)
+        forgejo_clients: dict[str, ForgejoClient] = {}
         if not args.no_fetch:
-            _fetch_github_data(client, store, report_date, args.force_refresh)
+            _fetch_data(client, forgejo_clients, store, report_date, args.force_refresh)
         else:
             logger.info("Skipping GitHub fetch; using existing local data.")
 
