@@ -15,13 +15,11 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
-
-env:
-  PAGES_ARTIFACT: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
   deploy:
@@ -39,14 +37,24 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v6
 
+      - name: Remove stale Pages artifacts
+        if: github.run_attempt > 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X GET "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.name == "github-pages") | .id' |
+          while read -r artifact_id; do
+            [ -n "$artifact_id" ] || continue
+            echo "Deleting stale artifact ${artifact_id}"
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}"
+          done
+
       - name: Upload report artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: reports
-          name: ${{ env.PAGES_ARTIFACT }}
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-        with:
-          artifact_name: ${{ env.PAGES_ARTIFACT }}
