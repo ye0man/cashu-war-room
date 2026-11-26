@@ -55,6 +55,22 @@ jobs:
         with:
           path: reports
 
+      - name: Wait for Pages artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 30); do
+            count=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?per_page=100" \
+              --jq '[.artifacts[] | select(.name == "github-pages")] | length')
+            echo "attempt ${i}: ${count} github-pages artifact(s) visible"
+            if [ "${count}" -ge 1 ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::github-pages artifact never became visible to the API"
+          exit 1
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
